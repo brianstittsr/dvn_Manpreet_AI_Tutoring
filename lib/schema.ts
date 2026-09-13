@@ -2159,6 +2159,9 @@ export const COLLECTIONS = {
   // LinkedIn Content & Publishing
   LINKEDIN_ARTICLES: "linkedinArticles",
   LINKEDIN_CONNECTIONS: "linkedinConnections",
+  LINKEDIN_LEADS: "linkedinLeads",
+  // OAuth State (temporary, TTL-based)
+  OAUTH_STATES: "oauthStates",
 } as const;
 
 /** Reference link stored with a LinkedIn article */
@@ -2180,14 +2183,15 @@ export interface LinkedInArticleDoc {
   referenceLinks: LinkedInReferenceLink[];
   glossary: { term: string; definition: string }[];
   status: "draft" | "scheduled" | "published" | "failed";
-  scheduledFor?: Timestamp;
-  publishedAt?: Timestamp;
-  linkedinPostId?: string; // URN from LinkedIn after publish
-  linkedinError?: string;
+  scheduledFor?: Timestamp | null;
+  publishedAt?: Timestamp | null;
+  linkedinPostId?: string | null; // URN from LinkedIn after publish
+  linkedinPostUrl?: string | null; // Public URL of the published post
+  linkedinError?: string | null;
   createdById: string;
   createdByName: string;
-  ghlFormUrl?: string;
-  ghlFormId?: string;
+  ghlFormUrl?: string | null;
+  ghlFormId?: string | null;
   ghlTags?: string[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -2197,16 +2201,43 @@ export interface LinkedInArticleDoc {
 export interface LinkedInConnectionDoc {
   id: string;
   userId: string;
-  profileId?: string;
+  profileId?: string | null;
   accessToken: string;
-  refreshToken?: string;
-  expiresAt?: Timestamp;
-  profileName?: string;
-  profileEmail?: string;
-  profilePicture?: string;
+  refreshToken?: string | null;
+  expiresAt?: Timestamp | null;
+  profileName?: string | null;
+  profileEmail?: string | null;
+  profilePicture?: string | null;
+  scopes?: string[];
   isActive: boolean;
   connectedAt: Timestamp;
   updatedAt: Timestamp;
+}
+
+/** Lead captured from a LinkedIn article's GHL form */
+export interface LinkedInLeadDoc {
+  id: string;
+  articleId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  message?: string;
+  ghlContactId?: string;
+  ghlTags?: string[];
+  status: "new" | "contacted" | "qualified" | "converted" | "archived";
+  source: "linkedin_article" | "ghl_form";
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+/** Temporary OAuth state for CSRF protection during OAuth flows */
+export interface OAuthStateDoc {
+  id: string;
+  userId: string;
+  provider: "linkedin" | "other";
+  createdAt: Timestamp;
+  expiresAt: Timestamp;
 }
 
 // ============================================================================
@@ -2274,6 +2305,8 @@ export const successStoriesCollection = () => getCollection<SuccessStoryDoc>(COL
 // LinkedIn Content & Publishing collection references
 export const linkedinArticlesCollection = () => getCollection<LinkedInArticleDoc>(COLLECTIONS.LINKEDIN_ARTICLES);
 export const linkedinConnectionsCollection = () => getCollection<LinkedInConnectionDoc>(COLLECTIONS.LINKEDIN_CONNECTIONS);
+export const linkedinLeadsCollection = () => getCollection<LinkedInLeadDoc>(COLLECTIONS.LINKEDIN_LEADS);
+export const oauthStatesCollection = () => getCollection<OAuthStateDoc>(COLLECTIONS.OAUTH_STATES);
 
 // ============================================================================
 // Subcollection Helpers

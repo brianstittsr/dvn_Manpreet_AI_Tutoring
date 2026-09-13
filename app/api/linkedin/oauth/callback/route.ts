@@ -36,13 +36,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Firebase not initialized" }, { status: 500 });
     }
 
-    const stateDoc = await adminDb.collection("oauthStates").doc(state).get();
+    const stateDoc = await adminDb.collection(COLLECTIONS.OAUTH_STATES).doc(state).get();
     if (!stateDoc.exists) {
       return NextResponse.json({ error: "Invalid or expired state" }, { status: 403 });
     }
 
     const { userId } = stateDoc.data() || {};
-    await adminDb.collection("oauthStates").doc(state).delete();
+    await adminDb.collection(COLLECTIONS.OAUTH_STATES).doc(state).delete();
 
     if (!userId) {
       return NextResponse.json({ error: "Missing userId in state" }, { status: 403 });
@@ -76,6 +76,7 @@ export async function GET(request: NextRequest) {
     const expiresAt = tokenData.expires_in
       ? Timestamp.fromMillis(Date.now() + tokenData.expires_in * 1000)
       : null;
+    const scopes = tokenData.scope ? tokenData.scope.split(" ") : [];
 
     // Fetch basic profile to get profile ID and name
     const profileResponse = await fetch(
@@ -130,6 +131,7 @@ export async function GET(request: NextRequest) {
       profileName: profileName || null,
       profileEmail: profileEmail || null,
       profilePicture: profilePicture || null,
+      scopes,
       isActive: true,
       updatedAt: now,
     };

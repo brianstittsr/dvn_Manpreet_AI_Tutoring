@@ -27,8 +27,9 @@ export async function GET(request: NextRequest) {
 
     // Store pending state in Firestore with 10 min TTL
     if (adminDb) {
-      await adminDb.collection("oauthStates").doc(state).set({
+      await adminDb.collection(COLLECTIONS.OAUTH_STATES).doc(state).set({
         userId,
+        provider: "linkedin",
         createdAt: Timestamp.now(),
         expiresAt: Timestamp.fromMillis(Date.now() + 10 * 60 * 1000),
       });

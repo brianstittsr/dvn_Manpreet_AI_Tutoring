@@ -48,10 +48,17 @@ export async function POST(request: NextRequest) {
 
     const connection = connectionSnap.docs[0].data();
     const accessToken = connection.accessToken;
+    const profileId = connection.profileId;
 
-    // Use LinkedIn's Posts API (URN NN) to create a post
-    // Body limited to share content for now. Image upload is not implemented here.
-    const shareContent = buildShareContent(body.title, body.content, body.hashtags, body.images);
+    if (!profileId) {
+      return NextResponse.json(
+        { error: "LinkedIn connection is missing a profile ID. Please reconnect your LinkedIn account." },
+        { status: 401 }
+      );
+    }
+
+    // Use LinkedIn's ugcPosts API to create a post
+    const shareContent = buildShareContent(profileId, body.title, body.content, body.hashtags, body.images);
 
     const response = await fetch("https://api.linkedin.com/v2/ugcPosts", {
       method: "POST",
@@ -74,6 +81,9 @@ export async function POST(request: NextRequest) {
 
     const result = await response.json();
     const linkedinPostId = result.id || null;
+    const linkedinPostUrl = linkedinPostId
+      ? `https://www.linkedin.com/feed/update/${linkedinPostId}`
+      : null;
     const now = Timestamp.now();
 
     const payload = {
@@ -86,6 +96,7 @@ export async function POST(request: NextRequest) {
       status: "published",
       publishedAt: now,
       linkedinPostId,
+      linkedinPostUrl,
       linkedinError: null,
       createdById: body.createdById,
       createdByName: body.createdByName,
@@ -116,9 +127,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function buildShareContent(title: string, content: string, hashtags?: string, images?: string[]) {
+function buildShareContent(profileId: string, title: string, content: string, hashtags?: string, images?: string[]) {
   const fullContent = `${title}\n\n${content}${hashtags ? `\n\n${hashtags}` : ""}`;
-  const authorUrn = "urn:li:person:(PROFILE_ID)"; // replaced by caller if profileId stored
+  const authorUrn = `urn:li:person:${profileId}`;
 
   const share: Record<string, unknown> = {
     author: authorUrn,

@@ -395,6 +395,22 @@
       ]
     },
     {
+      "collectionGroup": "linkedinLeads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "articleId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "linkedinLeads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "smsOptIns",
       "queryScope": "COLLECTION",
       "fields": [

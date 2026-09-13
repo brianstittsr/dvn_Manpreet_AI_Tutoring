@@ -131,41 +131,6 @@ const icyMarketingItems: { title: string; href: string; icon: React.ElementType;
 // System Management
 const systemManagementItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [];
 
-// Project Management
-const projectManagementItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
-  {
-    title: "AI Workforce",
-    href: "/portal/ai-workforce",
-    icon: Bot,
-    badge: "AI",
-    featureKey: "aiWorkforce",
-  },
-  {
-    title: "EOS2 Dashboard",
-    href: "/portal/eos2",
-    icon: Target,
-    badge: "EOS",
-    featureKey: "eos2",
-  },
-  {
-    title: "Action Items",
-    href: "/portal/rocks",
-    icon: CheckSquare,
-    featureKey: "rocks",
-  },
-];
-
-// Data
-const dataItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
-  {
-    title: "Apollo Search",
-    href: "/portal/apollo-search",
-    icon: Search,
-    badge: "AI",
-    featureKey: "apolloSearch",
-  },
-];
-
 // People
 const peopleItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [];
 
@@ -177,185 +142,6 @@ const affiliateCenterItems: { title: string; href: string; icon: React.ElementTy
 
 // Content
 const contentItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [];
-
-// Admin
-const adminItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
-  {
-    title: "Book a Call",
-    href: "/portal/admin/book-a-call",
-    icon: Calendar,
-    featureKey: "bookACall",
-  },
-  {
-    title: "Page Designer",
-    href: "/portal/admin/page-designer",
-    icon: Paintbrush,
-    featureKey: "pageDesigner",
-  },
-];
-
-// Legacy 83 Business
-const legacy83BusinessItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
-  {
-    title: "Bug Tracker",
-    href: "/portal/bug-tracker",
-    icon: Bug,
-    featureKey: "bugTracker",
-  },
-  {
-    title: "System Documentation",
-    href: "/portal/system-docs",
-    icon: BookOpen,
-    featureKey: "systemDocs",
-  },
-  {
-    title: "Opportunities",
-    href: "/portal/opportunities",
-    icon: Target,
-    featureKey: "opportunities",
-  },
-  {
-    title: "Projects",
-    href: "/portal/projects",
-    icon: FolderKanban,
-    featureKey: "projects",
-  },
-  {
-    title: "Calendar",
-    href: "/portal/calendar",
-    icon: Calendar,
-    featureKey: "calendar",
-  },
-  {
-    title: "Meetings",
-    href: "/portal/meetings",
-    icon: Users,
-    featureKey: "meetings",
-  },
-  {
-    title: "Availability",
-    href: "/portal/availability",
-    icon: CalendarDays,
-    featureKey: "availability",
-  },
-  {
-    title: "Proposal Creator",
-    href: "/portal/proposals",
-    icon: FileText,
-    badge: "AI",
-    featureKey: "proposals",
-  },
-  {
-    title: "Events",
-    href: "/portal/admin/events",
-    icon: Ticket,
-    featureKey: "events",
-  },
-  {
-    title: "Networking",
-    href: "/portal/networking",
-    icon: Handshake,
-    featureKey: "networking",
-  },
-  {
-    title: "Deals",
-    href: "/portal/deals",
-    icon: DollarSign,
-    featureKey: "deals",
-  },
-  {
-    title: "Supplier Search",
-    href: "/portal/supplier-search",
-    icon: Factory,
-    badge: "AI",
-    featureKey: "supplierSearch",
-  },
-  {
-    title: "Team Members",
-    href: "/portal/admin/team-members",
-    icon: UserCog,
-    featureKey: "teamMembers",
-  },
-  {
-    title: "Affiliates",
-    href: "/portal/affiliates",
-    icon: Users,
-    featureKey: "affiliates",
-  },
-  {
-    title: "Customers",
-    href: "/portal/customers",
-    icon: Building,
-    featureKey: "customers",
-  },
-  {
-    title: "Documents",
-    href: "/portal/documents",
-    icon: FileText,
-    featureKey: "documents",
-  },
-  {
-    title: "GoHighLevel",
-    href: "/portal/gohighlevel",
-    icon: Plug,
-    badge: "CRM",
-    featureKey: "gohighlevel",
-  },
-  {
-    title: "GHL Integration",
-    href: "/portal/admin/ghl-migration",
-    icon: ArrowRightLeft,
-    featureKey: "ghlMigration",
-  },
-  {
-    title: "Hero Carousel",
-    href: "/portal/admin/hero",
-    icon: Presentation,
-    featureKey: "heroManagement",
-  },
-  {
-    title: "Image Manager",
-    href: "/portal/admin/images",
-    icon: ImageIcon,
-    featureKey: "imageManager",
-  },
-  {
-    title: "Academy Admin",
-    href: "/portal/admin/academy",
-    icon: GraduationCap,
-    featureKey: "academyAdmin",
-  },
-  {
-    title: "Navigation Manager",
-    href: "/portal/admin/navigation",
-    icon: Menu,
-    featureKey: "navigationManager",
-  },
-  {
-    title: "Revenue Config",
-    href: "/portal/admin/revenue",
-    icon: DollarSign,
-    featureKey: "revenueConfig",
-  },
-  {
-    title: "Alignable",
-    href: "/portal/admin/alignable",
-    icon: Network,
-    featureKey: "alignable",
-  },
-  {
-    title: "Backup & Restore",
-    href: "/portal/admin/backups",
-    icon: Database,
-    featureKey: "backups",
-  },
-  {
-    title: "Success Stories",
-    href: "/portal/admin/success-stories",
-    icon: Quote,
-    featureKey: "successStories",
-  },
-];
 
 export function PortalSidebar() {
   const pathname = usePathname();
@@ -455,14 +241,10 @@ export function PortalSidebar() {
   const [openSections, setOpenSections] = useState({
     icyFocused: true,
     systemManagement: true,
-    projectManagement: true,
-    data: false,
     people: false,
     productivity: false,
     affiliateCenter: false,
     content: false,
-    admin: false,
-    legacy83Business: true,
   });
 
   const toggleSection = (section: keyof typeof openSections) => {
@@ -625,71 +407,11 @@ export function PortalSidebar() {
           </Collapsible>
         )}
 
-        {/* Legacy 83 Business */}
-        <Collapsible open={openSections.legacy83Business} onOpenChange={() => toggleSection("legacy83Business")}>
-          <SidebarGroup>
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md flex items-center justify-between pr-2">
-                <span>Legacy 83 Business</span>
-                {openSections.legacy83Business ? (
-                  <ChevronDown className="h-4 w-4 text-sidebar-foreground/60" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-sidebar-foreground/60" />
-                )}
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {legacy83BusinessItems.filter(item => canSeeFeature(item.featureKey)).map((item) => (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === item.href || pathname.startsWith(item.href + "/")}
-                        tooltip={item.title}
-                      >
-                        <Link href={item.href}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                      {item.badge && (
-                        <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
-                      )}
-                    </SidebarMenuItem>
-                  ))}
-                  {/* SuperAdmin Controls - Only visible to superadmins */}
-                  {showSuperAdminLink && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === "/portal/admin/superadmin"}
-                        tooltip="SuperAdmin Controls"
-                      >
-                        <Link href="/portal/admin/superadmin">
-                          <Shield className="h-4 w-4" />
-                          <span>SuperAdmin Controls</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
-
         {/* System Management */}
         {renderSection("systemManagement", "System Management", systemManagementItems)}
 
-        {/* Project Management */}
-        {renderSection("projectManagement", "Project Management", projectManagementItems)}
-
         {/* Productivity */}
         {renderSection("productivity", "Productivity", productivityItems)}
-
-        {/* Data */}
-        {renderSection("data", "Data", dataItems)}
 
         {/* People */}
         {renderSection("people", "People", peopleItems)}
@@ -700,8 +422,27 @@ export function PortalSidebar() {
         {/* Content */}
         {renderSection("content", "Content", contentItems)}
 
-        {/* Admin */}
-        {renderSection("admin", "Admin", adminItems)}
+        {/* SuperAdmin Controls - Only visible to superadmins */}
+        {showSuperAdminLink && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === "/portal/admin/superadmin"}
+                    tooltip="SuperAdmin Controls"
+                  >
+                    <Link href="/portal/admin/superadmin">
+                      <Shield className="h-4 w-4" />
+                      <span>SuperAdmin Controls</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
