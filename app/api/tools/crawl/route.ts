@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { createOpenAIClient } from "@/lib/openai-config";
 
 interface CrawlResult {
   url: string;
@@ -80,10 +80,9 @@ export async function POST(request: NextRequest) {
     // Use AI to extract structured information
     let aiExtraction = null;
     if (extractType === "ai" || extractType === "all") {
-      const apiKey = process.env.OPENAI_API_KEY;
-      if (apiKey) {
+      const openai = await createOpenAIClient();
+      if (openai) {
         try {
-          const openai = new OpenAI({ apiKey });
           const aiResponse = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [

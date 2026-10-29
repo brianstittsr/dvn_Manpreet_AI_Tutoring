@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { createOpenAIClient } from "@/lib/openai-config";
 
 // Maximum file size: 25MB (OpenAI Whisper limit)
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 export async function POST(request: NextRequest) {
   try {
-    // Get API key from environment variable
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
+    const openai = await createOpenAIClient();
+    if (!openai) {
       return NextResponse.json(
-        { success: false, error: "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables or go to Settings > LLM Configuration." },
+        { success: false, error: "No AI provider configured. Go to Settings > LLM Configuration or set OPENAI_API_KEY." },
         { status: 500 }
       );
     }
-    
-    const openai = new OpenAI({ apiKey });
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getLLMRuntime } from "@/lib/llm-runtime";
 
 const ANALYSIS_PROMPT = `You are an expert document analyzer for proposals, grants, RFPs, contracts, and agreements. Analyze the provided document and extract structured information.
 
@@ -138,10 +139,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for OpenAI API key
-    const apiKey = process.env.OPENAI_API_KEY;
-    
-    if (!apiKey) {
+    const runtime = await getLLMRuntime();
+
+    if (!runtime.client || !runtime.model) {
       // Return mock analysis for demo purposes
       return NextResponse.json({
         success: true,
@@ -149,39 +149,24 @@ export async function POST(request: NextRequest) {
         data: generateMockAnalysis(extractedText, documentType),
         extractedText: extractedText.substring(0, 1000),
         extractedTextLength: extractedText.length,
-        note: "OpenAI API key not configured. Using mock analysis.",
+        note: "No AI provider configured. Using mock analysis.",
       });
     }
 
-    // Call OpenAI API
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: ANALYSIS_PROMPT },
-          {
-            role: "user",
-            content: `Analyze this document${documentType ? ` (type hint: ${documentType})` : ""}:\n\n${extractedText}`,
-          },
-        ],
-        temperature: 0.3,
-        max_tokens: 4000,
-        response_format: { type: "json_object" },
-      }),
+    const aiResponse = await runtime.client.chat.completions.create({
+      model: runtime.model,
+      messages: [
+        { role: "system", content: ANALYSIS_PROMPT },
+        {
+          role: "user",
+          content: `Analyze this document${documentType ? ` (type hint: ${documentType})` : ""}:\n\n${extractedText}`,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 4000,
+      response_format: { type: "json_object" },
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenAI API error:", errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
-
-    const aiResponse = await response.json();
     const analysisResult = JSON.parse(aiResponse.choices[0]?.message?.content || "{}");
 
     return NextResponse.json({

@@ -666,6 +666,20 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /lms_interview_sessions/{sessionId} {
+      allow read: if false;
+      allow write: if false;
+      match /turns/{turnId} {
+        allow read: if false;
+        allow write: if false;
+      }
+    }
+
+    match /lms_learner_profiles/{profileId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
     // Public LMS catalog metadata. Learner progress and operational records still
     // require authentication through the authenticated fallback below.
     match /lms_categories/{docId} {
@@ -717,6 +731,8 @@ service cloud.firestore {
         'lms_gpt_lesson_scores',
         'lms_gpt_guardian_links',
         'lms_gpt_safety_incidents',
+        'lms_interview_sessions',
+        'lms_learner_profiles',
         'platformSecrets'
       ]);
       allow write: if isAuthenticated() && !(collection in [
@@ -725,6 +741,8 @@ service cloud.firestore {
         'lms_gpt_lesson_scores',
         'lms_gpt_guardian_links',
         'lms_gpt_safety_incidents',
+        'lms_interview_sessions',
+        'lms_learner_profiles',
         'platformSecrets'
       ]);
     }

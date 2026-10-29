@@ -45,7 +45,7 @@ export interface UserSubscription {
 // ============================================================================
 
 export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
-export type ContentType = 'video' | 'text' | 'quiz' | 'assignment' | 'download' | 'live' | 'gptLesson';
+export type ContentType = 'video' | 'text' | 'quiz' | 'assignment' | 'download' | 'live' | 'gptLesson' | 'studentInterview';
 export type GPTLessonStage = 'notice' | 'try' | 'challenge' | 'verify' | 'reflect' | 'transfer';
 export type GPTTutorPersona = 'generic' | 'math' | 'reading' | 'lifeSkills' | 'custom';
 export type GPTLessonAudience = 'adult' | 'minor';
@@ -66,6 +66,31 @@ export interface GPTLessonConfig {
   rubricPassingScore: number;
   maxTransferAttempts: number;
   promptVersion: string;
+}
+
+export interface StudentInterviewConfig {
+  /** Interviewer system prompt — admin-customizable, defaults to the learning-style interview. */
+  systemPrompt: string;
+  /** Minimum learner turns before the interview may conclude. */
+  minTurns: number;
+  /** Hard bound on learner turns; the interview always ends here. */
+  maxTurns: number;
+  estimatedDurationMinutes: number | null;
+  audience: GPTLessonAudience;
+  gradeBand: string | null;
+  requiresGuardianConsent: boolean;
+}
+
+/** Structured profile extracted from a completed student interview. */
+export interface LearnerProfileData {
+  learningStyles: string[];
+  motivators: string[];
+  interests: string[];
+  pacePreference: string | null;
+  helpPreference: string | null;
+  notes: string | null;
+  /** Compact summary injected into tutor prompts for personalization. */
+  tutorSummary: string;
 }
 
 export interface CourseCategory {
@@ -426,6 +451,7 @@ export function getContentTypeIcon(type: ContentType): string {
     download: 'Download',
     live: 'Radio',
     gptLesson: 'Sparkles',
+    studentInterview: 'MessagesSquare',
   };
   return icons[type];
 }

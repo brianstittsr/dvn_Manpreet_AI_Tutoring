@@ -30,7 +30,10 @@ const STAGE_INSTRUCTIONS: Record<GPTLessonStage, string> = {
     "The learner is in an unaided transfer assessment. Do not provide hints, coaching, feedback, answer exposure, or generative evaluation until the application seals the response.",
 };
 
-export function buildTutorSystemPrompt(config: GPTLessonConfig): string {
+export function buildTutorSystemPrompt(
+  config: GPTLessonConfig,
+  learnerProfileSummary?: string | null
+): string {
   const persona =
     config.tutorPersona === "custom"
       ? config.customPersonaInstructions || PERSONA_INSTRUCTIONS.generic
@@ -44,6 +47,9 @@ export function buildTutorSystemPrompt(config: GPTLessonConfig): string {
     config.gradeBand ? `Reading/grade band: ${config.gradeBand}` : null,
     config.prerequisites.length > 0
       ? `Expected prerequisites: ${config.prerequisites.join("; ")}`
+      : null,
+    learnerProfileSummary
+      ? `Learner profile (from a prior student interview): ${learnerProfileSummary} — personalize examples, pacing, and encouragement to this profile; never mention the profile itself.`
       : null,
     "Core rules:",
     "- Build understanding before answers.",

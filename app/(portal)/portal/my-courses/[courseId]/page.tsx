@@ -14,7 +14,7 @@ import {
   LessonDoc,
   EnrollmentDoc 
 } from "@/lib/firebase-lms";
-import { getLessonProgress, LessonProgressDoc } from "@/lib/firebase-lms-student";
+import { getLessonProgress, ensureCourseCertificate, LessonProgressDoc } from "@/lib/firebase-lms-student";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +35,9 @@ import {
   Lock,
   ArrowLeft,
   Loader2,
-  User
+  User,
+  Award,
+  Printer
 } from "lucide-react";
 
 interface ModuleWithLessons extends CourseModuleDoc {
@@ -52,6 +54,7 @@ export default function CoursePlayerPage() {
   const [course, setCourse] = useState<CourseDoc | null>(null);
   const [modules, setModules] = useState<ModuleWithLessons[]>([]);
   const [enrollment, setEnrollment] = useState<EnrollmentDoc | null>(null);
+  const [certificateId, setCertificateId] = useState<string | null>(null);
   const [lessonProgress, setLessonProgress] = useState<Record<string, LessonProgressDoc>>({});
   const [loading, setLoading] = useState(true);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
@@ -82,6 +85,23 @@ export default function CoursePlayerPage() {
 
       setCourse(courseData);
       setEnrollment(enrollmentData);
+
+      // Issue the completion certificate once the course is finished
+      if (enrollmentData?.completedAt) {
+        const recipientName =
+          [profile.firstName, profile.lastName].filter(Boolean).join(" ") ||
+          profile.email ||
+          "Learner";
+        ensureCourseCertificate({
+          enrollmentId: enrollmentData.id,
+          userId: profile.id,
+          courseId,
+          courseTitle: courseData.title,
+          recipientName,
+        })
+          .then((id) => setCertificateId(id))
+          .catch((e) => console.error("Certificate issuance failed:", e));
+      }
 
       // Load lessons for each module
       const modulesWithLessons = await Promise.all(
@@ -242,6 +262,48 @@ export default function CoursePlayerPage() {
             </div>
             <Progress value={enrollment?.progressPercentage || 0} className="h-2" />
           </div>
+
+          {enrollment?.completedAt && (
+            <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-lg border border-teal-500/40 bg-teal-500/10 p-4">
+              <div className="flex items-center gap-3 flex-1">
+                <Award className="h-8 w-8 text-teal-600 shrink-0" />
+                <div>
+                  <p className="font-semibold text-teal-800 dark:text-teal-200">
+                    Course complete — congratulations!
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Finished {enrollment.completedAt.toDate().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                {certificateId && (
+                  <Button className="bg-teal-600 hover:bg-teal-700 text-white" asChild>
+                    <Link href={`/certificate/${certificateId}`} target="_blank">
+                      <Award className="h-4 w-4 mr-2" />
+                      View Certificate
+                    </Link>
+                  </Button>
+                )}
+                <Button variant="outline" asChild>
+                  <Link href={`/portal/my-courses/${courseId}/report`}>
+                    <Printer className="h-4 w-4 mr-2" />
+                    Print Progress Report
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          )}
+          {!enrollment?.completedAt && enrollment && (
+            <div className="mt-4">
+              <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
+                <Link href={`/portal/my-courses/${courseId}/report`}>
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print Progress Report
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -353,7 +415,7 @@ export default function CoursePlayerPage() {
                 
                 {course.learningOutcomes && course.learningOutcomes.length > 0 && (
                   <div>
-                    <h4 className="font-medium mb-2">What You'll Learn</h4>
+                    <h4 className="font-medium mb-2">What You&apos;ll Learn</h4>
                     <ul className="space-y-2">
                       {course.learningOutcomes.map((outcome, i) => (
                         <li key={i} className="flex items-start gap-2 text-sm">

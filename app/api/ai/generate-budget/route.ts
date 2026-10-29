@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getLLMRuntime } from "@/lib/llm-runtime";
 
 interface GenerateBudgetRequest {
   proposalName: string;
@@ -16,26 +17,21 @@ interface BudgetBreakdown {
   description: string;
 }
 
-async function callOpenAI(apiKey: string, systemPrompt: string, userPrompt: string): Promise<string> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: 0.7,
-      max_tokens: 1500,
-    }),
+async function callLLM(systemPrompt: string, userPrompt: string): Promise<string> {
+  const runtime = await getLLMRuntime();
+  if (!runtime.client || !runtime.model) return "";
+
+  const completion = await runtime.client.chat.completions.create({
+    model: runtime.model,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    temperature: 0.7,
+    max_tokens: 1500,
   });
 
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || "";
+  return completion.choices?.[0]?.message?.content || "";
 }
 
 function generateFallbackBudget(request: GenerateBudgetRequest): { totalBudget: number; breakdown: BudgetBreakdown[] } {
@@ -125,9 +121,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const runtime = await getLLMRuntime();
 
-    if (apiKey) {
+    if (runtime.client && runtime.model) {
       const systemPrompt = `You are a financial planning expert who creates realistic project budgets. 
 You understand different types of proposals (grants, contracts, RFPs) and create appropriate budget estimates.
 Always respond with valid JSON containing totalBudget and breakdown.`;
@@ -161,7 +157,7 @@ Respond ONLY with JSON in this format:
 }`;
 
       try {
-        const aiResponse = await callOpenAI(apiKey, systemPrompt, userPrompt);
+        const aiResponse = await callLLM(systemPrompt, userPrompt);
         
         // Parse JSON from response
         const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);

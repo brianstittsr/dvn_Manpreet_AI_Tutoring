@@ -4,6 +4,7 @@ import { adminDb } from "@/lib/firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { COLLECTIONS, type EventDoc, type EventRegistration } from "@/lib/schema";
 import { rateLimit } from "@/lib/rate-limit";
+import { provisionStudentAccount } from "@/lib/student-provisioning";
 
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { scope: "stripe-event-checkout", limit: 15, windowMs: 60_000 });
@@ -145,6 +146,29 @@ export async function POST(request: NextRequest) {
       const regRef = await adminDb
         .collection(COLLECTIONS.EVENT_REGISTRATIONS)
         .add(registration);
+
+      // Provision the learner account and email login info — failures must not
+      // break the registration itself.
+      try {
+        const provision = await provisionStudentAccount({
+          email: customerInfo.email,
+          firstName: customerInfo.firstName,
+          lastName: customerInfo.lastName,
+          context: `your registration for "${event.title}"`,
+        });
+        await regRef.update({
+          accountUserId: provision.userId,
+          accountProvisioned: !provision.error,
+          accountProvisionError: provision.error || null,
+        });
+      } catch (provisionError) {
+        console.error("[create-checkout] Account provisioning failed:", provisionError);
+        await regRef.update({
+          accountProvisioned: false,
+          accountProvisionError:
+            provisionError instanceof Error ? provisionError.message : "unknown",
+        });
+      }
 
       return NextResponse.json({
         success: true,

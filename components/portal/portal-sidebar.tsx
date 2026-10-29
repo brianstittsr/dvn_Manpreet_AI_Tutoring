@@ -77,9 +77,11 @@ import {
   Phone,
   CalendarClock,
   GraduationCap,
+  TicketCheck,
   Paintbrush,
   BookOpen,
   Database,
+  Globe,
   Ticket,
   UsersRound,
   Briefcase,
@@ -100,8 +102,12 @@ const adminPlatformManagementItems: { title: string; href: string; icon: React.E
   { title: "Bug Tracker", href: "/portal/bug-tracker", icon: Bug, featureKey: "bugTracker" },
   { title: "Command Center", href: "/portal/command-center", icon: Rocket, featureKey: "commandCenter" },
   { title: "Academy Admin", href: "/portal/admin/academy", icon: GraduationCap, featureKey: "academyAdmin" },
+  { title: "Student Progress", href: "/portal/admin/academy/students", icon: BarChart3, featureKey: "academyAdmin" },
+  { title: "Events", href: "/portal/admin/events", icon: CalendarDays, featureKey: "events" },
+  { title: "Event Registrations", href: "/portal/admin/event-registrations", icon: TicketCheck, featureKey: "eventRegistrations" },
   { title: "Documentation", href: "/portal/system-docs", icon: BookOpen, featureKey: "systemDocs" },
   { title: "Hero Carousel", href: "/portal/admin/hero", icon: Presentation, featureKey: "heroManagement" },
+  { title: "REA Web Cloner", href: "/portal/admin/rea", icon: Globe, badge: "Local", featureKey: "reaCloner" },
 ];
 
 // Admin Focused — Deal Management

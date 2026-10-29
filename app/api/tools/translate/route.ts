@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { createOpenAIClient } from "@/lib/openai-config";
 
 export async function POST(request: NextRequest) {
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
+    const openai = await createOpenAIClient();
+    if (!openai) {
       return NextResponse.json(
-        { success: false, error: "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables." },
+        { success: false, error: "No AI provider configured. Go to Settings > LLM Configuration or set OPENAI_API_KEY." },
         { status: 500 }
       );
     }
-    
-    const openai = new OpenAI({ apiKey });
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

@@ -69,6 +69,7 @@ import {
   BookOpen,
   GraduationCap,
   Brain,
+  MessagesSquare,
 } from "lucide-react";
 import {
   getCourse,
@@ -87,6 +88,7 @@ import {
 } from "@/lib/firebase-lms";
 import type { ContentType, GPTLessonAudience, GPTTutorPersona } from "@/types/academy";
 import { GPT_LESSON_PROMPT_VERSION } from "@/lib/gpt-lesson-prompts";
+import { DEFAULT_INTERVIEW_SYSTEM_PROMPT } from "@/lib/interview-defaults";
 import {
   AISyllabusGenerator,
   AILessonGenerator,
@@ -115,6 +117,7 @@ const CONTENT_TYPE_OPTIONS: { value: ContentType; label: string; icon: React.Rea
   { value: "download", label: "Downloadable", icon: <Download className="h-4 w-4" />, description: "PDF, worksheet, or other downloadable resource" },
   { value: "live", label: "Live Session", icon: <Radio className="h-4 w-4" />, description: "Scheduled live video session" },
   { value: "gptLesson", label: "GPT Lesson", icon: <Sparkles className="h-4 w-4" />, description: "Interactive AI-guided six-stage lesson" },
+  { value: "studentInterview", label: "AI Student Interview", icon: <MessagesSquare className="h-4 w-4" />, description: "Chat interview that learns how the child learns best" },
 ];
 
 function getContentTypeIcon(type: ContentType) {
@@ -221,6 +224,15 @@ export default function CourseContentBuilderPage() {
   const [gptQuizPassingPercentage, setGptQuizPassingPercentage] = useState("70");
   const [gptRubricPassingScore, setGptRubricPassingScore] = useState("3");
   const [gptMaxTransferAttempts, setGptMaxTransferAttempts] = useState("2");
+
+  // Student interview fields
+  const [interviewSystemPrompt, setInterviewSystemPrompt] = useState(DEFAULT_INTERVIEW_SYSTEM_PROMPT);
+  const [interviewMinTurns, setInterviewMinTurns] = useState("6");
+  const [interviewMaxTurns, setInterviewMaxTurns] = useState("12");
+  const [interviewDuration, setInterviewDuration] = useState("10");
+  const [interviewAudience, setInterviewAudience] = useState<GPTLessonAudience>("minor");
+  const [interviewGradeBand, setInterviewGradeBand] = useState("");
+  const [interviewRequiresGuardianConsent, setInterviewRequiresGuardianConsent] = useState(true);
 
   // Delete confirmation state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -343,6 +355,13 @@ export default function CourseContentBuilderPage() {
     setGptQuizPassingPercentage("70");
     setGptRubricPassingScore("3");
     setGptMaxTransferAttempts("2");
+    setInterviewSystemPrompt(DEFAULT_INTERVIEW_SYSTEM_PROMPT);
+    setInterviewMinTurns("6");
+    setInterviewMaxTurns("12");
+    setInterviewDuration("10");
+    setInterviewAudience("minor");
+    setInterviewGradeBand("");
+    setInterviewRequiresGuardianConsent(true);
   };
 
   const openLessonDialog = (moduleId: string, lesson?: LessonDoc) => {
@@ -378,6 +397,17 @@ export default function CourseContentBuilderPage() {
         setGptRubricPassingScore(String(gptConfig.rubricPassingScore));
         setGptMaxTransferAttempts(String(gptConfig.maxTransferAttempts));
       }
+
+      const interviewConfig = lesson.interviewConfig;
+      if (interviewConfig) {
+        setInterviewSystemPrompt(interviewConfig.systemPrompt);
+        setInterviewMinTurns(String(interviewConfig.minTurns));
+        setInterviewMaxTurns(String(interviewConfig.maxTurns));
+        setInterviewDuration(interviewConfig.estimatedDurationMinutes ? String(interviewConfig.estimatedDurationMinutes) : "");
+        setInterviewAudience(interviewConfig.audience);
+        setInterviewGradeBand(interviewConfig.gradeBand || "");
+        setInterviewRequiresGuardianConsent(interviewConfig.requiresGuardianConsent);
+      }
     } else {
       setEditingLesson(null);
       setLessonTitle("");
@@ -409,6 +439,10 @@ export default function CourseContentBuilderPage() {
         return;
       }
     }
+    if (lessonContentType === "studentInterview" && !interviewSystemPrompt.trim()) {
+      toast.error("Enter a system prompt for the interview");
+      return;
+    }
 
     setSaving(true);
     try {
@@ -436,6 +470,15 @@ export default function CourseContentBuilderPage() {
           rubricPassingScore: Math.min(4, Math.max(0, parseInt(gptRubricPassingScore) || 0)),
           maxTransferAttempts: Math.max(1, parseInt(gptMaxTransferAttempts) || 1),
           promptVersion: GPT_LESSON_PROMPT_VERSION,
+        } : null,
+        interviewConfig: lessonContentType === "studentInterview" ? {
+          systemPrompt: interviewSystemPrompt.trim(),
+          minTurns: Math.max(1, parseInt(interviewMinTurns) || 1),
+          maxTurns: Math.max(parseInt(interviewMinTurns) || 1, parseInt(interviewMaxTurns) || 12),
+          estimatedDurationMinutes: interviewDuration ? parseInt(interviewDuration) : null,
+          audience: interviewAudience,
+          gradeBand: interviewGradeBand.trim() || null,
+          requiresGuardianConsent: interviewAudience === "minor" ? true : interviewRequiresGuardianConsent,
         } : null,
         imageId: lessonImageId || null,
         imageUrl: lessonImageUrl || null,
@@ -1171,6 +1214,106 @@ export default function CourseContentBuilderPage() {
                 <p className="text-xs text-muted-foreground">
                   The lesson uses the provider and API key configured in Settings &gt; LLM Configuration. The key remains server-side.
                 </p>
+              </div>
+            )}
+
+            {lessonContentType === "studentInterview" && (
+              <div className="space-y-5 p-4 border rounded-lg bg-muted/30">
+                <h4 className="font-medium flex items-center gap-2">
+                  <MessagesSquare className="h-4 w-4" />
+                  Student Interview Settings
+                </h4>
+
+                <div className="space-y-2">
+                  <Label htmlFor="interview-prompt">Interviewer System Prompt *</Label>
+                  <Textarea
+                    id="interview-prompt"
+                    value={interviewSystemPrompt}
+                    onChange={(e) => setInterviewSystemPrompt(e.target.value)}
+                    rows={12}
+                    className="font-mono text-xs"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    The default prompt interviews the child about their learning style, interests, and what
+                    rewards motivate them. Their answers become a learner profile your AI coaches use to
+                    personalize GPT lessons.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="interview-min">Min learner answers</Label>
+                    <Input
+                      id="interview-min"
+                      type="number"
+                      min={1}
+                      value={interviewMinTurns}
+                      onChange={(e) => setInterviewMinTurns(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="interview-max">Max learner answers</Label>
+                    <Input
+                      id="interview-max"
+                      type="number"
+                      min={1}
+                      value={interviewMaxTurns}
+                      onChange={(e) => setInterviewMaxTurns(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="interview-duration">Estimated (minutes)</Label>
+                    <Input
+                      id="interview-duration"
+                      type="number"
+                      min={1}
+                      value={interviewDuration}
+                      onChange={(e) => setInterviewDuration(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="interview-audience">Audience</Label>
+                    <Select
+                      value={interviewAudience}
+                      onValueChange={(value) => setInterviewAudience(value as GPTLessonAudience)}
+                    >
+                      <SelectTrigger id="interview-audience">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="adult">Adult / professional learner</SelectItem>
+                        <SelectItem value="minor">Minor-facing learner</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="interview-band">Grade Band (optional)</Label>
+                    <Input
+                      id="interview-band"
+                      value={interviewGradeBand}
+                      onChange={(e) => setInterviewGradeBand(e.target.value)}
+                      placeholder="e.g., 3-5"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border p-3 bg-background">
+                  <div>
+                    <Label htmlFor="interview-consent" className="font-medium">Guardian consent</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Required automatically for minor audiences; optional for adults
+                    </p>
+                  </div>
+                  <Switch
+                    id="interview-consent"
+                    checked={interviewAudience === "minor" ? true : interviewRequiresGuardianConsent}
+                    disabled={interviewAudience === "minor"}
+                    onCheckedChange={setInterviewRequiresGuardianConsent}
+                  />
+                </div>
               </div>
             )}
 

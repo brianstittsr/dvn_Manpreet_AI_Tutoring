@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { requireAuthenticatedActor, GPTLessonAuthError } from "@/lib/gpt-lesson-server";
+import { getLLMRuntime } from "@/lib/llm-runtime";
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -29,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build messages array for the API
-    const messages = [
+    const messages: ChatCompletionMessageParam[] = [
       { role: "system", content: systemPrompt },
       ...conversationHistory.map((msg) => ({
         role: msg.role,
@@ -38,19 +40,19 @@ export async function POST(request: NextRequest) {
       { role: "user", content: message },
     ];
 
-    // Try to get LLM config from environment or use defaults
-    const apiKey = process.env.OPENAI_API_KEY;
-    const ollamaUrl = process.env.OLLAMA_URL || "http://localhost:11434";
-    const useOllama = process.env.USE_OLLAMA === "true";
+    const runtime = await getLLMRuntime();
 
     let response: string;
 
-    if (useOllama) {
-      // Use Ollama for local LLM
-      response = await callOllama(ollamaUrl, messages);
-    } else if (apiKey) {
-      // Use OpenAI
-      response = await callOpenAI(apiKey, messages);
+    if (runtime.client && runtime.model) {
+      const completion = await runtime.client.chat.completions.create({
+        model: runtime.model,
+        messages,
+        temperature: 0.7,
+        max_tokens: 2000,
+      });
+      response =
+        completion.choices[0]?.message?.content || "No response generated";
     } else {
       // Fallback: Generate a helpful response without an API
       response = generateFallbackResponse(message, systemPrompt);
@@ -67,56 +69,6 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-async function callOpenAI(
-  apiKey: string,
-  messages: { role: string; content: string }[]
-): Promise<string> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4o",
-      messages,
-      temperature: 0.7,
-      max_tokens: 2000,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.choices[0]?.message?.content || "No response generated";
-}
-
-async function callOllama(
-  ollamaUrl: string,
-  messages: { role: string; content: string }[]
-): Promise<string> {
-  const response = await fetch(`${ollamaUrl}/api/chat`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "llama2",
-      messages,
-      stream: false,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Ollama API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.message?.content || "No response generated";
 }
 
 function generateFallbackResponse(message: string, systemPrompt: string): string {

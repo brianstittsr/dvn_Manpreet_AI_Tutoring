@@ -362,6 +362,48 @@ export async function getBestQuizAttempt(
 }
 
 // ============================================================================
+// CERTIFICATES
+// ============================================================================
+
+/**
+ * Idempotently issue a completion certificate for a finished enrollment.
+ * Safe to call on every render once a course is complete — it returns the
+ * existing certificateId if one was already issued.
+ */
+export async function ensureCourseCertificate(data: {
+  enrollmentId: string;
+  userId: string;
+  courseId: string;
+  courseTitle: string;
+  recipientName: string;
+}): Promise<string | null> {
+  if (!db) throw new Error("Firebase not initialized");
+
+  const enrollmentRef = doc(db, LMS_COLLECTIONS.ENROLLMENTS, data.enrollmentId);
+  const enrollmentSnap = await getDoc(enrollmentRef);
+  if (!enrollmentSnap.exists()) return null;
+
+  const enrollment = enrollmentSnap.data() as {
+    completedAt: Timestamp | null;
+    certificateId: string | null;
+  };
+  if (!enrollment.completedAt || enrollment.certificateId) {
+    return enrollment.certificateId || null;
+  }
+
+  const { issueCertificate } = await import("./firebase-lms");
+  const certificate = await issueCertificate({
+    odUserId: data.userId,
+    certificateType: "course",
+    courseId: data.courseId,
+    title: `${data.courseTitle} — Certificate of Completion`,
+    recipientName: data.recipientName,
+  });
+
+  return certificate.id;
+}
+
+// ============================================================================
 // NOTES
 // ============================================================================
 

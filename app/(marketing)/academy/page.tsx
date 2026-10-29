@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,12 +15,9 @@ import {
   Calendar,
   Target,
   TrendingUp,
-  Settings,
-  ArrowRightLeft,
   CheckCircle,
   Clock,
   Star,
-  Loader2,
 } from "lucide-react";
 import {
   getCourses,
@@ -33,145 +29,141 @@ import {
   type CategoryDoc,
 } from "@/lib/firebase-lms";
 
-// Fallback data for when Firebase is not available
+// Fallback data for when Firebase is not available — mirrors the seeded catalog
 const fallbackCourses = [
   {
-    title: "The G.R.O.W.S. Framework Masterclass",
-    description: "Master the complete AICenter4U methodology for building a business that thrives beyond you.",
-    category: "Goals & Vision",
-    duration: "8 hours",
-    lessons: 24,
-    level: "Intermediate",
-    image: "/academy/grows-masterclass.jpg",
-    slug: "grows-framework-masterclass",
+    title: "Number Sense Adventures",
+    description: "Place value, word problems, and multiplication missions with Coach Maya — your friendly AI math guide.",
+    category: "Math Adventures",
+    duration: "3 hours",
+    lessons: 14,
+    level: "Grades 3-5",
+    image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&h=450&q=80",
+    slug: "number-sense-adventures",
     isFeatured: true,
   },
   {
-    title: "Succession Planning Essentials",
-    description: "Create a comprehensive succession plan that protects your legacy and maximizes business value.",
-    category: "Succession & Legacy",
-    duration: "4 hours",
+    title: "Fractions Fun Lab",
+    description: "Slice, compare, and play with fractions through guided experiments and everyday examples.",
+    category: "Math Adventures",
+    duration: "2.5 hours",
+    lessons: 11,
+    level: "Grades 4-6",
+    image: "https://images.unsplash.com/photo-1596495578065-6e0763fa1178?auto=format&fit=crop&w=800&h=450&q=80",
+    slug: "fractions-fun-lab",
+  },
+  {
+    title: "Story Explorer: Reading Adventures",
+    description: "Find the big idea in every story and become a reading detective with your AI Story Explorer.",
+    category: "Reading & Stories",
+    duration: "3 hours",
     lessons: 12,
-    level: "Advanced",
-    image: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800&h=450&fit=crop",
-    slug: "succession-planning-essentials",
+    level: "Grades 3-5",
+    image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=800&h=450&q=80",
+    slug: "story-explorer-reading-adventures",
   },
   {
-    title: "Leadership That Lasts",
-    description: "Develop leadership skills that empower your team and create lasting organizational culture.",
-    category: "Workforce & Leadership",
-    duration: "6 hours",
-    lessons: 18,
-    level: "Intermediate",
-    image: "/academy/leadership-lasts.jpg",
-    slug: "leadership-that-lasts",
-  },
-  {
-    title: "Operational Excellence Blueprint",
-    description: "Build systems and processes that run without you—the key to true business freedom.",
-    category: "Operations",
-    duration: "5 hours",
-    lessons: 15,
-    level: "Beginner",
-    image: "/academy/operational-excellence.jpg",
-    slug: "operational-excellence-blueprint",
+    title: "Growth & Glow: Confidence & Kindness",
+    description: "Name feelings, solve friendship puzzles, and build everyday confidence with your Growth & Glow coach.",
+    category: "Life Skills",
+    duration: "3 hours",
+    lessons: 12,
+    level: "Grades 3-6",
+    image: "https://images.unsplash.com/photo-1544776193-352d25ca82cd?auto=format&fit=crop&w=800&h=450&q=80",
+    slug: "growth-glow-confidence-kindness",
   },
 ];
 
 const fallbackCategories = [
-  { id: "goals-vision", name: "Goals & Vision", slug: "goals-vision", icon: Target, color: "bg-amber-500", courseCount: 8 },
-  { id: "revenue-growth", name: "Revenue & Growth", slug: "revenue-growth", icon: TrendingUp, color: "bg-green-500", courseCount: 6 },
-  { id: "operations", name: "Operations", slug: "operations", icon: Settings, color: "bg-blue-500", courseCount: 7 },
-  { id: "workforce-leadership", name: "Workforce & Leadership", slug: "workforce-leadership", icon: Users, color: "bg-purple-500", courseCount: 9 },
-  { id: "succession-legacy", name: "Succession & Legacy", slug: "succession-legacy", icon: ArrowRightLeft, color: "bg-orange-500", courseCount: 5 },
+  { id: "math-adventures", name: "Math Adventures", slug: "math-adventures", icon: Target, color: "bg-teal-500", courseCount: 2 },
+  { id: "reading-stories", name: "Reading & Stories", slug: "reading-stories", icon: BookOpen, color: "bg-purple-500", courseCount: 2 },
+  { id: "life-skills", name: "Life Skills", slug: "life-skills", icon: Users, color: "bg-pink-500", courseCount: 1 },
+  { id: "study-skills", name: "Study Skills", slug: "study-skills", icon: Star, color: "bg-blue-500", courseCount: 1 },
 ];
 
 const fallbackWorkshops = [
   {
-    title: "Building Your 90-Day Action Plan",
-    date: "January 15, 2025",
-    time: "2:00 PM EST",
+    title: "Meet Your AI Coach: Family Orientation",
+    date: "Next Saturday",
+    time: "10:00 AM EST",
     type: "Live Workshop",
-    spots: 12,
+    spots: 20,
   },
   {
-    title: "Exit Strategy Deep Dive",
-    date: "January 22, 2025",
-    time: "1:00 PM EST",
-    type: "Live Workshop",
-    spots: 8,
-  },
-  {
-    title: "Team Accountability Systems",
-    date: "January 29, 2025",
-    time: "3:00 PM EST",
+    title: "Family Math Game Night",
+    date: "Monthly",
+    time: "6:30 PM EST",
     type: "Live Workshop",
     spots: 15,
+  },
+  {
+    title: "Reading Circle Live: Story Detectives",
+    date: "Monthly",
+    time: "5:00 PM EST",
+    type: "Live Workshop",
+    spots: 18,
   },
 ];
 
 // Category icon mapping
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
-  "goals-vision": Target,
-  "revenue-growth": TrendingUp,
-  "operations": Settings,
-  "workforce-leadership": Users,
-  "succession-legacy": ArrowRightLeft,
+  "math-adventures": Target,
+  "reading-stories": BookOpen,
+  "life-skills": Users,
+  "study-skills": Star,
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  "goals-vision": "bg-amber-500",
-  "revenue-growth": "bg-green-500",
-  "operations": "bg-blue-500",
-  "workforce-leadership": "bg-purple-500",
-  "succession-legacy": "bg-orange-500",
+  "math-adventures": "bg-teal-500",
+  "reading-stories": "bg-purple-500",
+  "life-skills": "bg-pink-500",
+  "study-skills": "bg-blue-500",
 };
 
 const subscriptionTiers = [
   {
-    name: "Legacy Starter",
-    price: 49,
+    name: "Little Explorer",
+    price: 0,
     period: "month",
-    description: "Essential resources for business owners beginning their legacy journey",
+    description: "A gentle first step — perfect for trying AI-guided learning together",
     features: [
-      "Access to Journal articles",
-      "Monthly newsletter",
-      "Community forum access",
-      "1 free workshop per quarter",
+      "1 course of your choice",
+      "Meet-the-coach demo lesson",
+      "Student interview for personalization",
+      "Progress dashboard for parents",
     ],
-    cta: "Start Free Trial",
+    cta: "Start Free",
     popular: false,
   },
   {
-    name: "Legacy Builder",
-    price: 149,
+    name: "Learner",
+    price: 9.99,
     period: "month",
-    description: "Comprehensive tools and training for growing business leaders",
+    description: "Full access for one child across every course and coach",
     features: [
-      "All Starter features",
-      "Full course library access",
-      "Weekly group coaching calls",
-      "Pre/Post assessments",
-      "Certificate programs",
+      "All courses unlocked",
+      "All AI coach personas",
+      "Six-stage guided lessons",
+      "Badges, points & certificates",
+      "Printable progress reports",
       "Priority workshop registration",
     ],
-    cta: "Start Free Trial",
+    cta: "Start Learning",
     popular: true,
   },
   {
-    name: "Legacy Master",
-    price: 349,
+    name: "Family Plan",
+    price: 19.99,
     period: "month",
-    description: "Premium access with personalized coaching and exclusive resources",
+    description: "Everything for the whole family — up to 4 learners on one plan",
     features: [
-      "All Builder features",
-      "Monthly 1-on-1 coaching session",
-      "Custom learning paths",
-      "Executive peer group access",
-      "Annual strategy retreat invitation",
-      "White-glove onboarding",
+      "All Learner features",
+      "Up to 4 learner profiles",
+      "Guardian consent controls",
+      "Family workshops included",
+      "Dedicated family support",
     ],
-    cta: "Contact Us",
+    cta: "Start Family Plan",
     popular: false,
   },
 ];
@@ -221,19 +213,20 @@ export default function AcademyPage() {
         <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10" />
         <div className="container relative">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-6 bg-amber-500/20 text-amber-400 border-amber-500/30">
+            <Badge className="mb-6 bg-teal-500/20 text-teal-300 border-teal-500/30">
               AICenter4U Academy
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-6">
-              Build Your Legacy Through{" "}
-              <span className="text-amber-400">Continuous Learning</span>
+              Where Kids Learn to Love{" "}
+              <span className="text-teal-300">Learning</span>
             </h1>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Access world-class business coaching courses, live workshops, and assessments 
-              designed to help you build a business that thrives beyond you.
+              Friendly AI coaches guide your child through K-12 lessons built for real
+              understanding — not memorization. Every course is safe, family-friendly,
+              and made for curious minds.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" className="text-lg bg-amber-500 hover:bg-amber-600 text-slate-900" asChild>
+              <Button size="lg" className="text-lg bg-teal-500 hover:bg-teal-600 text-slate-900" asChild>
                 <Link href="/academy/courses">
                   Explore Courses
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -249,20 +242,20 @@ export default function AcademyPage() {
             {/* Stats */}
             <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
               <div>
-                <div className="text-3xl font-bold text-amber-400">{stats.totalCourses || 35}+</div>
+                <div className="text-3xl font-bold text-teal-300">{stats.totalCourses || 6}</div>
                 <div className="text-gray-400">Courses</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-amber-400">{stats.totalLessons || 200}+</div>
-                <div className="text-gray-400">Video Lessons</div>
+                <div className="text-3xl font-bold text-teal-300">{stats.totalLessons || 70}+</div>
+                <div className="text-gray-400">Guided Lessons</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-amber-400">{stats.totalWorkshops || 50}+</div>
-                <div className="text-gray-400">Workshops</div>
+                <div className="text-3xl font-bold text-teal-300">3</div>
+                <div className="text-gray-400">AI Coaches</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-amber-400">{stats.totalEnrollments || 500}+</div>
-                <div className="text-gray-400">Students</div>
+                <div className="text-3xl font-bold text-teal-300">6</div>
+                <div className="text-gray-400">Learning Stages</div>
               </div>
             </div>
           </div>
@@ -275,9 +268,9 @@ export default function AcademyPage() {
           <div className="flex justify-between items-end mb-12">
             <div>
               <h2 className="text-3xl font-bold mb-2">Featured Courses</h2>
-              <p className="text-muted-foreground">Start your legacy journey with our most popular programs</p>
+              <p className="text-muted-foreground">Kid-approved adventures in math, reading, and life skills</p>
             </div>
-            <Button variant="ghost" className="text-amber-600" asChild>
+            <Button variant="ghost" className="text-teal-600" asChild>
               <Link href="/academy/courses">
                 View All Courses
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -313,15 +306,15 @@ export default function AcademyPage() {
                         className="absolute inset-0 w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-slate-900/40" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-teal-500/20 to-slate-900/40" />
                     )}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Play className="h-6 w-6 text-amber-600 ml-1" />
+                        <Play className="h-6 w-6 text-teal-600 ml-1" />
                       </div>
                     </div>
                     {course.isFeatured && (
-                      <Badge className="absolute top-3 left-3 bg-amber-500 text-white">Featured</Badge>
+                      <Badge className="absolute top-3 left-3 bg-teal-500 text-white">Featured</Badge>
                     )}
                   </div>
                   <CardHeader className="pb-2">
@@ -358,15 +351,15 @@ export default function AcademyPage() {
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-slate-900/40" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-teal-500/20 to-slate-900/40" />
                   )}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Play className="h-6 w-6 text-amber-600 ml-1" />
+                      <Play className="h-6 w-6 text-teal-600 ml-1" />
                     </div>
                   </div>
                   {course.isFeatured && (
-                    <Badge className="absolute top-3 left-3 bg-amber-500 text-white">Featured</Badge>
+                    <Badge className="absolute top-3 left-3 bg-teal-500 text-white">Featured</Badge>
                   )}
                 </div>
                 <CardHeader className="pb-2">
@@ -400,14 +393,14 @@ export default function AcademyPage() {
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-2">Browse by Category</h2>
-            <p className="text-muted-foreground">Explore courses aligned with the G.R.O.W.S. framework</p>
+            <p className="text-muted-foreground">Pick a topic your child is curious about</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {displayCategories.length > 0 ? (
               displayCategories.map((category) => {
                 const IconComponent = CATEGORY_ICONS[category.slug] || Target;
-                const colorClass = CATEGORY_COLORS[category.slug] || "bg-amber-500";
+                const colorClass = CATEGORY_COLORS[category.slug] || "bg-teal-500";
                 return (
                   <Link
                     key={category.id}
@@ -418,7 +411,7 @@ export default function AcademyPage() {
                       <div className={`w-14 h-14 rounded-full ${colorClass} flex items-center justify-center mx-auto mb-4`}>
                         <IconComponent className="h-7 w-7 text-white" />
                       </div>
-                      <h3 className="font-semibold mb-1 group-hover:text-amber-600 transition-colors">{category.name}</h3>
+                      <h3 className="font-semibold mb-1 group-hover:text-teal-600 transition-colors">{category.name}</h3>
                       <p className="text-sm text-muted-foreground">{category.courseCount} courses</p>
                     </Card>
                   </Link>
@@ -435,7 +428,7 @@ export default function AcademyPage() {
                     <div className={`w-14 h-14 rounded-full ${category.color} flex items-center justify-center mx-auto mb-4`}>
                       <category.icon className="h-7 w-7 text-white" />
                     </div>
-                    <h3 className="font-semibold mb-1 group-hover:text-amber-600 transition-colors">{category.name}</h3>
+                    <h3 className="font-semibold mb-1 group-hover:text-teal-600 transition-colors">{category.name}</h3>
                     <p className="text-sm text-muted-foreground">{category.courseCount} courses</p>
                   </Card>
                 </Link>
@@ -451,9 +444,9 @@ export default function AcademyPage() {
           <div className="flex justify-between items-end mb-12">
             <div>
               <h2 className="text-3xl font-bold mb-2">Upcoming Workshops</h2>
-              <p className="text-muted-foreground">Live, interactive sessions with Manpreet Hundal</p>
+              <p className="text-muted-foreground">Live family sessions — learn and play together</p>
             </div>
-            <Button variant="ghost" className="text-amber-600" asChild>
+            <Button variant="ghost" className="text-teal-600" asChild>
               <Link href="/academy/workshops">
                 View All Workshops
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -467,7 +460,7 @@ export default function AcademyPage() {
                 <Card key={workshop.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="text-amber-600 border-amber-500/50">
+                      <Badge variant="outline" className="text-teal-600 border-teal-500/50">
                         <Calendar className="h-3 w-3 mr-1" />
                         {workshop.workshopType === "live" ? "Live Workshop" : "Recorded"}
                       </Badge>
@@ -489,8 +482,10 @@ export default function AcademyPage() {
                         {workshop.maxParticipants ? `${workshop.maxParticipants - workshop.registrationCount} spots remaining` : "Open registration"}
                       </div>
                     </div>
-                    <Button className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900">
-                      Register Now
+                    <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
+                      <Link href="/academy/workshops">
+                        Register Now
+                      </Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -500,7 +495,7 @@ export default function AcademyPage() {
                 <Card key={workshop.title} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="text-amber-600 border-amber-500/50">
+                      <Badge variant="outline" className="text-teal-600 border-teal-500/50">
                         <Calendar className="h-3 w-3 mr-1" />
                         {workshop.type}
                       </Badge>
@@ -522,8 +517,10 @@ export default function AcademyPage() {
                         {workshop.spots} spots remaining
                       </div>
                     </div>
-                    <Button className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900">
-                      Register Now
+                    <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
+                      <Link href="/academy/workshops">
+                        Register Now
+                      </Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -537,42 +534,43 @@ export default function AcademyPage() {
       <section className="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-6 bg-amber-500/20 text-amber-400 border-amber-500/30">
-              Pre & Post Assessments
+            <Badge className="mb-6 bg-teal-500/20 text-teal-300 border-teal-500/30">
+              How Our AI Coaches Teach
             </Badge>
-            <h2 className="text-3xl font-bold mb-4">Measure Your Growth</h2>
+            <h2 className="text-3xl font-bold mb-4">Six Stages to Real Understanding</h2>
             <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-              Take diagnostic assessments before and after each program to track your progress, 
-              identify growth areas, and demonstrate ROI on your learning investment.
+              Every guided lesson walks your child through Notice, Try, Challenge, Verify,
+              Reflect, and Transfer — so they prove what they know by doing it themselves,
+              not by memorizing answers.
             </p>
 
             <div className="grid md:grid-cols-3 gap-8 mt-12">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
-                  <Target className="h-8 w-8 text-amber-400" />
+                <div className="w-16 h-16 rounded-full bg-teal-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Target className="h-8 w-8 text-teal-300" />
                 </div>
-                <h3 className="font-semibold mb-2">Diagnostic Assessments</h3>
-                <p className="text-sm text-gray-400">Identify your starting point and key areas for development</p>
+                <h3 className="font-semibold mb-2">Personalized Lessons</h3>
+                <p className="text-sm text-gray-400">A friendly interview learns how your child learns best — then every coach adapts</p>
               </div>
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp className="h-8 w-8 text-amber-400" />
+                <div className="w-16 h-16 rounded-full bg-teal-500/20 flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp className="h-8 w-8 text-teal-300" />
                 </div>
-                <h3 className="font-semibold mb-2">Progress Tracking</h3>
-                <p className="text-sm text-gray-400">Monitor skill development throughout your learning journey</p>
+                <h3 className="font-semibold mb-2">Progress You Can See</h3>
+                <p className="text-sm text-gray-400">Track quiz scores, completed lessons, and learning metrics — printable anytime</p>
               </div>
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
-                  <Award className="h-8 w-8 text-amber-400" />
+                <div className="w-16 h-16 rounded-full bg-teal-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Award className="h-8 w-8 text-teal-300" />
                 </div>
-                <h3 className="font-semibold mb-2">Certification</h3>
-                <p className="text-sm text-gray-400">Earn certificates upon successful course completion</p>
+                <h3 className="font-semibold mb-2">Certificates & Badges</h3>
+                <p className="text-sm text-gray-400">Celebrate wins with badges along the way and a certificate at completion</p>
               </div>
             </div>
 
-            <Button size="lg" className="mt-10 bg-amber-500 hover:bg-amber-600 text-slate-900" asChild>
-              <Link href="/quiz-intro">
-                Take the Legacy Growth IQ™ Quiz
+            <Button size="lg" className="mt-10 bg-teal-500 hover:bg-teal-600 text-slate-900" asChild>
+              <Link href="/academy/courses">
+                See How It Works
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -584,19 +582,19 @@ export default function AcademyPage() {
       <section id="pricing" className="py-20">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-2">Choose Your Learning Path</h2>
-            <p className="text-muted-foreground">Flexible plans designed for every stage of your legacy journey</p>
+            <h2 className="text-3xl font-bold mb-2">Choose Your Family Plan</h2>
+            <p className="text-muted-foreground">Simple pricing that grows with your learner</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {subscriptionTiers.map((tier) => (
               <Card 
                 key={tier.name} 
-                className={`relative ${tier.popular ? 'border-amber-500 shadow-lg scale-105' : ''}`}
+                className={`relative ${tier.popular ? 'border-teal-500 shadow-lg scale-105' : ''}`}
               >
                 {tier.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-amber-500 text-white">Most Popular</Badge>
+                    <Badge className="bg-teal-500 text-white">Most Popular</Badge>
                   </div>
                 )}
                 <CardHeader className="text-center pb-2">
@@ -611,13 +609,13 @@ export default function AcademyPage() {
                   <ul className="space-y-3 text-left mb-8">
                     {tier.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2">
-                        <CheckCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                        <CheckCircle className="h-5 w-5 text-teal-500 shrink-0 mt-0.5" />
                         <span className="text-sm">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   <Button 
-                    className={`w-full ${tier.popular ? 'bg-amber-500 hover:bg-amber-600 text-slate-900' : ''}`}
+                    className={`w-full ${tier.popular ? 'bg-teal-500 hover:bg-teal-600 text-slate-900' : ''}`}
                     variant={tier.popular ? 'default' : 'outline'}
                   >
                     {tier.cta}
@@ -628,30 +626,30 @@ export default function AcademyPage() {
           </div>
 
           <p className="text-center text-sm text-muted-foreground mt-8">
-            All plans include a 14-day free trial. Cancel anytime. Annual billing saves 20%.
+            Start free — no credit card required. Cancel anytime. Parents approve everything.
           </p>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-amber-50">
+      <section className="py-20 bg-teal-50">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Ready to Start Building Your Legacy?</h2>
+            <h2 className="text-3xl font-bold mb-4">Ready to Meet Your Child&apos;s AI Coach?</h2>
             <p className="text-muted-foreground mb-8">
-              Join hundreds of business owners who are transforming their companies through 
-              the AICenter4U Academy. Start your free trial today.
+              Join families discovering a safer, friendlier way to learn with AI.
+              The first course is free — and the first lesson shows you exactly how it works.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-slate-900" asChild>
+              <Button size="lg" className="bg-teal-600 hover:bg-teal-700 text-white" asChild>
                 <Link href="/academy/courses">
                   Browse All Courses
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/schedule-a-call">
-                  Talk to an Advisor
+                <Link href="/contact">
+                  Ask a Question
                 </Link>
               </Button>
             </div>

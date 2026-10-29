@@ -4,6 +4,7 @@ import { adminDb } from "@/lib/firebase-admin";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { COLLECTIONS, type EventDoc, type EventRegistration } from "@/lib/schema";
 import { LMS_COLLECTIONS, type CoursePurchaseDoc } from "@/lib/firebase-lms";
+import { provisionStudentAccount } from "@/lib/student-provisioning";
 import Stripe from "stripe";
 
 export async function POST(request: NextRequest) {
@@ -140,6 +141,32 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       ticketTypes: updatedTicketTypes,
       currentAttendees: FieldValue.increment(totalTicketsSold),
       updatedAt: Timestamp.now(),
+    });
+  }
+
+  // Provision the learner account and email login info — failures must not
+  // break the confirmed registration.
+  try {
+    const eventTitle = eventSnap.exists
+      ? (eventSnap.data() as EventDoc).title
+      : "your event";
+    const provision = await provisionStudentAccount({
+      email: registration.email,
+      firstName: registration.firstName,
+      lastName: registration.lastName,
+      context: `your registration for "${eventTitle}"`,
+    });
+    await regRef.update({
+      accountUserId: provision.userId,
+      accountProvisioned: !provision.error,
+      accountProvisionError: provision.error || null,
+    });
+  } catch (provisionError) {
+    console.error("[webhook] Account provisioning failed:", provisionError);
+    await regRef.update({
+      accountProvisioned: false,
+      accountProvisionError:
+        provisionError instanceof Error ? provisionError.message : "unknown",
     });
   }
 

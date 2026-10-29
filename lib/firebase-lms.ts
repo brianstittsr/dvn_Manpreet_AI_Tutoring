@@ -42,6 +42,7 @@ import type {
   DifficultyLevel,
   ContentType,
   GPTLessonConfig,
+  StudentInterviewConfig,
   WorkshopType,
 } from "@/types/academy";
 
@@ -161,6 +162,7 @@ export interface LessonDoc {
   textContent: string | null;
   downloadUrl: string | null;
   gptConfig?: GPTLessonConfig | null;
+  interviewConfig?: StudentInterviewConfig | null;
   imageId: string | null; // Firebase image ID for lesson thumbnail/content image
   imageUrl: string | null; // Cached image URL for display
   isPreview: boolean;
@@ -593,6 +595,7 @@ export async function createLesson(data: {
   textContent?: string | null;
   downloadUrl?: string | null;
   gptConfig?: GPTLessonConfig | null;
+  interviewConfig?: StudentInterviewConfig | null;
   imageId?: string | null;
   imageUrl?: string | null;
   isPreview?: boolean;
@@ -616,6 +619,7 @@ export async function createLesson(data: {
     textContent: data.textContent || null,
     downloadUrl: data.downloadUrl || null,
     gptConfig: data.gptConfig || null,
+    interviewConfig: data.interviewConfig || null,
     imageId: data.imageId || null,
     imageUrl: data.imageUrl || null,
     isPreview: data.isPreview || false,

@@ -87,6 +87,7 @@ type ContentType =
   | "assignment"
   | "download"
   | "live"
+  | "studentInterview"
   | "gptLesson";
 
 interface GPTConfig {
@@ -107,6 +108,16 @@ interface GPTConfig {
   promptVersion: string;
 }
 
+interface InterviewConfig {
+  systemPrompt: string;
+  minTurns: number;
+  maxTurns: number;
+  estimatedDurationMinutes: number | null;
+  audience: "minor" | "adult";
+  gradeBand: string | null;
+  requiresGuardianConsent: boolean;
+}
+
 interface SeedLesson {
   title: string;
   description: string;
@@ -114,6 +125,7 @@ interface SeedLesson {
   videoDurationSeconds?: number;
   textContent?: string;
   gptConfig?: Partial<GPTConfig> & Pick<GPTConfig, "topicArea" | "learningObjective" | "tutorPersona">;
+  interviewConfig?: InterviewConfig;
 }
 
 interface SeedModule {
@@ -185,6 +197,39 @@ function gpt(
     maxTransferAttempts: 2,
     promptVersion: "gpt-lesson-v1",
     ...overrides,
+  };
+}
+
+// Mirrors lib/interview-server.ts DEFAULT_INTERVIEW_SYSTEM_PROMPT — kept inline
+// so the seed never imports the app's firebase-admin graph.
+const DEFAULT_INTERVIEW_SYSTEM_PROMPT = `You are a warm, friendly interviewer talking with a child about how they like to learn. Your goal is to understand what helps them enjoy learning and do their best.
+
+Ask ONE short question at a time, then wait for their answer. Keep your words simple — about a 6th grade reading level. Be curious and encouraging, never pushy.
+
+Across the conversation, gently explore:
+- Which school subjects and activities they enjoy most
+- How they like to learn new things (watching videos, playing games, reading, doing it with their hands, talking it through)
+- What makes them feel proud of their work
+- What rewards motivate them (stars, badges, streaks, unlocking new things, hearing "great job", free time)
+- When they feel focused and when they get bored or stuck
+- How they like to be helped when something is hard (hints, examples, trying again, being shown once)
+- Their hobbies and interests that a coach could use in examples
+
+Rules:
+- Never ask for their name, address, school name, phone, email, passwords, or family details.
+- If they share something that sounds unsafe or upsetting, respond kindly and briefly, then flag it — do not keep asking questions about it.
+- Ask at most one question per message. No lists of questions.
+- When you have a good picture (usually after several answers), wrap up warmly and thank them.`;
+
+function interview(gradeBand: string): InterviewConfig {
+  return {
+    systemPrompt: DEFAULT_INTERVIEW_SYSTEM_PROMPT,
+    minTurns: 6,
+    maxTurns: 12,
+    estimatedDurationMinutes: 10,
+    audience: "minor",
+    gradeBand,
+    requiresGuardianConsent: true,
   };
 }
 
@@ -276,6 +321,29 @@ Best for learners in grades 3–5, or anyone who wants to feel more confident wi
         title: "Place Value Power",
         description: "Discover what each digit in a number really means.",
         lessons: [
+          {
+            title: "How Your AI Coach Teaches",
+            description:
+              "Your first guided lesson — experience all six stages (Notice, Try, Challenge, Verify, Reflect, Transfer) while Coach Maya shows you how learning works here.",
+            contentType: "gptLesson",
+            gptConfig: gpt({
+              topicArea:
+                "the six-stage guided-learning method — noticing a problem, trying on your own, taking on a challenge, verifying your work, reflecting, and transferring the idea to real life",
+              learningObjective:
+                "Name the six stages of a guided lesson and describe what the learner does at each stage.",
+              tutorPersona: "math",
+              gradeBand: "3-5",
+              prerequisites: [],
+              estimatedDurationMinutes: 15,
+            }),
+          },
+          {
+            title: "Tell Me How You Learn",
+            description:
+              "A friendly chat with your coach — answer a few fun questions so every lesson can be shaped just for you.",
+            contentType: "studentInterview",
+            interviewConfig: interview("3-5"),
+          },
           {
             title: "Welcome to Place Value",
             description: "A warm-up video: what place value is and why it matters.",
@@ -468,6 +536,29 @@ Best for learners in grades 4–6 who are ready to stop guessing and start under
         description: "What a fraction is — and what it is not.",
         lessons: [
           {
+            title: "How Your AI Coach Teaches",
+            description:
+              "Your first guided lesson — experience all six stages (Notice, Try, Challenge, Verify, Reflect, Transfer) while Coach Maya shows you how learning works here.",
+            contentType: "gptLesson",
+            gptConfig: gpt({
+              topicArea:
+                "the six-stage guided-learning method — noticing a problem, trying on your own, taking on a challenge, verifying your work, reflecting, and transferring the idea to real life",
+              learningObjective:
+                "Name the six stages of a guided lesson and describe what the learner does at each stage.",
+              tutorPersona: "math",
+              gradeBand: "4-6",
+              prerequisites: [],
+              estimatedDurationMinutes: 15,
+            }),
+          },
+          {
+            title: "Tell Me How You Learn",
+            description:
+              "A friendly chat with your coach — answer a few fun questions so every lesson can be shaped just for you.",
+            contentType: "studentInterview",
+            interviewConfig: interview("4-6"),
+          },
+          {
             title: "What Is a Fraction?",
             description: "Video: fractions as parts of a whole, with drawings you'll recognize.",
             contentType: "video",
@@ -627,6 +718,29 @@ Best for learners in grades 3–5 who love stories — or who want to love them.
         title: "Main Idea Magic",
         description: "Find the one big idea every paragraph is really about.",
         lessons: [
+          {
+            title: "How Your AI Coach Teaches",
+            description:
+              "Your first guided lesson — experience all six stages (Notice, Try, Challenge, Verify, Reflect, Transfer) while Story Explorer shows you how learning works here.",
+            contentType: "gptLesson",
+            gptConfig: gpt({
+              topicArea:
+                "the six-stage guided-learning method — noticing a problem, trying on your own, taking on a challenge, verifying your work, reflecting, and transferring the idea to real life",
+              learningObjective:
+                "Name the six stages of a guided lesson and describe what the learner does at each stage.",
+              tutorPersona: "reading",
+              gradeBand: "3-5",
+              prerequisites: [],
+              estimatedDurationMinutes: 15,
+            }),
+          },
+          {
+            title: "Tell Me How You Learn",
+            description:
+              "A friendly chat with your coach — answer a few fun questions so every lesson can be shaped just for you.",
+            contentType: "studentInterview",
+            interviewConfig: interview("3-5"),
+          },
           {
             title: "Finding the Big Idea",
             description: "Video: what 'main idea' means and how to spot it fast.",
@@ -814,6 +928,29 @@ Best for learners in grades 5–7 who are ready to level up their writing.`,
         description: "Figure out new words without a dictionary.",
         lessons: [
           {
+            title: "How Your AI Coach Teaches",
+            description:
+              "Your first guided lesson — experience all six stages (Notice, Try, Challenge, Verify, Reflect, Transfer) while Story Explorer shows you how learning works here.",
+            contentType: "gptLesson",
+            gptConfig: gpt({
+              topicArea:
+                "the six-stage guided-learning method — noticing a problem, trying on your own, taking on a challenge, verifying your work, reflecting, and transferring the idea to real life",
+              learningObjective:
+                "Name the six stages of a guided lesson and describe what the learner does at each stage.",
+              tutorPersona: "reading",
+              gradeBand: "5-7",
+              prerequisites: [],
+              estimatedDurationMinutes: 15,
+            }),
+          },
+          {
+            title: "Tell Me How You Learn",
+            description:
+              "A friendly chat with your coach — answer a few fun questions so every lesson can be shaped just for you.",
+            contentType: "studentInterview",
+            interviewConfig: interview("5-7"),
+          },
+          {
             title: "Context Clues",
             description: "Read how the words around a mystery word give away its meaning.",
             contentType: "text",
@@ -993,6 +1130,29 @@ Best for learners in grades 3–6. Grown-ups love watching this one too.`,
         description: "Name it to tame it — understand what you feel and why.",
         lessons: [
           {
+            title: "How Your AI Coach Teaches",
+            description:
+              "Your first guided lesson — experience all six stages (Notice, Try, Challenge, Verify, Reflect, Transfer) while Growth & Glow shows you how learning works here.",
+            contentType: "gptLesson",
+            gptConfig: gpt({
+              topicArea:
+                "the six-stage guided-learning method — noticing a problem, trying on your own, taking on a challenge, verifying your work, reflecting, and transferring the idea to real life",
+              learningObjective:
+                "Name the six stages of a guided lesson and describe what the learner does at each stage.",
+              tutorPersona: "lifeSkills",
+              gradeBand: "3-6",
+              prerequisites: [],
+              estimatedDurationMinutes: 15,
+            }),
+          },
+          {
+            title: "Tell Me How You Learn",
+            description:
+              "A friendly chat with your coach — answer a few fun questions so every lesson can be shaped just for you.",
+            contentType: "studentInterview",
+            interviewConfig: interview("3-6"),
+          },
+          {
             title: "Name That Feeling",
             description: "Video: a tour of feelings — the big ones, the tricky ones, and why they matter.",
             contentType: "video",
@@ -1166,6 +1326,29 @@ Best for learners in grades 6–8 who want to study smarter, not longer.`,
         title: "Focus Power",
         description: "Train your attention like a muscle.",
         lessons: [
+          {
+            title: "How Your AI Coach Teaches",
+            description:
+              "Your first guided lesson — experience all six stages (Notice, Try, Challenge, Verify, Reflect, Transfer) while Growth & Glow shows you how learning works here.",
+            contentType: "gptLesson",
+            gptConfig: gpt({
+              topicArea:
+                "the six-stage guided-learning method — noticing a problem, trying on your own, taking on a challenge, verifying your work, reflecting, and transferring the idea to real life",
+              learningObjective:
+                "Name the six stages of a guided lesson and describe what the learner does at each stage.",
+              tutorPersona: "lifeSkills",
+              gradeBand: "6-8",
+              prerequisites: [],
+              estimatedDurationMinutes: 15,
+            }),
+          },
+          {
+            title: "Tell Me How You Learn",
+            description:
+              "A friendly chat with your coach — answer a few fun questions so every lesson can be shaped just for you.",
+            contentType: "studentInterview",
+            interviewConfig: interview("6-8"),
+          },
           {
             title: "Train Your Focus",
             description: "Video: why your brain wanders — and how to bring it back.",
@@ -1523,19 +1706,19 @@ async function main() {
     let lessonSortOrder = 0;
     let lessonCount = 0;
     for (let m = 0; m < course.modules.length; m++) {
-      const module = course.modules[m];
+      const mod = course.modules[m];
       const moduleRef = db.collection(COLLECTIONS.COURSE_MODULES).doc();
       await moduleRef.set({
         id: moduleRef.id,
         courseId: courseRef.id,
-        title: module.title,
-        description: module.description,
+        title: mod.title,
+        description: mod.description,
         sortOrder: m,
         createdAt: Timestamp.now(),
       });
 
-      for (let l = 0; l < module.lessons.length; l++) {
-        const lesson = module.lessons[l];
+      for (let l = 0; l < mod.lessons.length; l++) {
+        const lesson = mod.lessons[l];
         const lessonRef = db.collection(COLLECTIONS.LESSONS).doc();
         await lessonRef.set({
           id: lessonRef.id,
@@ -1550,6 +1733,7 @@ async function main() {
           textContent: lesson.textContent ?? null,
           downloadUrl: null,
           gptConfig: lesson.gptConfig ?? null,
+          interviewConfig: lesson.interviewConfig ?? null,
           imageId: null,
           imageUrl: null,
           isPreview: m === 0 && l === 0,
@@ -1631,10 +1815,121 @@ async function main() {
     console.log(`   ✓ ${tier.name}`);
   }
 
+  // ------------------------------------------------------------------
+  // Phase 7: published family events (public /events page + registration)
+  // ------------------------------------------------------------------
+  console.log("\n📅 Creating events...");
+  const nextDay = (dayOfWeek: number, hour: number): Date => {
+    const d = new Date();
+    const delta = (dayOfWeek - d.getDay() + 7) % 7 || 7;
+    d.setDate(d.getDate() + delta);
+    d.setHours(hour, 0, 0, 0);
+    return d;
+  };
+
+  const seedEvents = [
+    {
+      title: "Meet Your AI Coach: Family Orientation",
+      slug: "meet-your-ai-coach-family-orientation",
+      shortDescription:
+        "A live walkthrough for parents and kids — see the six-stage learning method, meet the coaches, and ask questions.",
+      category: "webinar" as const,
+      start: nextDay(6, 10), // Saturday 10am
+      hours: 1,
+      locationType: "virtual" as const,
+      location: "",
+      maxAttendees: 40,
+    },
+    {
+      title: "Family Math Game Night",
+      slug: "family-math-game-night",
+      shortDescription:
+        "Play number games together and see how Coach Maya turns math practice into family fun.",
+      category: "workshop" as const,
+      start: nextDay(5, 18), // Friday 6pm — nextDay uses 24h: 18:30 below via hours offset
+      hours: 1.5,
+      locationType: "virtual" as const,
+      location: "",
+      maxAttendees: 25,
+    },
+    {
+      title: "Parents' Q&A: AI-Guided Learning, Safety & Progress",
+      slug: "parents-qa-ai-guided-learning",
+      shortDescription:
+        "Bring your questions about AI tutoring, child safety, guardian consent, and how progress is measured.",
+      category: "webinar" as const,
+      start: nextDay(3, 19), // Wednesday 7pm
+      hours: 1,
+      locationType: "virtual" as const,
+      location: "",
+      maxAttendees: 60,
+    },
+  ];
+
+  // Wipe only the events this script seeds — leave admin-created events alone.
+  const seedSlugs = seedEvents.map((e) => e.slug);
+  const existingEvents = await db
+    .collection("events")
+    .where("slug", "in", seedSlugs)
+    .get();
+  for (const d of existingEvents.docs) {
+    await d.ref.delete();
+  }
+
+  for (const ev of seedEvents) {
+    const ref = db.collection("events").doc();
+    const end = new Date(ev.start.getTime() + ev.hours * 60 * 60 * 1000);
+    await ref.set({
+      title: ev.title,
+      slug: ev.slug,
+      shortDescription: ev.shortDescription,
+      description: ev.shortDescription,
+      startDate: Timestamp.fromDate(ev.start),
+      endDate: Timestamp.fromDate(end),
+      timezone: "America/New_York",
+      isAllDay: false,
+      locationType: ev.locationType,
+      location: ev.location,
+      virtualLink: null,
+      registrationUrl: null,
+      registrationDeadline: null,
+      maxAttendees: ev.maxAttendees,
+      currentAttendees: 0,
+      ticketTypes: [
+        {
+          id: "general",
+          name: "Family Ticket",
+          description: "Free admission for one family",
+          price: 0,
+          quantity: ev.maxAttendees,
+          quantitySold: 0,
+          maxPerOrder: 6,
+          isActive: true,
+          sortOrder: 0,
+        },
+      ],
+      isFreeEvent: true,
+      requiresPayment: false,
+      hasCustomLandingPage: false,
+      speakers: [],
+      agenda: [],
+      sponsors: [],
+      faq: [],
+      imageUrl: null,
+      category: ev.category,
+      tags: ["family", "free", "live"],
+      status: "published",
+      isFeatured: false,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    });
+    console.log(`   ✓ ${ev.title}`);
+  }
+
   console.log("\n✅ AICenter4U Academy reseed complete!");
   console.log(`   ${categories.length} categories`);
   console.log(`   ${courses.length} courses, ${courses.reduce((n, c) => n + c.modules.length, 0)} modules, ${totalLessons} lessons`);
-  console.log(`   ${workshops.length} workshops, ${badges.length} badges, ${subscriptionTiers.length} tiers`);
+  console.log(`   ${workshops.length} workshops, ${badges.length} badges, ${subscriptionTiers.length} tiers, ${seedEvents.length} events`);
   process.exit(0);
 }
 

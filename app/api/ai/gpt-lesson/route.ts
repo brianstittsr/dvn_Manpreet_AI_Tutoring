@@ -32,6 +32,7 @@ import {
   GPT_LESSON_RUBRIC_VERSION,
 } from "@/lib/gpt-lesson-prompts";
 import { screenLearnerText, shouldPauseForSafety } from "@/lib/gpt-lesson-safety";
+import { getLearnerProfile } from "@/lib/interview-server";
 import type { LessonDoc } from "@/lib/firebase-lms";
 import type { GPTLessonConfig } from "@/types/academy";
 import type {
@@ -90,6 +91,11 @@ async function loadOwnedSession(sessionId: string, actor: AuthenticatedActor) {
 
 function requiresConsent(config: GPTLessonConfig): boolean {
   return config.requiresGuardianConsent || config.audience === "minor";
+}
+
+async function profileSummaryFor(learnerId: string): Promise<string | null> {
+  const profile = await getLearnerProfile(learnerId);
+  return profile?.profile.tutorSummary || null;
 }
 
 async function getConsentStatus(learnerId: string, required: boolean) {
@@ -179,6 +185,7 @@ async function activateSession(input: {
     stage: "notice",
     learnerResponse: null,
     hintsUsed: 0,
+    learnerProfileSummary: await profileSummaryFor(input.actor.teamMember.id),
   });
 
   const sessionData = baseSession({
@@ -321,6 +328,7 @@ async function respondToStage(input: {
     stage: currentStage,
     learnerResponse: input.response,
     hintsUsed: stageState.hintsUsed,
+    learnerProfileSummary: await profileSummaryFor(input.session.learnerId),
   });
 
   if (shouldPauseForSafety(turn.safetyResult)) {
@@ -412,6 +420,7 @@ async function respondToStage(input: {
           stage: targetStage,
           learnerResponse: null,
           hintsUsed: 0,
+          learnerProfileSummary: await profileSummaryFor(input.session.learnerId),
         });
         await addLearningEvent({
           sessionId: input.session.id,
@@ -481,6 +490,7 @@ async function requestHint(input: {
     stage: currentStage,
     learnerResponse: stageState.lastResponse,
     hintsUsed: stageState.hintsUsed,
+    learnerProfileSummary: await profileSummaryFor(input.session.learnerId),
   });
 
   await addLearningEvent({
