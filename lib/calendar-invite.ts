@@ -43,7 +43,7 @@ export function buildICSContent(params: CalendarInviteParams): string {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Legacy83 Business//Booking System//EN",
+    "PRODID:-//AICenter4U Business//Booking System//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:REQUEST",
     "BEGIN:VEVENT",
@@ -115,7 +115,7 @@ export function buildOutlookCalendarLink(params: {
     body: description,
     location: location || "",
     allday: "false",
-    uid: `legacy83-${Date.now()}`,
+    uid: `aicenter4u-${Date.now()}`,
   });
 
   return `https://outlook.live.com/calendar/0/deeplink/compose?${query.toString()}`;

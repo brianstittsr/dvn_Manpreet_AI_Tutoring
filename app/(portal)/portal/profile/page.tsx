@@ -119,7 +119,7 @@ const industries = [
   "Defense",
 ];
 
-// L83 Tools list with role-based access
+// Platform Tools list with role-based access
 interface SVPTool {
   id: string;
   name: string;
@@ -132,14 +132,11 @@ interface SVPTool {
 
 const svpTools: SVPTool[] = [
   { id: "apollo", name: "Apollo Search", description: "Lead generation and prospecting", icon: "search", href: "/portal/apollo-search", teamAccess: true, affiliateAccess: false },
-  { id: "supplier", name: "Supplier Search", description: "Find and evaluate suppliers", icon: "truck", href: "/portal/supplier-search", teamAccess: true, affiliateAccess: true },
-  { id: "deals", name: "Deals", description: "Track and manage deals", icon: "handshake", href: "/portal/deals", teamAccess: true, affiliateAccess: true },
   { id: "calendar", name: "Calendar", description: "Schedule and manage meetings", icon: "calendar", href: "/portal/calendar", teamAccess: true, affiliateAccess: true },
   { id: "proposal", name: "Proposal Creator", description: "Create professional proposals", icon: "file-text", href: "/portal/proposals", teamAccess: true, affiliateAccess: false },
   { id: "intelliedge", name: "Ask IntelliEdge", description: "AI-powered business intelligence", icon: "brain", href: "/portal/ask", teamAccess: true, affiliateAccess: false },
   { id: "linkedin", name: "LinkedIn Content", description: "Create and schedule LinkedIn posts", icon: "linkedin", href: "/portal/linkedin-content", teamAccess: true, affiliateAccess: false },
   { id: "docuseal", name: "DocuSeal", description: "Document signing and management", icon: "file-signature", href: "/portal/docuseal", teamAccess: true, affiliateAccess: false },
-  { id: "gohighlevel", name: "GoHighLevel", description: "CRM and marketing automation", icon: "zap", href: "/portal/gohighlevel", teamAccess: true, affiliateAccess: false },
   { id: "bugtracker", name: "Bug Tracker", description: "Report and track issues", icon: "bug", href: "/portal/bug-tracker", teamAccess: true, affiliateAccess: false },
   { id: "availability", name: "Availability", description: "Set your availability schedule", icon: "clock", href: "/portal/availability", teamAccess: true, affiliateAccess: false },
   { id: "translator", name: "Spanish Translator", description: "Real-time Spanish to English translation", icon: "languages", href: "/portal/svp-tools/translator", teamAccess: true, affiliateAccess: true },
@@ -451,7 +448,7 @@ export default function ProfilePage() {
         <div>
           <h1 className="text-3xl font-bold">My Profile</h1>
           <p className="text-muted-foreground">
-            Manage your profile, networking preferences, and L83 tools
+            Manage your profile, networking preferences, and Platform tools
           </p>
         </div>
         <Button onClick={saveProfile} disabled={isSaving}>
@@ -573,7 +570,7 @@ export default function ProfilePage() {
           </TabsTrigger>
           <TabsTrigger value="tools" className="text-xs sm:text-sm">
             <Wrench className="h-4 w-4 mr-1 hidden sm:inline" />
-            L83 Tools
+            Platform Tools
           </TabsTrigger>
           <TabsTrigger value="recordings" className="text-xs sm:text-sm">
             <Video className="h-4 w-4 mr-1 hidden sm:inline" />
@@ -1207,11 +1204,11 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
 
-        {/* L83 Tools Tab */}
+        {/* Platform Tools Tab */}
         <TabsContent value="tools" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>L83 Tools</CardTitle>
+              <CardTitle>Platform Tools</CardTitle>
               <CardDescription>
                 Access Strategic Value+ platform tools based on your role
                 {(profile.role === "team_member" || profile.role === "admin") && (

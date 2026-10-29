@@ -120,13 +120,10 @@ function getActivityIcon(type: string) {
     case "affiliate":
       return <Users className="h-4 w-4" />;
     case "task":
-    case "rock":
       return <CheckSquare className="h-4 w-4" />;
     case "event":
     case "event_registration":
       return <Ticket className="h-4 w-4" />;
-    case "deal":
-      return <DollarSign className="h-4 w-4" />;
     case "bug":
     case "issue":
       return <Bug className="h-4 w-4" />;
@@ -675,13 +672,11 @@ export default function NotificationsPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 {[
                   { icon: Calendar, label: "Calendar Events", description: "Meeting and event reminders" },
-                  { icon: CheckSquare, label: "Rocks & Todos", description: "Task deadlines and updates" },
-                  { icon: Target, label: "Opportunities", description: "Pipeline and deal updates" },
+                  { icon: Target, label: "New Leads", description: "Form submissions and leads" },
                   { icon: FolderKanban, label: "Projects", description: "Project status changes" },
                   { icon: Ticket, label: "Events", description: "Event registrations and updates" },
                   { icon: Users, label: "Team Updates", description: "Team member activity" },
                   { icon: Bug, label: "Issues", description: "Bug and issue tracking" },
-                  { icon: DollarSign, label: "Deals", description: "Deal progress and closures" },
                 ].map((item) => (
                   <div
                     key={item.label}

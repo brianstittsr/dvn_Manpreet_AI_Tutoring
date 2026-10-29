@@ -345,7 +345,7 @@ export default function BookingPage() {
       const startDateTime = new Date(`${dateStr}T${selectedTime}`);
       const endDateTime = new Date(`${dateStr}T${endTime}`);
 
-      // Build calendar invite links and ICS content for GHL email
+      // Build calendar invite links and ICS content for the confirmation email
       const calendarSummary = `${selectedMeetingType.name} with ${availability.teamMemberName}`;
       const calendarDescription = [
         `Meeting: ${selectedMeetingType.name}`,
@@ -357,7 +357,7 @@ export default function BookingPage() {
       ].filter(Boolean).join("\n");
 
       const icsContent = buildICSContent({
-        uid: `booking-${bookingRef.id}@legacy83business.com`,
+        uid: `booking-${bookingRef.id}@aicenter4u.com`,
         summary: calendarSummary,
         description: calendarDescription,
         organizerEmail: availability.teamMemberEmail,
@@ -409,32 +409,7 @@ export default function BookingPage() {
         // Don't fail the booking if calendar event creation fails
       }
 
-      // 2. Create the appointment in the connected GoHighLevel calendar
-      try {
-        const ghlResponse = await fetch('/api/gohighlevel/calendar-events/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: `${selectedMeetingType.name} with ${bookingDetails.name}`,
-            description: calendarEvent.description,
-            startTime: startDateTime.toISOString(),
-            endTime: endDateTime.toISOString(),
-            location: 'Virtual Meeting',
-          }),
-        });
-
-        const ghlResult = await ghlResponse.json();
-        if (ghlResult.success) {
-          console.log("GHL calendar event created for booking:", bookingRef.id, ghlResult.event?.ghlEventId);
-        } else {
-          console.error("GHL calendar event creation returned error:", ghlResult.error);
-        }
-      } catch (ghlError) {
-        console.error("Error creating GHL calendar event for booking:", ghlError);
-        // Don't fail the booking if GHL calendar creation fails
-      }
-
-      // 1. Send email confirmation with iCal attachment
+      // Send email confirmation with iCal attachment
       let confirmationEmailSent = false;
       try {
         await fetch('/api/bookings/notify', {
@@ -798,7 +773,7 @@ export default function BookingPage() {
                     onCheckedChange={(checked) => setSmsConsentTransactional(checked === true)}
                   />
                   <label htmlFor="sms-transactional" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
-                    I consent to receive non-marketing text messages from Legacy 83 Business Inc about appointment reminders and service inquiries. Message frequency may vary, message &amp; data rates may apply. I am 18 or older. Text HELP for assistance, reply STOP to opt out.
+                    I consent to receive non-marketing text messages from AICenter4U about appointment reminders and service inquiries. Message frequency may vary, message &amp; data rates may apply. I am 18 or older. Text HELP for assistance, reply STOP to opt out.
                   </label>
                 </div>
                 <div className="flex items-start gap-3">
@@ -808,7 +783,7 @@ export default function BookingPage() {
                     onCheckedChange={(checked) => setSmsConsentMarketing(checked === true)}
                   />
                   <label htmlFor="sms-marketing" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
-                    I consent to receive marketing text messages, about special offers, discounts, and service updates, from Legacy 83 Business Inc at the phone number provided. Message frequency may vary. Message &amp; data rates may apply. I am 18 or older. Text HELP for assistance, reply STOP to opt out.
+                    I consent to receive marketing text messages, about special offers, discounts, and service updates, from AICenter4U at the phone number provided. Message frequency may vary. Message &amp; data rates may apply. I am 18 or older. Text HELP for assistance, reply STOP to opt out.
                   </label>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -851,7 +826,7 @@ export default function BookingPage() {
               </div>
               <h2 className="text-2xl font-bold mb-2">Booking Confirmed!</h2>
               <p className="text-muted-foreground mb-6">
-                Your meeting has been scheduled. A confirmation email with a calendar invite has been sent to <strong>{bookingDetails.email}</strong> and our team at <strong>info@legacy83business.com</strong>.
+                Your meeting has been scheduled. A confirmation email with a calendar invite has been sent to <strong>{bookingDetails.email}</strong> and our team at <strong>info@aicenter4u.com</strong>.
               </p>
               
               <div className="bg-muted rounded-lg p-4 max-w-sm mx-auto text-left space-y-2">
@@ -917,7 +892,7 @@ export default function BookingPage() {
 
         {/* Footer */}
         <div className="text-center mt-8 text-sm text-muted-foreground">
-          <p>Powered by Legacy 83 Business</p>
+          <p>Powered by AICenter4U</p>
         </div>
       </div>
     </div>

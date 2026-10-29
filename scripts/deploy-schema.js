@@ -37,7 +37,7 @@ function logSection(title) {
 }
 
 async function deploySchema() {
-  logSection('🚀 Legacy83 Platform - Schema Deployment to EasyPanel Supabase');
+  logSection('🚀 AICenter4U Platform - Schema Deployment to EasyPanel Supabase');
 
   // Validate environment variables
   const databaseUrl = process.env.DATABASE_URL;
@@ -173,7 +173,6 @@ async function deploySchema() {
       'organizations',
       'opportunities',
       'projects',
-      'traction_rocks',
       'affiliate_biographies',
       'calendar_events'
     ];

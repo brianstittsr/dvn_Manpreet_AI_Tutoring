@@ -833,7 +833,7 @@ Click "Apply Design to Page" to implement these design patterns on your selected
             element: "Hero Image",
             issue: "Missing alt attribute",
             wcagCriteria: "1.1.1 Non-text Content",
-            suggestedFix: "Add alt='Icy Williams coaching a business owner'",
+            suggestedFix: "Add alt='Manpreet Hundal coaching a business owner'",
           },
           {
             severity: "warning",
@@ -2333,7 +2333,7 @@ Click "Apply Design to Page" to implement these design patterns on your selected
                         <CardContent className="space-y-4">
                           <div className="space-y-2">
                             <Label>Page Title</Label>
-                            <Input placeholder="e.g., Transform Your Business Legacy | Icy Williams" />
+                            <Input placeholder="e.g., Transform Your Business Legacy | Manpreet Hundal" />
                             <p className="text-xs text-muted-foreground">60 characters recommended</p>
                           </div>
                           <div className="space-y-2">

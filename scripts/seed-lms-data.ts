@@ -2,7 +2,7 @@
  * Seed LMS Data Script
  * 
  * Populates the LMS with initial categories, courses, workshops, and badges
- * based on the Legacy 83 G.R.O.W.S. framework content.
+ * based on the AICenter4U G.R.O.W.S. framework content.
  * 
  * Run with: npx ts-node scripts/seed-lms-data.ts
  */
@@ -21,7 +21,7 @@ import {
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "icywilliams-svp",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "manpreethundal-svp",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
@@ -97,8 +97,8 @@ const categories = [
 const courses = [
   {
     title: "The G.R.O.W.S. Framework Masterclass",
-    shortDescription: "Master the complete Legacy 83 methodology for building a business that thrives beyond you.",
-    description: `This comprehensive masterclass takes you through the entire G.R.O.W.S. framework - the proven methodology used by Legacy 83 to help business owners build companies that thrive beyond them.
+    shortDescription: "Master the complete AICenter4U methodology for building a business that thrives beyond you.",
+    description: `This comprehensive masterclass takes you through the entire G.R.O.W.S. framework - the proven methodology used by AICenter4U to help business owners build companies that thrive beyond them.
 
 You'll learn how to:
 - Set clear, actionable goals aligned with your vision
@@ -127,7 +127,7 @@ This course includes real-world case studies, practical exercises, and templates
         description: "Understanding the framework and its components",
         lessons: [
           { title: "Welcome & Course Overview", contentType: "video", duration: 10 },
-          { title: "The Legacy 83 Philosophy", contentType: "video", duration: 15 },
+          { title: "The AICenter4U Philosophy", contentType: "video", duration: 15 },
           { title: "G.R.O.W.S. Framework Overview", contentType: "video", duration: 20 },
           { title: "Self-Assessment: Where Are You Now?", contentType: "quiz", duration: 15 },
         ],
@@ -447,10 +447,10 @@ const workshops = [
   {
     title: "Building Your 90-Day Action Plan",
     shortDescription: "Learn how to break down your annual goals into quarterly rocks and weekly priorities.",
-    description: "A hands-on workshop where you'll create your own 90-day action plan with guidance from Icy Williams.",
+    description: "A hands-on workshop where you'll create your own 90-day action plan with guidance from Manpreet Hundal.",
     workshopType: "live",
     categorySlug: "goals-vision",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     scheduledStart: new Date("2025-01-15T14:00:00-05:00"),
     scheduledEnd: new Date("2025-01-15T16:00:00-05:00"),
     maxParticipants: 25,
@@ -462,7 +462,7 @@ const workshops = [
     description: "Learn the key steps to maximize your business value and prepare for a successful exit.",
     workshopType: "live",
     categorySlug: "succession-legacy",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     scheduledStart: new Date("2025-01-22T13:00:00-05:00"),
     scheduledEnd: new Date("2025-01-22T15:30:00-05:00"),
     maxParticipants: 20,
@@ -474,7 +474,7 @@ const workshops = [
     description: "Learn how to create and implement accountability systems that keep your team aligned and performing.",
     workshopType: "live",
     categorySlug: "workforce-leadership",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     scheduledStart: new Date("2025-01-29T15:00:00-05:00"),
     scheduledEnd: new Date("2025-01-29T17:00:00-05:00"),
     maxParticipants: 30,
@@ -486,7 +486,7 @@ const workshops = [
     description: "Create custom financial dashboards that give you instant insight into your business performance.",
     workshopType: "live",
     categorySlug: "operations",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     scheduledStart: new Date("2025-02-05T14:00:00-05:00"),
     scheduledEnd: new Date("2025-02-05T16:00:00-05:00"),
     maxParticipants: 25,
@@ -498,7 +498,7 @@ const workshops = [
     description: "Analyze and optimize your sales process for better conversion rates and shorter sales cycles.",
     workshopType: "live",
     categorySlug: "revenue-growth",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     scheduledStart: new Date("2025-02-12T13:00:00-05:00"),
     scheduledEnd: new Date("2025-02-12T15:00:00-05:00"),
     maxParticipants: 25,
@@ -599,7 +599,7 @@ const subscriptionTiers = [
     priceMonthly: 49,
     priceAnnual: 470,
     features: [
-      "Access to Legacy Journal articles",
+      "Access to Journal articles",
       "Monthly newsletter",
       "Community forum access",
       "1 free workshop per quarter",
@@ -681,8 +681,8 @@ async function seedData() {
         shortDescription: course.shortDescription,
         description: course.description,
         categoryId,
-        instructorName: "Icy Williams",
-        instructorBio: "Founder of Legacy 83 Business with 20+ years of experience helping business owners build lasting legacies.",
+        instructorName: "Manpreet Hundal",
+        instructorBio: "Founder of AICenter4U with 20+ years of experience helping business owners build lasting legacies.",
         instructorImageUrl: null,
         difficultyLevel: course.difficultyLevel,
         estimatedDurationMinutes: course.estimatedDurationMinutes,

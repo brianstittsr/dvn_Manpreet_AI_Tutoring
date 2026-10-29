@@ -6,14 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowRight,
-  ArrowUpRight,
-  ArrowDownRight,
-  TrendingUp,
   Target,
   FolderKanban,
   CheckSquare,
@@ -23,31 +18,20 @@ import {
   Video,
   FileText,
   AlertCircle,
-  MoreHorizontal,
-  Plus,
   Bug,
 } from "lucide-react";
 import { db, auth } from "@/lib/firebase";
 import { collection, query, where, orderBy, limit, getDocs, Timestamp, onSnapshot } from "firebase/firestore";
-import { COLLECTIONS, type OpportunityDoc, type ProjectDoc, type ActionItemDoc, type ActivityDoc, type TeamMemberDoc } from "@/lib/schema";
+import { COLLECTIONS, type ProjectDoc, type ActionItemDoc, type ActivityDoc, type TeamMemberDoc } from "@/lib/schema";
 import type { CalendarEventDoc } from "@/lib/schema";
 import { DataMigrationBanner } from "@/components/portal/data-migration-banner";
 import { BugTrackerForm } from "@/components/bug-tracker";
 
 // Types for dashboard data
 interface DashboardStats {
-  pipeline: {
-    value: number;
-    change: number;
-    trend: "up" | "down";
-  };
   activeProjects: {
     count: number;
     atRisk: number;
-  };
-  actionItems: {
-    progress: number;
-    daysRemaining: number;
   };
   teamOnline: number;
   bugTracker: {
@@ -55,15 +39,6 @@ interface DashboardStats {
     totalItems: number;
     criticalCount: number;
   };
-}
-
-interface OpportunityDisplay {
-  id: string;
-  name: string;
-  stage: string;
-  value: number;
-  daysAgo: number;
-  owner: { name: string; initials: string };
 }
 
 interface MeetingDisplay {
@@ -74,44 +49,11 @@ interface MeetingDisplay {
   attendees: number;
 }
 
-interface ActionItemDisplay {
-  id: string;
-  title: string;
-  dueDate: string;
-  priority: string;
-  completed: boolean;
-}
-
 interface ActivityDisplay {
   id: string;
   type: string;
   message: string;
   time: string;
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function getStageColor(stage: string) {
-  const colors: Record<string, string> = {
-    lead: "bg-gray-500",
-    discovery: "bg-blue-500",
-    proposal: "bg-yellow-500",
-    negotiation: "bg-orange-500",
-    "closed-won": "bg-green-500",
-    "closed-lost": "bg-red-500",
-  };
-  return colors[stage.toLowerCase()] || "bg-gray-500";
-}
-
-function formatStage(stage: string) {
-  return stage.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 }
 
 function getRelativeTime(date: Date): string {
@@ -129,39 +71,15 @@ function getRelativeTime(date: Date): string {
   return `${diffDays} days ago`;
 }
 
-function getDaysAgo(date: Date): number {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  return Math.floor(diffMs / 86400000);
-}
-
-function getCurrentQuarter(): string {
-  const now = new Date();
-  const quarter = Math.floor(now.getMonth() / 3) + 1;
-  return `Q${quarter} ${now.getFullYear()}`;
-}
-
-function getDaysRemainingInQuarter(): number {
-  const now = new Date();
-  const quarter = Math.floor(now.getMonth() / 3);
-  const quarterEnd = new Date(now.getFullYear(), (quarter + 1) * 3, 0);
-  const diffMs = quarterEnd.getTime() - now.getTime();
-  return Math.max(0, Math.ceil(diffMs / 86400000));
-}
-
 export default function CommandCenterPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
-    pipeline: { value: 0, change: 0, trend: "up" },
     activeProjects: { count: 0, atRisk: 0 },
-    actionItems: { progress: 0, daysRemaining: getDaysRemainingInQuarter() },
     teamOnline: 0,
     bugTracker: { openBugs: 0, totalItems: 0, criticalCount: 0 },
   });
-  const [opportunities, setOpportunities] = useState<OpportunityDisplay[]>([]);
   const [meetings, setMeetings] = useState<MeetingDisplay[]>([]);
-  const [actionItems, setActionItems] = useState<ActionItemDisplay[]>([]);
   const [recentActivity, setRecentActivity] = useState<ActivityDisplay[]>([]);
   const [teamMembers, setTeamMembers] = useState<{ initials: string; name: string }[]>([]);
 
@@ -186,31 +104,6 @@ export default function CommandCenterPage() {
       }
 
       try {
-        // Fetch opportunities
-        const oppsRef = collection(db, COLLECTIONS.OPPORTUNITIES);
-        const oppsQuery = query(oppsRef, orderBy("updatedAt", "desc"), limit(5));
-        const oppsSnapshot = await getDocs(oppsQuery);
-        
-        let totalPipelineValue = 0;
-        const oppsData: OpportunityDisplay[] = [];
-        
-        oppsSnapshot.forEach((doc) => {
-          const data = doc.data() as OpportunityDoc;
-          if (data.stage !== "closed-won" && data.stage !== "closed-lost") {
-            totalPipelineValue += data.value || 0;
-          }
-          const updatedAt = data.updatedAt?.toDate() || new Date();
-          oppsData.push({
-            id: doc.id,
-            name: data.name || "Unnamed Opportunity",
-            stage: data.stage || "lead",
-            value: data.value || 0,
-            daysAgo: getDaysAgo(updatedAt),
-            owner: { name: "Owner", initials: "OW" },
-          });
-        });
-        setOpportunities(oppsData);
-
         // Fetch projects
         const projectsRef = collection(db, COLLECTIONS.PROJECTS);
         const activeProjectsQuery = query(projectsRef, where("status", "==", "active"));
@@ -225,29 +118,6 @@ export default function CommandCenterPage() {
             atRiskCount++;
           }
         });
-
-        // Fetch action items (Traction Todos)
-        const todosRef = collection(db, COLLECTIONS.TRACTION_TODOS);
-        const todosQuery = query(todosRef, where("status", "!=", "complete"), orderBy("status"), orderBy("dueDate", "asc"), limit(5));
-        
-        try {
-          const todosSnapshot = await getDocs(todosQuery);
-          const todosData: ActionItemDisplay[] = [];
-          todosSnapshot.forEach((doc) => {
-            const data = doc.data();
-            const dueDate = data.dueDate?.toDate();
-            todosData.push({
-              id: doc.id,
-              title: data.description || "Task",
-              dueDate: dueDate ? getRelativeTime(dueDate) : "No due date",
-              priority: data.priority || "medium",
-              completed: data.status === "complete",
-            });
-          });
-          setActionItems(todosData);
-        } catch {
-          setActionItems([]);
-        }
 
         // Fetch recent activity
         const activitiesRef = collection(db, COLLECTIONS.ACTIVITIES);
@@ -291,24 +161,6 @@ export default function CommandCenterPage() {
           setTeamMembers([]);
         }
 
-        // Fetch action items progress
-        const rocksRef = collection(db, COLLECTIONS.TRACTION_ROCKS);
-        const currentQuarter = getCurrentQuarter();
-        const rocksQuery = query(rocksRef, where("quarter", "==", currentQuarter));
-        
-        let totalProgress = 0;
-        let actionItemCount = 0;
-        try {
-          const rocksSnapshot = await getDocs(rocksQuery);
-          rocksSnapshot.forEach((doc) => {
-            const data = doc.data();
-            totalProgress += data.progress || 0;
-            actionItemCount++;
-          });
-        } catch {
-          // Action items collection may not exist
-        }
-
         // Fetch bug tracker stats
         let openBugsCount = 0;
         let totalItemsCount = 0;
@@ -334,18 +186,9 @@ export default function CommandCenterPage() {
 
         // Update stats
         setStats({
-          pipeline: {
-            value: totalPipelineValue,
-            change: 0, // Would need historical data to calculate
-            trend: "up",
-          },
           activeProjects: {
             count: activeCount,
             atRisk: atRiskCount,
-          },
-          actionItems: {
-            progress: actionItemCount > 0 ? Math.round(totalProgress / actionItemCount) : 0,
-            daysRemaining: getDaysRemainingInQuarter(),
           },
           teamOnline: teamMembers.length,
           bugTracker: {
@@ -460,41 +303,11 @@ export default function CommandCenterPage() {
               Ask AI
             </Link>
           </Button>
-          <Button asChild>
-            <Link href="/portal/opportunities/new">
-              New Opportunity
-            </Link>
-          </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Pipeline */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pipeline Value</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.pipeline.value)}</div>
-            {stats.pipeline.value > 0 ? (
-              <div className="flex items-center text-xs text-muted-foreground">
-                {stats.pipeline.trend === "up" ? (
-                  <ArrowUpRight className="mr-1 h-4 w-4 text-green-500" />
-                ) : (
-                  <ArrowDownRight className="mr-1 h-4 w-4 text-red-500" />
-                )}
-                <span className={stats.pipeline.trend === "up" ? "text-green-500" : "text-red-500"}>
-                  Active opportunities
-                </span>
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground">No active opportunities</p>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Active Projects */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -515,21 +328,6 @@ export default function CommandCenterPage() {
                 <span>No active projects</span>
               )}
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Action Items Progress */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{getCurrentQuarter()} Action Items</CardTitle>
-            <CheckSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.actionItems.progress}%</div>
-            <Progress value={stats.actionItems.progress} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-2">
-              {stats.actionItems.daysRemaining} days remaining
-            </p>
           </CardContent>
         </Card>
 
@@ -592,68 +390,8 @@ export default function CommandCenterPage() {
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Opportunities */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Recent Opportunities</CardTitle>
-              <CardDescription>Your latest pipeline activity</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/portal/opportunities">
-                View All
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {opportunities.length > 0 ? (
-              <div className="space-y-4">
-                {opportunities.map((opp) => (
-                  <div
-                    key={opp.id}
-                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-primary/20 text-primary">
-                          {opp.owner.initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{opp.name}</p>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Badge variant="secondary" className={`${getStageColor(opp.stage)} text-white`}>
-                            {formatStage(opp.stage)}
-                          </Badge>
-                          <span>•</span>
-                          <span>{opp.daysAgo === 0 ? "Today" : `${opp.daysAgo} days ago`}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{formatCurrency(opp.value)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground mb-4">No opportunities yet</p>
-                <Button asChild>
-                  <Link href="/portal/opportunities/new">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Opportunity
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Today's Meetings */}
-        <Card>
+        <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Today's Meetings</CardTitle>
@@ -704,56 +442,6 @@ export default function CommandCenterPage() {
 
       {/* Bottom Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Action Items */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Action Items</CardTitle>
-              <CardDescription>Tasks requiring your attention</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/portal/rocks">
-                View All
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {actionItems.length > 0 ? (
-              <div className="space-y-3">
-                {actionItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`flex items-center gap-3 p-3 rounded-lg border ${
-                      item.completed ? "opacity-60" : ""
-                    }`}
-                  >
-                    <Checkbox checked={item.completed} />
-                    <div className="flex-1">
-                      <p className={`font-medium ${item.completed ? "line-through" : ""}`}>
-                        {item.title}
-                      </p>
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-muted-foreground">Due: {item.dueDate}</span>
-                        {item.priority === "high" && !item.completed && (
-                          <Badge variant="destructive" className="text-xs">
-                            High Priority
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No pending action items</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Recent Activity */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">

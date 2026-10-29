@@ -1,5 +1,5 @@
 /**
- * Target Company Types for Legacy 83 Business
+ * Target Company Types for AICenter4U
  * 
  * These types define the structure for prospect/target company management
  */

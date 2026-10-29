@@ -14,7 +14,6 @@ import {
 import {
   BookOpen,
   Search,
-  Target,
   FolderKanban,
   Calendar,
   Users,
@@ -22,12 +21,9 @@ import {
   FileText,
   Bot,
   Ticket,
-  CheckSquare,
-  Factory,
   UserCog,
   Building,
   Handshake,
-  DollarSign,
   Plug,
   Paintbrush,
   GraduationCap,
@@ -87,23 +83,6 @@ const systemDocumentation: FeatureDoc[] = [
   },
 
   // Project Management
-  {
-    id: "opportunities",
-    title: "Opportunities",
-    category: "Project Management",
-    icon: Target,
-    description: "Manage sales opportunities and track potential deals through your pipeline. Integrates with CRM data for comprehensive opportunity management.",
-    features: [
-      "Create and track sales opportunities",
-      "Pipeline stage management",
-      "Deal value and probability tracking",
-      "Activity logging and follow-ups",
-      "Integration with GoHighLevel CRM",
-      "Kanban and list view options",
-    ],
-    usage: "Navigate to Project Management → Opportunities to view your pipeline. Drag opportunities between stages or click to view/edit details.",
-    relatedPages: ["/portal/opportunities"],
-  },
   {
     id: "projects",
     title: "Projects",
@@ -226,38 +205,6 @@ const systemDocumentation: FeatureDoc[] = [
     usage: "Navigate to Project Management → Events to manage events. Create ticket types, set pricing, and publish events with custom landing pages at /events/[slug].",
     relatedPages: ["/portal/admin/events", "/events"],
   },
-  {
-    id: "eos2",
-    title: "EOS2 Dashboard",
-    category: "Project Management",
-    icon: Target,
-    description: "Entrepreneurial Operating System (EOS) dashboard for tracking rocks, issues, and quarterly goals.",
-    features: [
-      "Quarterly rock tracking",
-      "Issue management (IDS process)",
-      "Scorecard metrics",
-      "Meeting pulse tracking",
-      "Team accountability",
-    ],
-    usage: "Navigate to Project Management → EOS2 Dashboard to view your EOS metrics and manage quarterly rocks.",
-    relatedPages: ["/portal/eos2"],
-  },
-  {
-    id: "rocks",
-    title: "Rocks",
-    category: "Project Management",
-    icon: CheckSquare,
-    description: "Track quarterly priorities (Rocks) as part of the EOS methodology. Set, track, and complete your most important goals.",
-    features: [
-      "Create quarterly rocks with owners",
-      "Progress tracking",
-      "Status updates",
-      "Team visibility",
-      "Historical tracking",
-    ],
-    usage: "Navigate to Project Management → Rocks to view and manage your quarterly priorities.",
-    relatedPages: ["/portal/rocks"],
-  },
 
   // Data
   {
@@ -275,22 +222,6 @@ const systemDocumentation: FeatureDoc[] = [
     ],
     usage: "Navigate to Data → Apollo Search to find leads. Enter search criteria and browse results to find potential contacts.",
     relatedPages: ["/portal/apollo-search"],
-  },
-  {
-    id: "supplier-search",
-    title: "Supplier Search",
-    category: "Data",
-    icon: Factory,
-    description: "Search and discover suppliers for various business needs. AI-assisted supplier matching and evaluation.",
-    features: [
-      "Supplier database search",
-      "Category filtering",
-      "Supplier profiles",
-      "Contact information",
-      "Rating and reviews",
-    ],
-    usage: "Navigate to Data → Supplier Search to find suppliers. Filter by category and requirements to find matching suppliers.",
-    relatedPages: ["/portal/supplier-search"],
   },
 
   // People
@@ -360,22 +291,6 @@ const systemDocumentation: FeatureDoc[] = [
     usage: "Navigate to Productivity → Networking to manage your professional connections and networking activities.",
     relatedPages: ["/portal/networking"],
   },
-  {
-    id: "deals",
-    title: "Deals",
-    category: "Productivity",
-    icon: DollarSign,
-    description: "Track deals and business opportunities. Manage deal stages, values, and close dates.",
-    features: [
-      "Deal pipeline management",
-      "Stage tracking",
-      "Value and probability",
-      "Close date tracking",
-      "Win/loss analysis",
-    ],
-    usage: "Navigate to Productivity → Deals to view and manage your deal pipeline.",
-    relatedPages: ["/portal/deals"],
-  },
 
   // Content
   {
@@ -397,22 +312,6 @@ const systemDocumentation: FeatureDoc[] = [
 
   // Admin
   {
-    id: "gohighlevel",
-    title: "GoHighLevel Integration",
-    category: "Admin",
-    icon: Plug,
-    description: "Integration with GoHighLevel CRM for contact sync, pipeline management, and marketing automation.",
-    features: [
-      "Contact synchronization",
-      "Pipeline integration",
-      "Calendar sync",
-      "Automation triggers",
-      "Reporting integration",
-    ],
-    usage: "Navigate to Admin → GoHighLevel to configure and manage your GoHighLevel integration.",
-    relatedPages: ["/portal/gohighlevel"],
-  },
-  {
     id: "page-designer",
     title: "Page Designer",
     category: "Admin",
@@ -433,7 +332,7 @@ const systemDocumentation: FeatureDoc[] = [
     title: "Academy Admin",
     category: "Admin",
     icon: GraduationCap,
-    description: "Manage the Legacy 83 Academy learning management system. Create courses, manage enrollments, and track progress.",
+    description: "Manage the AICenter4U Academy learning management system. Create courses, manage enrollments, and track progress.",
     features: [
       "Course creation and management",
       "Lesson and module organization",
@@ -465,10 +364,9 @@ const systemDocumentation: FeatureDoc[] = [
     title: "Settings & Integrations",
     category: "Admin",
     icon: Settings,
-    description: "Platform settings including API integrations, webhooks, notifications, and user preferences.",
+    description: "Platform settings including API integrations, notifications, and user preferences.",
     features: [
-      "API key management (Stripe, Mattermost, Apollo, etc.)",
-      "Webhook configuration",
+      "API key management (Stripe, Apollo, Zoom, etc.)",
       "Notification preferences",
       "LLM provider settings",
       "Social link configuration",

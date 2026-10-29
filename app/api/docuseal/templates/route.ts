@@ -7,8 +7,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { collection, getDocs, addDoc, updateDoc, doc, query, where, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { Timestamp } from "firebase-admin/firestore";
+import { adminDb } from "@/lib/firebase-admin";
 import { COLLECTIONS, DocuSealTemplateDoc } from "@/lib/schema";
 import { getDefaultDocuSealService } from "@/lib/docuseal";
 
@@ -54,16 +54,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch from local cache
-    if (!db) {
+    if (!adminDb) {
       return NextResponse.json({ success: true, templates: [], source: 'local' });
     }
 
-    let q = query(collection(db, COLLECTIONS.DOCUSEAL_TEMPLATES));
+    let q: FirebaseFirestore.Query = adminDb.collection(COLLECTIONS.DOCUSEAL_TEMPLATES);
     if (category) {
-      q = query(collection(db, COLLECTIONS.DOCUSEAL_TEMPLATES), where('category', '==', category));
+      q = adminDb.collection(COLLECTIONS.DOCUSEAL_TEMPLATES).where('category', '==', category);
     }
 
-    const snapshot = await getDocs(q);
+    const snapshot = await q.get();
     const templates = snapshot.docs.map((docSnap) => {
       const data = docSnap.data() as DocuSealTemplateDoc;
       return serializeTemplate({ ...data, id: docSnap.id });
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    if (!db) {
+    if (!adminDb) {
       return NextResponse.json(
         { success: false, error: "Database not configured" },
         { status: 503 }
@@ -114,13 +114,12 @@ export async function POST(request: NextRequest) {
 
       for (const template of result.data.data) {
         // Check if template already exists
-        const existingQuery = query(
-          collection(db, COLLECTIONS.DOCUSEAL_TEMPLATES),
-          where('docusealId', '==', template.id)
-        );
-        const existingSnap = await getDocs(existingQuery);
+        const existingSnap = await adminDb
+          .collection(COLLECTIONS.DOCUSEAL_TEMPLATES)
+          .where('docusealId', '==', template.id)
+          .get();
 
-        const templateData: Omit<DocuSealTemplateDoc, 'id'> = {
+        const templateData = {
           docusealId: template.id,
           name: template.name,
           slug: template.slug,
@@ -138,10 +137,10 @@ export async function POST(request: NextRequest) {
         };
 
         if (existingSnap.empty) {
-          await addDoc(collection(db, COLLECTIONS.DOCUSEAL_TEMPLATES), templateData);
+          await adminDb.collection(COLLECTIONS.DOCUSEAL_TEMPLATES).add(templateData);
         } else {
           const existingDoc = existingSnap.docs[0];
-          await updateDoc(doc(db, COLLECTIONS.DOCUSEAL_TEMPLATES, existingDoc.id), {
+          await adminDb.collection(COLLECTIONS.DOCUSEAL_TEMPLATES).doc(existingDoc.id).update({
             ...templateData,
             createdAt: existingDoc.data().createdAt,
           });
@@ -168,7 +167,7 @@ export async function POST(request: NextRequest) {
       }
 
       const now = Timestamp.now();
-      const templateData: Omit<DocuSealTemplateDoc, 'id'> = {
+      const templateData = {
         docusealId,
         name,
         slug: '',
@@ -182,7 +181,7 @@ export async function POST(request: NextRequest) {
         updatedAt: now,
       };
 
-      const docRef = await addDoc(collection(db, COLLECTIONS.DOCUSEAL_TEMPLATES), templateData);
+      const docRef = await adminDb.collection(COLLECTIONS.DOCUSEAL_TEMPLATES).add(templateData);
 
       return NextResponse.json({
         success: true,

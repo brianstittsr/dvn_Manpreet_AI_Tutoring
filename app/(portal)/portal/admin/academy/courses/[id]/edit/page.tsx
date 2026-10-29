@@ -208,7 +208,7 @@ export default function EditCoursePage() {
         shortDescription: shortDescription.trim() || null,
         description: description.trim() || null,
         categoryId: categoryId || null,
-        instructorName: instructorName.trim() || "Icy Williams",
+        instructorName: instructorName.trim() || "Manpreet Hundal",
         instructorBio: instructorBio.trim() || null,
         difficultyLevel,
         isFeatured,
@@ -373,7 +373,7 @@ export default function EditCoursePage() {
                     id="instructorName"
                     value={instructorName}
                     onChange={(e) => setInstructorName(e.target.value)}
-                    placeholder="Icy Williams"
+                    placeholder="Manpreet Hundal"
                   />
                 </div>
 

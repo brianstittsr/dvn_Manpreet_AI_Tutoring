@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { db } from "@/lib/firebase";
-import { collection, doc, setDoc, Timestamp } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 import { LMS_COLLECTIONS } from "@/lib/firebase-lms";
+import { rateLimit } from "@/lib/rate-limit";
 
 // Initialize Stripe lazily to avoid build-time errors when env var is not available
 function getStripe() {
@@ -26,6 +27,8 @@ interface CheckoutRequest {
 }
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { scope: "stripe-checkout", limit: 15, windowMs: 60_000 });
+  if (limited) return limited;
   try {
     const body = await request.json();
     const { items, userId, userEmail } = body as CheckoutRequest;
@@ -50,9 +53,9 @@ export async function POST(request: NextRequest) {
     // Create purchase records in Firestore
     const purchaseIds: string[] = [];
     
-    if (db) {
+    if (adminDb) {
       for (const item of items) {
-        const purchaseRef = doc(collection(db, LMS_COLLECTIONS.COURSE_PURCHASES));
+        const purchaseRef = adminDb.collection(LMS_COLLECTIONS.COURSE_PURCHASES).doc();
         const purchaseData = {
           id: purchaseRef.id,
           odUserId: userId,
@@ -65,7 +68,7 @@ export async function POST(request: NextRequest) {
           refundedAt: null,
           createdAt: Timestamp.now(),
         };
-        await setDoc(purchaseRef, purchaseData);
+        await purchaseRef.set(purchaseData);
         purchaseIds.push(purchaseRef.id);
       }
     }
@@ -107,10 +110,10 @@ export async function POST(request: NextRequest) {
     });
 
     // Update purchase records with session ID
-    if (db) {
+    if (adminDb) {
       for (const purchaseId of purchaseIds) {
-        const purchaseRef = doc(db, LMS_COLLECTIONS.COURSE_PURCHASES, purchaseId);
-        await setDoc(purchaseRef, { stripeSessionId: session.id }, { merge: true });
+        const purchaseRef = adminDb.collection(LMS_COLLECTIONS.COURSE_PURCHASES).doc(purchaseId);
+        await purchaseRef.set({ stripeSessionId: session.id }, { merge: true });
       }
     }
 

@@ -25,7 +25,7 @@ const upcomingWorkshops = [
     time: "2:00 PM - 4:00 PM EST",
     type: "live",
     category: "Goals & Vision",
-    instructor: "Icy Williams",
+    instructor: "Manpreet Hundal",
     spotsTotal: 25,
     spotsRemaining: 12,
     price: "Included with Builder+",
@@ -38,7 +38,7 @@ const upcomingWorkshops = [
     time: "1:00 PM - 3:30 PM EST",
     type: "live",
     category: "Succession & Legacy",
-    instructor: "Icy Williams",
+    instructor: "Manpreet Hundal",
     spotsTotal: 20,
     spotsRemaining: 8,
     price: "Included with Builder+",
@@ -51,7 +51,7 @@ const upcomingWorkshops = [
     time: "3:00 PM - 5:00 PM EST",
     type: "live",
     category: "Workforce & Leadership",
-    instructor: "Icy Williams",
+    instructor: "Manpreet Hundal",
     spotsTotal: 30,
     spotsRemaining: 15,
     price: "Included with Builder+",
@@ -64,7 +64,7 @@ const upcomingWorkshops = [
     time: "2:00 PM - 4:00 PM EST",
     type: "live",
     category: "Operations",
-    instructor: "Icy Williams",
+    instructor: "Manpreet Hundal",
     spotsTotal: 25,
     spotsRemaining: 22,
     price: "Included with Builder+",
@@ -77,7 +77,7 @@ const upcomingWorkshops = [
     time: "1:00 PM - 3:00 PM EST",
     type: "live",
     category: "Revenue & Growth",
-    instructor: "Icy Williams",
+    instructor: "Manpreet Hundal",
     spotsTotal: 25,
     spotsRemaining: 18,
     price: "Included with Builder+",
@@ -98,7 +98,7 @@ const pastWorkshops = [
   {
     id: "p2",
     title: "Hiring A-Players Workshop",
-    description: "Learn the Legacy 83 method for attracting and hiring top talent.",
+    description: "Learn the AICenter4U method for attracting and hiring top talent.",
     date: "December 8, 2024",
     duration: "2 hours",
     type: "recorded",
@@ -135,7 +135,7 @@ export default function WorkshopsPage() {
         <div className="mb-12">
           <h1 className="text-4xl font-bold mb-4">Workshops</h1>
           <p className="text-muted-foreground text-lg max-w-3xl">
-            Join live, interactive workshops led by Icy Williams. Get hands-on guidance, 
+            Join live, interactive workshops led by Manpreet Hundal. Get hands-on guidance, 
             ask questions in real-time, and connect with fellow business owners on the same journey.
           </p>
         </div>

@@ -41,6 +41,7 @@ import type {
   LearningPath,
   DifficultyLevel,
   ContentType,
+  GPTLessonConfig,
   WorkshopType,
 } from "@/types/academy";
 
@@ -159,6 +160,7 @@ export interface LessonDoc {
   videoDurationSeconds: number | null;
   textContent: string | null;
   downloadUrl: string | null;
+  gptConfig?: GPTLessonConfig | null;
   imageId: string | null; // Firebase image ID for lesson thumbnail/content image
   imageUrl: string | null; // Cached image URL for display
   isPreview: boolean;
@@ -297,7 +299,7 @@ function generateSlug(title: string): string {
 }
 
 function generateCertificateNumber(): string {
-  const prefix = "L83";
+  const prefix = "Platform";
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substring(2, 6).toUpperCase();
   return `${prefix}-${timestamp}-${random}`;
@@ -590,6 +592,7 @@ export async function createLesson(data: {
   videoDurationSeconds?: number | null;
   textContent?: string | null;
   downloadUrl?: string | null;
+  gptConfig?: GPTLessonConfig | null;
   imageId?: string | null;
   imageUrl?: string | null;
   isPreview?: boolean;
@@ -612,6 +615,7 @@ export async function createLesson(data: {
     videoDurationSeconds: data.videoDurationSeconds || null,
     textContent: data.textContent || null,
     downloadUrl: data.downloadUrl || null,
+    gptConfig: data.gptConfig || null,
     imageId: data.imageId || null,
     imageUrl: data.imageUrl || null,
     isPreview: data.isPreview || false,

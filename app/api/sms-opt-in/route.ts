@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { Timestamp } from "firebase-admin/firestore";
+import { adminDb } from "@/lib/firebase-admin";
 import { COLLECTIONS } from "@/lib/schema";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
 
 const smsOptInSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -13,8 +14,10 @@ const smsOptInSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { scope: "sms-opt-in", limit: 5, windowMs: 60_000 });
+  if (limited) return limited;
   try {
-    if (!db) {
+    if (!adminDb) {
       return NextResponse.json(
         { error: "Database not initialized" },
         { status: 500 }
@@ -51,7 +54,7 @@ export async function POST(request: NextRequest) {
       updatedAt: Timestamp.now(),
     };
 
-    await addDoc(collection(db, COLLECTIONS.SMS_OPT_INS), optInData);
+    await adminDb.collection(COLLECTIONS.SMS_OPT_INS).add(optInData);
 
     return NextResponse.json(
       { success: true, message: "Opt-in submitted successfully" },

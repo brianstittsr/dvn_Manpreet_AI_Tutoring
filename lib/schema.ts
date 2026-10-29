@@ -20,7 +20,6 @@ import type {
   Project,
   Meeting,
   ActionItem,
-  Rock,
   Document as AppDocument,
   Service,
   Certification,
@@ -28,7 +27,6 @@ import type {
   Activity,
   Note,
   Milestone,
-  RockMilestone,
 } from "@/types";
 
 // ============================================================================
@@ -89,140 +87,6 @@ export interface ActionItemDoc extends Omit<ActionItem, "createdAt" | "dueDate" 
   updatedAt: Timestamp;
   dueDate?: Timestamp;
   assigneeId: string; // Reference to user
-}
-
-/** Rock (90-day goal) document in Firestore */
-export interface RockDoc extends Omit<Rock, "createdAt" | "owner" | "milestones"> {
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  ownerId: string; // Reference to user
-}
-
-// ============================================================================
-// Traction/EOS System Types
-// ============================================================================
-
-/** Traction Scorecard Metric document in Firestore */
-export interface TractionScorecardMetricDoc {
-  id: string;
-  name: string;
-  goal: number;
-  actual: number;
-  ownerId: string; // Reference to team member
-  ownerName: string; // Denormalized for display
-  trend: "up" | "down" | "flat";
-  unit?: string; // $, %, #, etc.
-  weekNumber?: number;
-  year?: number;
-  // Linkages to other EOS components
-  linkedRockIds?: string[]; // Rocks that affect this metric
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-/** Traction Issue document in Firestore (IDS: Identify, Discuss, Solve) */
-export interface TractionIssueDoc {
-  id: string;
-  title: string; // Short title for the issue
-  description: string;
-  priority: "high" | "medium" | "low";
-  identifiedDate: Timestamp;
-  ownerId: string; // Reference to team member
-  ownerName: string; // Denormalized for display
-  status: "open" | "in-progress" | "solved";
-  solvedDate?: Timestamp;
-  // Linkages to other EOS components
-  linkedRockId?: string; // Rock this issue is blocking or related to
-  linkedTodoIds?: string[]; // Todos created to solve this issue
-  meetingId?: string; // Meeting where this issue was identified
-  notes?: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-/** Traction To-Do document in Firestore */
-export interface TractionTodoDoc {
-  id: string;
-  title: string; // Short title for the todo
-  description: string;
-  ownerId: string; // Reference to team member
-  ownerName: string; // Denormalized for display
-  dueDate: Timestamp;
-  status: "not-started" | "in-progress" | "complete";
-  completedDate?: Timestamp;
-  // Linkages to other EOS components
-  linkedRockId?: string; // Rock this todo supports
-  linkedIssueId?: string; // Issue this todo helps solve
-  meetingId?: string; // Reference to meeting where created
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-/** Traction Level 10 Meeting document in Firestore */
-export interface TractionMeetingDoc {
-  id: string;
-  title?: string; // Optional meeting title
-  date: Timestamp;
-  startTime: string;
-  endTime: string;
-  attendeeIds: string[]; // References to team members
-  attendeeNames: string[]; // Denormalized for display
-  rating: number; // 1-10
-  issuesSolved: number;
-  rocksReviewed: boolean;
-  scorecardReviewed: boolean;
-  todoCompletionRate: number; // 0-100
-  // Linkages to other EOS components
-  reviewedRockIds?: string[]; // Rocks reviewed in this meeting
-  solvedIssueIds?: string[]; // Issues solved in this meeting
-  createdTodoIds?: string[]; // Todos created in this meeting
-  notes?: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-/** Traction Team Member document (extends base TeamMemberDoc) */
-export interface TractionTeamMemberDoc {
-  id: string;
-  name: string;
-  role: string;
-  category: "team" | "contractor" | "advisor" | "other";
-  getsIt: boolean | null;
-  wantsIt: boolean | null;
-  capacityToDoIt: boolean | null;
-  rightSeat: boolean | null;
-  email?: string;
-  phone?: string;
-  avatar?: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-/** Traction Rock document (quarterly priorities) */
-export interface TractionRockDoc {
-  id: string;
-  title: string; // Short title for the rock
-  description: string; // Detailed description
-  ownerId: string; // Reference to team member
-  ownerName: string; // Denormalized for display
-  dueDate: Timestamp;
-  status: "on-track" | "at-risk" | "off-track" | "complete";
-  progress: number; // 0-100
-  quarter: string; // e.g., "Q1 2025"
-  // Milestones for tracking progress
-  milestones?: Array<{
-    id: string;
-    title: string;
-    completed: boolean;
-    completedAt?: Timestamp;
-  }>;
-  // Linkages to other EOS components
-  linkedIssueIds?: string[]; // Issues related to this rock
-  linkedTodoIds?: string[]; // Todos created from this rock
-  linkedMetricIds?: string[]; // Metrics this rock affects
-  notes?: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
 }
 
 /** Document/File document in Firestore */
@@ -727,12 +591,6 @@ export interface MilestoneDoc extends Omit<Milestone, "dueDate" | "completedDate
   completedDate?: Timestamp;
 }
 
-/** Rock Milestone document in Firestore */
-export interface RockMilestoneDoc extends Omit<RockMilestone, "completedDate"> {
-  completedDate?: Timestamp;
-  rockId: string;
-}
-
 // ============================================================================
 // Strategic Partners
 // ============================================================================
@@ -795,8 +653,8 @@ export interface TeamMemberDoc {
   isClient?: boolean; // Can this affiliate/team member also be served as a client?
   clientSince?: Timestamp; // When they became a client
   clientNotes?: string; // Notes about them as a client
-  // Mattermost integration
-  mattermostUserId?: string; // Links to Mattermost user ID for playbook assignments
+  isGuardian?: boolean;
+  guardianRelationship?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -992,24 +850,9 @@ export interface PlatformSettingsDoc {
   };
   // API Integrations
   integrations: {
-    mattermost?: {
-      apiKey?: string;
-      webhookUrl?: string;
-      serverUrl?: string;
-      teamId?: string;
-      status: "connected" | "disconnected" | "error";
-      lastTested?: Timestamp;
-    };
     apollo?: {
       apiKey?: string;
       accountId?: string;
-      status: "connected" | "disconnected" | "error";
-      lastTested?: Timestamp;
-    };
-    gohighlevel?: {
-      apiKey?: string;
-      locationId?: string;
-      agencyId?: string;
       status: "connected" | "disconnected" | "error";
       lastTested?: Timestamp;
     };
@@ -1044,11 +887,8 @@ export interface PlatformSettingsDoc {
     baseUrl?: string;
     useOpenAICompatible?: boolean;
   };
-  // Webhook Events
-  webhookEvents?: Record<string, boolean>;
   // Notification Settings
   notificationSettings?: {
-    syncWithMattermost: boolean;
     inAppEnabled: boolean;
     browserEnabled: boolean;
     soundEnabled: boolean;
@@ -1061,15 +901,12 @@ export interface PlatformSettingsDoc {
     admin?: boolean;
     initiatives?: boolean;
     commandCenter?: boolean;
-    opportunities?: boolean;
     projects?: boolean;
     affiliates?: boolean;
     organizations?: boolean;
     calendar?: boolean;
     meetings?: boolean;
-    rocks?: boolean;
     proposals?: boolean;
-    goHighLevel?: boolean;
     askIntellEdge?: boolean;
     teamMembers?: boolean;
     strategicPartners?: boolean;
@@ -1077,7 +914,7 @@ export interface PlatformSettingsDoc {
     settings?: boolean;
     activityLog?: boolean;
   };
-  l83ToolsVisibility?: {
+  platformToolsVisibility?: {
     transcription?: boolean;
     imageGen?: boolean;
     headshot?: boolean;
@@ -1146,201 +983,6 @@ export interface ApolloSavedListDoc {
   updatedAt: Timestamp;
 }
 
-// ============================================================================
-// ThomasNet Supplier Search Types
-// ============================================================================
-
-/** ThomasNet saved supplier document */
-export interface ThomasNetSupplierDoc {
-  id: string;
-  thomasnetId?: string;
-  companyName: string;
-  description?: string;
-  location?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  phone?: string;
-  website?: string;
-  categories?: string[];
-  certifications?: string[];
-  annualRevenue?: string;
-  employeeCount?: string;
-  yearFounded?: string;
-  thomasnetUrl?: string;
-  savedAt: Timestamp;
-  updatedAt: Timestamp;
-  notes?: string;
-}
-
-/** Supplier entry in a saved list */
-export interface SavedSupplierContact {
-  thomasnetId?: string;
-  companyName: string;
-  description?: string;
-  location?: string;
-  city?: string;
-  state?: string;
-  phone?: string;
-  website?: string;
-  categories?: string[];
-  certifications?: string[];
-  employeeCount?: string;
-  thomasnetUrl?: string;
-  addedAt: Timestamp;
-}
-
-/** Saved supplier list */
-export interface ThomasNetSavedListDoc {
-  id: string;
-  name: string;
-  description?: string;
-  suppliers: SavedSupplierContact[];
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-// ============================================================================
-// GoHighLevel Integration Types
-// ============================================================================
-
-/** GoHighLevel Integration configuration */
-export interface GHLIntegrationDoc {
-  id: string;
-  // API Configuration
-  apiToken: string;
-  locationId: string;
-  agencyId?: string;
-  // Integration Settings
-  name: string;
-  description?: string;
-  isActive: boolean;
-  // Sync Settings
-  syncContacts: boolean;
-  syncOpportunities: boolean;
-  syncCalendars: boolean;
-  syncPipelines: boolean;
-  syncCampaigns: boolean;
-  // Mapping Configuration
-  contactMapping: Record<string, string>;
-  // Pipeline Configuration
-  defaultPipelineId?: string;
-  defaultStageId?: string;
-  // Webhook Configuration
-  webhookUrl?: string;
-  webhookSecret?: string;
-  enableWebhooks: boolean;
-  // Last Sync Information
-  lastSyncAt?: Timestamp;
-  lastSyncStatus: 'success' | 'error' | 'pending' | 'never';
-  lastSyncError?: string;
-  totalContactsSynced: number;
-  totalOpportunitiesSynced: number;
-  // Rate Limiting
-  rateLimitRemaining?: number;
-  rateLimitReset?: Timestamp;
-  // Metadata
-  createdBy: string;
-  lastModifiedBy: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-/** GoHighLevel Contact (synced copy stored locally for display) */
-export interface GHLContactDoc {
-  id: string;
-  integrationId: string;
-  ghlContactId: string;
-  locationId: string;
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  address1?: string;
-  city?: string;
-  state?: string;
-  postalCode?: string;
-  country?: string;
-  companyName?: string;
-  website?: string;
-  tags?: string[];
-  source?: string;
-  dnd?: boolean;
-  dateOfBirth?: string;
-  customFields?: Array<{ id: string; value: string }>;
-  campaignIds?: string[];
-  workflowIds?: string[];
-  lastSyncedAt: Timestamp;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-/** GoHighLevel Sync Log */
-export interface GHLSyncLogDoc {
-  id: string;
-  integrationId: string;
-  // Sync Details
-  syncType: 'contacts' | 'opportunities' | 'calendars' | 'pipelines' | 'campaigns' | 'full';
-  status: 'started' | 'in_progress' | 'completed' | 'failed';
-  // Statistics
-  recordsProcessed: number;
-  recordsSuccessful: number;
-  recordsFailed: number;
-  // Timing
-  startedAt: Timestamp;
-  completedAt?: Timestamp;
-  duration?: number;
-  // Errors
-  errors: Array<{
-    recordId?: string;
-    error: string;
-    details?: unknown;
-  }>;
-  // Summary
-  summary?: {
-    contactsCreated: number;
-    contactsUpdated: number;
-    opportunitiesCreated: number;
-    opportunitiesUpdated: number;
-  };
-  // Metadata
-  triggeredBy: string;
-  triggerType: 'manual' | 'scheduled' | 'webhook' | 'event';
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-/** GoHighLevel Workflow (AI-generated) */
-export interface GHLWorkflowDoc {
-  id: string;
-  name: string;
-  description: string;
-  workflow: object;
-  status: 'draft' | 'deployed' | 'archived';
-  ghlWorkflowId?: string;
-  createdBy: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  deployedAt?: Timestamp;
-}
-
-/** GoHighLevel Imported Workflow */
-export interface GHLImportedWorkflowDoc {
-  id: string;
-  ghlWorkflowId: string;
-  name: string;
-  description: string;
-  status: string;
-  originalFormat: object;
-  trigger: object;
-  actions: unknown[];
-  plainLanguagePrompt?: string;
-  importedAt: Timestamp;
-  convertedAt?: Timestamp;
-  locationId: string;
-}
-
 /** Calendar Event (built-in calendar) */
 export interface CalendarEventDoc {
   id: string;
@@ -1349,20 +991,13 @@ export interface CalendarEventDoc {
   startDate: Timestamp;
   endDate: Timestamp;
   allDay?: boolean;
-  type: 'meeting' | 'rock' | 'todo' | 'issue' | 'custom' | 'one-to-one';
+  type: 'meeting' | 'todo' | 'issue' | 'custom' | 'one-to-one';
   color?: string;
   attendees?: string[];
   location?: string;
   recurringFrequency?: 'daily' | 'weekly' | 'monthly';
   recurringUntil?: Timestamp;
   recurringParentId?: string; // ID of the parent recurring event
-  // GHL sync fields
-  ghlEventId?: string;
-  syncedToGhl?: boolean;
-  // Traction references
-  rockId?: string;
-  todoId?: string;
-  issueId?: string;
   meetingId?: string;
   // 1-to-1 reference
   oneToOneQueueItemId?: string;
@@ -1561,14 +1196,11 @@ export interface DocuSealSubmissionDoc {
 
 export type ToolType = 
   | 'apollo-search'
-  | 'supplier-search'
   | 'ai-workforce'
   | 'proposal-creator'
   | 'docuseal'
-  | 'gohighlevel'
   | 'linkedin-content'
   | 'bug-tracker'
-  | 'traction'
   | 'networking'
   | 'calendar'
   | 'all-tools';
@@ -1681,75 +1313,6 @@ export interface WhiteLabelDeploymentDoc {
   provisionedAt?: Timestamp;
   lastActivityAt?: Timestamp;
   notes?: string;
-}
-
-/** Mattermost Playbook tracking document in Firestore */
-export interface MattermostPlaybookDoc {
-  id: string;
-  mattermostPlaybookId: string; // ID from Mattermost
-  title: string;
-  description?: string;
-  teamId: string;
-  teamName?: string;
-  type: "reminder" | "rock" | "level10" | "recurring" | "custom";
-  recurrence?: "daily" | "weekly" | "biweekly" | "monthly";
-  // Assigned team members (SVP Platform IDs)
-  assignedMemberIds: string[];
-  // Mattermost user IDs
-  mattermostMemberIds: string[];
-  // Checklist configuration
-  checklists: {
-    title: string;
-    items: { title: string; description?: string }[];
-  }[];
-  // Status
-  status: "active" | "archived" | "draft";
-  // Notification settings
-  notificationsEnabled: boolean;
-  broadcastChannelId?: string;
-  reminderIntervalSeconds?: number;
-  // Metadata
-  createdBy: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  lastDeployedAt?: Timestamp;
-}
-
-/** Mattermost Playbook Run tracking document in Firestore */
-export interface MattermostPlaybookRunDoc {
-  id: string;
-  mattermostRunId: string; // ID from Mattermost
-  playbookId: string; // SVP Platform playbook doc ID
-  mattermostPlaybookId: string; // Mattermost playbook ID
-  name: string;
-  description?: string;
-  teamId: string;
-  channelId?: string; // Mattermost channel created for the run
-  // Owner
-  ownerUserId: string; // Mattermost user ID
-  ownerMemberId?: string; // SVP Platform team member ID
-  // Status tracking
-  status: "in_progress" | "finished" | "archived";
-  currentStatus?: string;
-  // Checklist progress
-  checklistProgress: {
-    checklistIndex: number;
-    title: string;
-    totalItems: number;
-    completedItems: number;
-  }[];
-  totalTasks: number;
-  completedTasks: number;
-  completionPercentage: number;
-  // Assigned members
-  assignedMemberIds: string[];
-  mattermostMemberIds: string[];
-  // Timestamps
-  startedAt: Timestamp;
-  endedAt?: Timestamp;
-  lastStatusUpdate?: Timestamp;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
 }
 
 // ============================================================================
@@ -1944,7 +1507,7 @@ export interface SuccessStoryDoc {
   location: string; // Location (e.g., "Cincinnati, OH")
   quote: string; // Main testimonial quote
   challenge: string; // The challenge they faced
-  solution?: string; // How Legacy 83 helped (for featured stories)
+  solution?: string; // How AICenter4U helped (for featured stories)
   results: Array<{
     metric: string;
     value: string;
@@ -1992,7 +1555,7 @@ export interface BackupMetadataDoc {
   triggeredBy: "manual" | "scheduled";
   scheduleId?: string;
   error?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 /** Backup schedule document in Firestore */
@@ -2064,7 +1627,6 @@ export const COLLECTIONS = {
   PROJECTS: "projects",
   MEETINGS: "meetings",
   ACTION_ITEMS: "actionItems",
-  ROCKS: "rocks",
   DOCUMENTS: "documents",
   PLATFORM_DOCUMENTS: "platformDocuments",
   DOCUMENT_VERSIONS: "documentVersions",
@@ -2074,7 +1636,6 @@ export const COLLECTIONS = {
   ACTIVITIES: "activities",
   NOTES: "notes",
   MILESTONES: "milestones",
-  ROCK_MILESTONES: "rockMilestones",
   CAPABILITIES: "capabilities",
   // Affiliate Networking Collections
   AFFILIATE_BIOGRAPHIES: "affiliateBiographies",
@@ -2095,23 +1656,6 @@ export const COLLECTIONS = {
   APOLLO_PURCHASED_CONTACTS: "apolloPurchasedContacts",
   // Apollo Saved Lists
   APOLLO_SAVED_LISTS: "apolloSavedLists",
-  // ThomasNet Saved Suppliers
-  THOMASNET_SAVED_SUPPLIERS: "thomasnetSavedSuppliers",
-  // ThomasNet Saved Lists
-  THOMASNET_SAVED_LISTS: "thomasnetSavedLists",
-  // Traction/EOS Collections
-  TRACTION_ROCKS: "tractionRocks",
-  TRACTION_SCORECARD_METRICS: "tractionScorecardMetrics",
-  TRACTION_ISSUES: "tractionIssues",
-  TRACTION_TODOS: "tractionTodos",
-  TRACTION_MEETINGS: "tractionMeetings",
-  TRACTION_TEAM_MEMBERS: "tractionTeamMembers",
-  // GoHighLevel Integration Collections
-  GHL_INTEGRATIONS: "gohighlevelIntegrations",
-  GHL_SYNC_LOGS: "gohighlevelSyncLogs",
-  GHL_WORKFLOWS: "ghlWorkflows",
-  GHL_IMPORTED_WORKFLOWS: "ghlImportedWorkflows",
-  GHL_CONTACTS: "gohighlevelContacts",
   // Calendar Events (built-in calendar)
   CALENDAR_EVENTS: "calendarEvents",
   // 1-to-1 Scheduling Queue
@@ -2131,9 +1675,6 @@ export const COLLECTIONS = {
   WHITE_LABEL_DEPLOYMENTS: "whiteLabelDeployments",
   DEPLOYMENT_ANALYTICS: "deploymentAnalytics",
   DEPLOYMENT_AUDIT_LOGS: "deploymentAuditLogs",
-  // Mattermost Playbooks
-  MATTERMOST_PLAYBOOKS: "mattermostPlaybooks",
-  MATTERMOST_PLAYBOOK_RUNS: "mattermostPlaybookRuns",
   // Book a Call Leads
   BOOK_CALL_LEADS: "bookCallLeads",
   // Events
@@ -2190,9 +1731,6 @@ export interface LinkedInArticleDoc {
   linkedinError?: string | null;
   createdById: string;
   createdByName: string;
-  ghlFormUrl?: string | null;
-  ghlFormId?: string | null;
-  ghlTags?: string[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -2214,7 +1752,7 @@ export interface LinkedInConnectionDoc {
   updatedAt: Timestamp;
 }
 
-/** Lead captured from a LinkedIn article's GHL form */
+/** Lead captured from a LinkedIn article form */
 export interface LinkedInLeadDoc {
   id: string;
   articleId: string;
@@ -2223,10 +1761,8 @@ export interface LinkedInLeadDoc {
   phone?: string;
   company?: string;
   message?: string;
-  ghlContactId?: string;
-  ghlTags?: string[];
   status: "new" | "contacted" | "qualified" | "converted" | "archived";
-  source: "linkedin_article" | "ghl_form";
+  source: "linkedin_article";
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -2263,7 +1799,7 @@ export const opportunitiesCollection = () => getCollection<OpportunityDoc>(COLLE
 export const projectsCollection = () => getCollection<ProjectDoc>(COLLECTIONS.PROJECTS);
 export const meetingsCollection = () => getCollection<MeetingDoc>(COLLECTIONS.MEETINGS);
 export const actionItemsCollection = () => getCollection<ActionItemDoc>(COLLECTIONS.ACTION_ITEMS);
-export const rocksCollection = () => getCollection<RockDoc>(COLLECTIONS.ROCKS);
+
 export const documentsCollection = () => getCollection<DocumentDoc>(COLLECTIONS.DOCUMENTS);
 export const servicesCollection = () => getCollection<ServiceDoc>(COLLECTIONS.SERVICES);
 export const activitiesCollection = () => getCollection<ActivityDoc>(COLLECTIONS.ACTIVITIES);
@@ -2288,13 +1824,7 @@ export const teamMembersCollection = () => getCollection<TeamMemberDoc>(COLLECTI
 // Platform Settings collection reference
 export const platformSettingsCollection = () => getCollection<PlatformSettingsDoc>(COLLECTIONS.PLATFORM_SETTINGS);
 
-// Traction/EOS collection references
-export const tractionRocksCollection = () => getCollection<TractionRockDoc>(COLLECTIONS.TRACTION_ROCKS);
-export const tractionScorecardMetricsCollection = () => getCollection<TractionScorecardMetricDoc>(COLLECTIONS.TRACTION_SCORECARD_METRICS);
-export const tractionIssuesCollection = () => getCollection<TractionIssueDoc>(COLLECTIONS.TRACTION_ISSUES);
-export const tractionTodosCollection = () => getCollection<TractionTodoDoc>(COLLECTIONS.TRACTION_TODOS);
-export const tractionMeetingsCollection = () => getCollection<TractionMeetingDoc>(COLLECTIONS.TRACTION_MEETINGS);
-export const tractionTeamMembersCollection = () => getCollection<TractionTeamMemberDoc>(COLLECTIONS.TRACTION_TEAM_MEMBERS);
+
 
 // Bug Tracker collection reference
 export const bugTrackerItemsCollection = () => getCollection<BugTrackerItemDoc>(COLLECTIONS.BUG_TRACKER_ITEMS);
@@ -2324,11 +1854,6 @@ export const meetingActionItemsCollection = (meetingId: string): CollectionRefer
   return collection(db, COLLECTIONS.MEETINGS, meetingId, "actionItems") as CollectionReference<ActionItemDoc>;
 };
 
-/** Get milestones subcollection for a rock */
-export const rockMilestonesCollection = (rockId: string): CollectionReference<RockMilestoneDoc> | null => {
-  if (!db) return null;
-  return collection(db, COLLECTIONS.ROCKS, rockId, "milestones") as CollectionReference<RockMilestoneDoc>;
-};
 
 /** Get certifications subcollection for an organization */
 export const organizationCertificationsCollection = (orgId: string): CollectionReference<CertificationDoc> | null => {
@@ -2388,10 +1913,6 @@ export const generateId = (collectionName: string): string | null => {
  * /meetings/{meetingId}
  *   - MeetingDoc
  *   /actionItems/{actionId} - ActionItemDoc
- * 
- * /rocks/{rockId}
- *   - RockDoc
- *   /milestones/{milestoneId} - RockMilestoneDoc
  * 
  * /documents/{docId}
  *   - DocumentDoc

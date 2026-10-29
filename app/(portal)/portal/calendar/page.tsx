@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BuiltInCalendar, type CalendarEventData } from "@/components/eos2/built-in-calendar";
+import { BuiltInCalendar, type CalendarEventData } from "@/components/calendar/built-in-calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +27,7 @@ import {
 import {
   Calendar as CalendarIcon,
   Plus,
-  Mountain,
+
   ListTodo,
   Flag,
   Users,
@@ -51,32 +51,8 @@ import { COLLECTIONS, type OneToOneQueueItemDoc, type CalendarEventDoc } from "@
 import { showError, showSuccess } from "@/lib/toast";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
-// GoHighLevel event type
-interface GHLCalendarEvent {
-  id: string;
-  title: string;
-  description?: string;
-  startTime: string;
-  endTime: string;
-  calendarId: string;
-  calendarName?: string;
-  integrationId: string;
-  integrationName: string;
-  contactId?: string;
-  contactName?: string;
-  status?: string;
-  appointmentStatus?: string;
-  location?: string;
-  source: "gohighlevel";
-}
-
 export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEventData[]>([]);
-  const [ghlEvents, setGhlEvents] = useState<GHLCalendarEvent[]>([]);
-  const [loadingGhlEvents, setLoadingGhlEvents] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
-  const [syncType, setSyncType] = useState<"full" | "incremental">("incremental");
-  const [hasCompletedInitialSync, setHasCompletedInitialSync] = useState(false);
   const [view, setView] = useState<"month" | "week" | "day">("month");
   const [filterType, setFilterType] = useState<string | null>(null);
   const [filterTeamMember, setFilterTeamMember] = useState<string | null>(null);
@@ -98,53 +74,6 @@ export default function CalendarPage() {
     meetingType: "virtual" as "virtual" | "in-person",
     location: "",
   });
-
-  // Fetch GoHighLevel calendar events
-  const fetchGhlCalendarEvents = async (type: "full" | "incremental" = "incremental", forceRefresh = false) => {
-    setLoadingGhlEvents(true);
-    setSyncType(type);
-    try {
-      const params = new URLSearchParams({
-        syncType: type,
-        forceRefresh: forceRefresh.toString(),
-      });
-      const response = await fetch(`/api/gohighlevel/calendar-events?${params}`);
-      const data = await response.json();
-      if (data.success && data.events && data.events.length > 0) {
-        setGhlEvents(data.events);
-        // Convert GHL events to CalendarEventData format and add to events
-        const ghlCalendarEvents: CalendarEventData[] = data.events.map((event: GHLCalendarEvent) => ({
-          id: `ghl-${event.id}`,
-          title: event.title,
-          description: event.description || `${event.calendarName || "GoHighLevel"} - ${event.integrationName}`,
-          startDate: new Date(event.startTime),
-          endDate: new Date(event.endTime),
-          type: "meeting" as const,
-          color: "#f97316", // Orange for GHL events
-          location: event.location,
-          attendees: event.contactName ? [event.contactName] : [],
-        }));
-        setEvents(prev => {
-          // Remove old GHL events and add new ones
-          const nonGhlEvents = prev.filter(e => !e.id.startsWith("ghl-"));
-          return [...nonGhlEvents, ...ghlCalendarEvents];
-        });
-        setLastSyncTime(new Date());
-        if (type === "full") {
-          setHasCompletedInitialSync(true);
-        }
-      } else {
-        // No events or no active integrations - clear GHL events
-        setGhlEvents([]);
-        setLastSyncTime(new Date());
-      }
-    } catch (error) {
-      console.error("Error fetching GHL calendar events:", error);
-      setGhlEvents([]);
-    } finally {
-      setLoadingGhlEvents(false);
-    }
-  };
 
   // Fetch 1-to-1 queue from Firebase
   const fetchOneToOneQueue = async () => {
@@ -198,11 +127,7 @@ export default function CalendarPage() {
           });
         });
 
-        setEvents((prev) => {
-          // Keep GHL events and replace Firestore events
-          const ghlEvents = prev.filter((event) => event.id.startsWith("ghl-"));
-          return [...ghlEvents, ...firestoreEvents];
-        });
+        setEvents(firestoreEvents);
       },
       (error) => {
         console.error("Error loading calendar events:", error);
@@ -210,34 +135,11 @@ export default function CalendarPage() {
     );
   };
 
-  // Initial load: Do full historical sync first time, then incremental syncs
+  // Initial load
   useEffect(() => {
     fetchOneToOneQueue();
-
     const unsubscribeCalendar = loadCalendarEvents();
-
-    // Check if we need to do a full historical sync (first time)
-    const checkAndSync = async () => {
-      // First try incremental (will use cache if available)
-      await fetchGhlCalendarEvents("incremental", false);
-
-      // If no events found, do a full historical sync
-      if (ghlEvents.length === 0 && !hasCompletedInitialSync) {
-        console.log("No cached events found, performing full historical sync...");
-        await fetchGhlCalendarEvents("full", true);
-      }
-    };
-
-    checkAndSync();
-
-    // Set up auto-refresh interval (5 minutes = 300000ms) for incremental syncs
-    const syncInterval = setInterval(() => {
-      console.log("Auto-syncing GHL calendar events (incremental)...");
-      fetchGhlCalendarEvents("incremental", true);
-    }, 300000);
-
     return () => {
-      clearInterval(syncInterval);
       unsubscribeCalendar?.();
     };
   }, []);
@@ -397,13 +299,11 @@ export default function CalendarPage() {
       });
     }
     
-    // Save each event to Firestore AND sync to GHL immediately
+    // Save each event to Firestore
     const savedEvents: CalendarEventData[] = [];
-    let ghlSyncCount = 0;
-    
+
     for (const newEvent of eventsToCreate) {
       try {
-        // 1. Save to Firestore first for persistence
         const firestoreEvent: Omit<CalendarEventDoc, 'id'> = {
           title: newEvent.title,
           description: newEvent.description || '',
@@ -418,67 +318,27 @@ export default function CalendarPage() {
           updatedAt: Timestamp.now(),
           ...(newEvent.recurringParentId && { recurringParentId: newEvent.recurringParentId }),
         };
-        
+
         const docRef = await addDoc(collection(db, COLLECTIONS.CALENDAR_EVENTS), firestoreEvent);
-        const savedEvent = { ...newEvent, id: docRef.id };
-        savedEvents.push(savedEvent);
-        
-        // 2. Sync to GoHighLevel immediately
-        try {
-          const response = await fetch("/api/gohighlevel/calendar-events/create", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              title: newEvent.title,
-              description: newEvent.description || `${newEvent.type} event`,
-              startTime: newEvent.startDate.toISOString(),
-              endTime: newEvent.endDate.toISOString(),
-              location: newEvent.location,
-            }),
-          });
-          const data = await response.json();
-          if (data.success) {
-            console.log("Event synced to GoHighLevel:", data.event);
-            ghlSyncCount++;
-            // Update Firestore with GHL ID
-            const ghlEventId = data.event.ghlEventId || data.event.id;
-            if (ghlEventId) {
-              await updateDoc(doc(db, COLLECTIONS.CALENDAR_EVENTS, docRef.id), {
-                ghlEventId: ghlEventId,
-                syncedToGhl: true,
-                updatedAt: Timestamp.now(),
-              });
-            }
-          } else {
-            console.warn("Failed to sync event to GHL:", data.error);
-          }
-        } catch (ghlError) {
-          console.error("Error syncing event to GHL:", ghlError);
-        }
+        savedEvents.push({ ...newEvent, id: docRef.id });
       } catch (error) {
         console.error("Error saving event to Firestore:", error);
         showError("Failed to save event");
       }
     }
-    
+
     // Add all saved events to state
     setEvents((prev) => [...prev, ...savedEvents]);
-    
+
     // Show success message
     if (event.recurring) {
-      showSuccess(`Created ${savedEvents.length} recurring events (${ghlSyncCount} synced to GHL)`);
+      showSuccess(`Created ${savedEvents.length} recurring events`);
     } else {
-      showSuccess(ghlSyncCount > 0 ? "Event created and synced to GoHighLevel" : "Event created locally");
+      showSuccess("Event created");
     }
   };
 
   const handleEventUpdate = async (id: string, updates: Partial<CalendarEventData>) => {
-    // Skip GHL events (they're read-only from external source)
-    if (id.startsWith("ghl-")) {
-      showError("Cannot edit GoHighLevel events directly");
-      return;
-    }
-    
     try {
       // Update in Firebase
       if (db) {
@@ -535,7 +395,6 @@ export default function CalendarPage() {
 
   // Stats
   const meetingCount = events.filter((e) => e.type === "meeting").length;
-  const rockCount = events.filter((e) => e.type === "rock").length;
   const todoCount = events.filter((e) => e.type === "todo").length;
   const issueCount = events.filter((e) => e.type === "issue").length;
 
@@ -549,33 +408,10 @@ export default function CalendarPage() {
             Calendar
           </h1>
           <p className="text-muted-foreground">
-            View and manage all your meetings, rocks, to-dos, and issues in one place
+            View and manage all your meetings, priorities, to-dos, and issues in one place
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {lastSyncTime && (
-            <span className="text-xs text-muted-foreground">
-              Last sync: {lastSyncTime.toLocaleTimeString()}
-            </span>
-          )}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => fetchGhlCalendarEvents("incremental", true)}
-            disabled={loadingGhlEvents}
-          >
-            <RefreshCw className={`mr-2 h-4 w-4 ${loadingGhlEvents ? "animate-spin" : ""}`} />
-            {loadingGhlEvents ? "Syncing..." : "Sync"}
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => fetchGhlCalendarEvents("full", true)}
-            disabled={loadingGhlEvents}
-          >
-            <RefreshCw className={`mr-2 h-4 w-4 ${loadingGhlEvents ? "animate-spin" : ""}`} />
-            {loadingGhlEvents ? "Syncing..." : "Full Sync"}
-          </Button>
           <Button variant="outline" size="sm">
             <Download className="mr-2 h-4 w-4" />
             Export
@@ -602,7 +438,7 @@ export default function CalendarPage() {
         {/* Calendar Tab */}
         <TabsContent value="calendar" className="space-y-6">
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <Card
               className={`cursor-pointer transition-all ${filterType === "meeting" ? "ring-2 ring-blue-500" : ""}`}
               onClick={() => setFilterType(filterType === "meeting" ? null : "meeting")}
@@ -614,20 +450,6 @@ export default function CalendarPage() {
                     <p className="text-2xl font-bold text-blue-600">{meetingCount}</p>
                   </div>
                   <Users className="h-8 w-8 text-blue-200" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card
-              className={`cursor-pointer transition-all ${filterType === "rock" ? "ring-2 ring-purple-500" : ""}`}
-              onClick={() => setFilterType(filterType === "rock" ? null : "rock")}
-            >
-              <CardContent className="pt-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Rocks</p>
-                    <p className="text-2xl font-bold text-purple-600">{rockCount}</p>
-                  </div>
-                  <Mountain className="h-8 w-8 text-purple-200" />
                 </div>
               </CardContent>
             </Card>
@@ -676,7 +498,6 @@ export default function CalendarPage() {
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="meeting">Meetings</SelectItem>
-                  <SelectItem value="rock">Rocks</SelectItem>
                   <SelectItem value="todo">To-Dos</SelectItem>
                   <SelectItem value="issue">Issues</SelectItem>
                   <SelectItem value="one-to-one">1-to-1 Meetings</SelectItem>
@@ -778,23 +599,10 @@ export default function CalendarPage() {
                   <span className="text-sm">1-to-1 Meetings</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-orange-500" />
-                  <span className="text-sm">GoHighLevel Events</span>
-                </div>
-                <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-gray-500" />
                   <span className="text-sm">Custom Events</span>
                 </div>
               </div>
-              {ghlEvents.length > 0 ? (
-                <p className="text-xs text-muted-foreground mt-2">
-                  {ghlEvents.length} GoHighLevel event{ghlEvents.length !== 1 ? "s" : ""} synced
-                </p>
-              ) : (
-                <p className="text-xs text-muted-foreground mt-2">
-                  No GoHighLevel events synced. Ensure you have an active integration with calendar sync enabled.
-                </p>
-              )}
             </CardContent>
           </Card>
         </TabsContent>

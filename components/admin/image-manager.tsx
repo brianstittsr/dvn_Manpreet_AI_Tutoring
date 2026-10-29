@@ -203,7 +203,7 @@ function ImageUploadForm({ onSuccess, onCancel }: ImageUploadFormProps) {
           id="image-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g., about-icy-williams"
+          placeholder="e.g., about-manpreet-hundal"
           disabled={uploading}
         />
         <p className="text-xs text-muted-foreground">

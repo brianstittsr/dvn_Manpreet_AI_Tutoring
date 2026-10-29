@@ -85,7 +85,8 @@ import {
   type CourseModuleDoc,
   type LessonDoc,
 } from "@/lib/firebase-lms";
-import type { ContentType } from "@/types/academy";
+import type { ContentType, GPTLessonAudience, GPTTutorPersona } from "@/types/academy";
+import { GPT_LESSON_PROMPT_VERSION } from "@/lib/gpt-lesson-prompts";
 import {
   AISyllabusGenerator,
   AILessonGenerator,
@@ -113,6 +114,7 @@ const CONTENT_TYPE_OPTIONS: { value: ContentType; label: string; icon: React.Rea
   { value: "assignment", label: "Assignment", icon: <ClipboardList className="h-4 w-4" />, description: "Homework or project submission" },
   { value: "download", label: "Downloadable", icon: <Download className="h-4 w-4" />, description: "PDF, worksheet, or other downloadable resource" },
   { value: "live", label: "Live Session", icon: <Radio className="h-4 w-4" />, description: "Scheduled live video session" },
+  { value: "gptLesson", label: "GPT Lesson", icon: <Sparkles className="h-4 w-4" />, description: "Interactive AI-guided six-stage lesson" },
 ];
 
 function getContentTypeIcon(type: ContentType) {
@@ -205,6 +207,20 @@ export default function CourseContentBuilderPage() {
   const [lessonImageId, setLessonImageId] = useState<string | undefined>(undefined);
   const [lessonImageUrl, setLessonImageUrl] = useState<string | undefined>(undefined);
   const [lessonIsPreview, setLessonIsPreview] = useState(false);
+  const [gptTopicArea, setGptTopicArea] = useState("");
+  const [gptLearningObjective, setGptLearningObjective] = useState("");
+  const [gptAudience, setGptAudience] = useState<GPTLessonAudience>("adult");
+  const [gptGradeBand, setGptGradeBand] = useState("");
+  const [gptPrerequisites, setGptPrerequisites] = useState("");
+  const [gptTutorPersona, setGptTutorPersona] = useState<GPTTutorPersona>("generic");
+  const [gptCustomPersona, setGptCustomPersona] = useState("");
+  const [gptDuration, setGptDuration] = useState("");
+  const [gptMaxHints, setGptMaxHints] = useState("3");
+  const [gptRequiresGuardianConsent, setGptRequiresGuardianConsent] = useState(false);
+  const [gptRequiresInstructorReview, setGptRequiresInstructorReview] = useState(false);
+  const [gptQuizPassingPercentage, setGptQuizPassingPercentage] = useState("70");
+  const [gptRubricPassingScore, setGptRubricPassingScore] = useState("3");
+  const [gptMaxTransferAttempts, setGptMaxTransferAttempts] = useState("2");
 
   // Delete confirmation state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -312,8 +328,26 @@ export default function CourseContentBuilderPage() {
   };
 
   // Lesson functions
+  const resetGptLessonFields = () => {
+    setGptTopicArea("");
+    setGptLearningObjective("");
+    setGptAudience("adult");
+    setGptGradeBand("");
+    setGptPrerequisites("");
+    setGptTutorPersona("generic");
+    setGptCustomPersona("");
+    setGptDuration("");
+    setGptMaxHints("3");
+    setGptRequiresGuardianConsent(false);
+    setGptRequiresInstructorReview(false);
+    setGptQuizPassingPercentage("70");
+    setGptRubricPassingScore("3");
+    setGptMaxTransferAttempts("2");
+  };
+
   const openLessonDialog = (moduleId: string, lesson?: LessonDoc) => {
     setLessonModuleId(moduleId);
+    resetGptLessonFields();
     if (lesson) {
       setEditingLesson(lesson);
       setLessonTitle(lesson.title);
@@ -326,6 +360,24 @@ export default function CourseContentBuilderPage() {
       setLessonImageId(lesson.imageId || undefined);
       setLessonImageUrl(lesson.imageUrl || undefined);
       setLessonIsPreview(lesson.isPreview);
+
+      const gptConfig = lesson.gptConfig;
+      if (gptConfig) {
+        setGptTopicArea(gptConfig.topicArea);
+        setGptLearningObjective(gptConfig.learningObjective);
+        setGptAudience(gptConfig.audience);
+        setGptGradeBand(gptConfig.gradeBand || "");
+        setGptPrerequisites(gptConfig.prerequisites.join("\n"));
+        setGptTutorPersona(gptConfig.tutorPersona);
+        setGptCustomPersona(gptConfig.customPersonaInstructions || "");
+        setGptDuration(gptConfig.estimatedDurationMinutes ? String(gptConfig.estimatedDurationMinutes) : "");
+        setGptMaxHints(String(gptConfig.maxHints));
+        setGptRequiresGuardianConsent(gptConfig.requiresGuardianConsent);
+        setGptRequiresInstructorReview(gptConfig.requiresInstructorReview);
+        setGptQuizPassingPercentage(String(gptConfig.quizPassingPercentage));
+        setGptRubricPassingScore(String(gptConfig.rubricPassingScore));
+        setGptMaxTransferAttempts(String(gptConfig.maxTransferAttempts));
+      }
     } else {
       setEditingLesson(null);
       setLessonTitle("");
@@ -347,6 +399,16 @@ export default function CourseContentBuilderPage() {
       toast.error("Please enter a lesson title");
       return;
     }
+    if (lessonContentType === "gptLesson") {
+      if (!gptTopicArea.trim() || !gptLearningObjective.trim()) {
+        toast.error("Enter a topic area and learning objective for the GPT Lesson");
+        return;
+      }
+      if (gptTutorPersona === "custom" && !gptCustomPersona.trim()) {
+        toast.error("Enter custom tutor instructions");
+        return;
+      }
+    }
 
     setSaving(true);
     try {
@@ -358,6 +420,23 @@ export default function CourseContentBuilderPage() {
         videoDurationSeconds: lessonContentType === "video" && lessonVideoDuration ? parseInt(lessonVideoDuration) * 60 : null,
         textContent: lessonContentType === "text" ? lessonTextContent.trim() || null : null,
         downloadUrl: lessonContentType === "download" ? lessonDownloadUrl.trim() || null : null,
+        gptConfig: lessonContentType === "gptLesson" ? {
+          topicArea: gptTopicArea.trim(),
+          learningObjective: gptLearningObjective.trim(),
+          audience: gptAudience,
+          gradeBand: gptGradeBand.trim() || null,
+          prerequisites: gptPrerequisites.split("\n").map(item => item.trim()).filter(Boolean),
+          tutorPersona: gptTutorPersona,
+          customPersonaInstructions: gptTutorPersona === "custom" ? gptCustomPersona.trim() : null,
+          estimatedDurationMinutes: gptDuration ? parseInt(gptDuration) : null,
+          maxHints: Math.max(0, parseInt(gptMaxHints) || 0),
+          requiresGuardianConsent: gptAudience === "minor" ? true : gptRequiresGuardianConsent,
+          requiresInstructorReview: gptRequiresInstructorReview,
+          quizPassingPercentage: Math.min(100, Math.max(0, parseInt(gptQuizPassingPercentage) || 0)),
+          rubricPassingScore: Math.min(4, Math.max(0, parseInt(gptRubricPassingScore) || 0)),
+          maxTransferAttempts: Math.max(1, parseInt(gptMaxTransferAttempts) || 1),
+          promptVersion: GPT_LESSON_PROMPT_VERSION,
+        } : null,
         imageId: lessonImageId || null,
         imageUrl: lessonImageUrl || null,
         isPreview: lessonIsPreview,
@@ -367,12 +446,12 @@ export default function CourseContentBuilderPage() {
         await updateLesson(editingLesson.id, lessonData);
         toast.success("Lesson updated");
       } else {
-        const module = modules.find(m => m.id === lessonModuleId);
+        const targetModule = modules.find(m => m.id === lessonModuleId);
         await createLesson({
           moduleId: lessonModuleId,
           courseId,
           ...lessonData,
-          sortOrder: module?.lessons.length || 0,
+          sortOrder: targetModule?.lessons.length || 0,
         });
         toast.success("Lesson created");
       }
@@ -387,13 +466,13 @@ export default function CourseContentBuilderPage() {
   };
 
   const handleMoveLesson = async (moduleId: string, lessonId: string, direction: "up" | "down") => {
-    const module = modules.find(m => m.id === moduleId);
-    if (!module) return;
+    const targetModule = modules.find(m => m.id === moduleId);
+    if (!targetModule) return;
 
-    const index = module.lessons.findIndex(l => l.id === lessonId);
-    if ((direction === "up" && index === 0) || (direction === "down" && index === module.lessons.length - 1)) return;
+    const index = targetModule.lessons.findIndex(l => l.id === lessonId);
+    if ((direction === "up" && index === 0) || (direction === "down" && index === targetModule.lessons.length - 1)) return;
 
-    const newLessons = [...module.lessons];
+    const newLessons = [...targetModule.lessons];
     const swapIndex = direction === "up" ? index - 1 : index + 1;
     [newLessons[index], newLessons[swapIndex]] = [newLessons[swapIndex], newLessons[index]];
 
@@ -514,9 +593,9 @@ export default function CourseContentBuilderPage() {
       toast.error("Please enter a lesson title first");
       return;
     }
-    const module = modules.find(m => m.id === lessonModuleId);
+    const targetModule = modules.find(m => m.id === lessonModuleId);
     setAiLessonContext({
-      moduleTitle: module?.title || "Module",
+      moduleTitle: targetModule?.title || "Module",
       lessonTitle,
       lessonDescription,
       contentType: lessonContentType === "video" || lessonContentType === "text" || lessonContentType === "assignment" 
@@ -899,6 +978,202 @@ export default function CourseContentBuilderPage() {
             </div>
 
             {/* Content Type Specific Fields */}
+            {lessonContentType === "gptLesson" && (
+              <div className="space-y-5 p-4 border rounded-lg bg-muted/30">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  GPT Lesson Settings
+                </h4>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="gpt-topic">Topic Area *</Label>
+                    <Input
+                      id="gpt-topic"
+                      value={gptTopicArea}
+                      onChange={(e) => setGptTopicArea(e.target.value)}
+                      placeholder="e.g., Fractions, photosynthesis, budgeting"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gpt-duration">Estimated Session (minutes)</Label>
+                    <Input
+                      id="gpt-duration"
+                      type="number"
+                      min={1}
+                      value={gptDuration}
+                      onChange={(e) => setGptDuration(e.target.value)}
+                      placeholder="e.g., 20"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="gpt-objective">Learning Objective *</Label>
+                  <Textarea
+                    id="gpt-objective"
+                    value={gptLearningObjective}
+                    onChange={(e) => setGptLearningObjective(e.target.value)}
+                    placeholder="What should the student be able to explain or apply?"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="gpt-audience">Audience</Label>
+                    <Select
+                      value={gptAudience}
+                      onValueChange={(value) => setGptAudience(value as GPTLessonAudience)}
+                    >
+                      <SelectTrigger id="gpt-audience">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="adult">Adult / professional learner</SelectItem>
+                        <SelectItem value="minor">Minor-facing learner</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gpt-grade-band">Grade / Reading Band</Label>
+                    <Input
+                      id="gpt-grade-band"
+                      value={gptGradeBand}
+                      onChange={(e) => setGptGradeBand(e.target.value)}
+                      placeholder="e.g., Grade 5, middle school, adult"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="gpt-prerequisites">Prerequisites or Key Concepts</Label>
+                  <Textarea
+                    id="gpt-prerequisites"
+                    value={gptPrerequisites}
+                    onChange={(e) => setGptPrerequisites(e.target.value)}
+                    placeholder="One per line"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="gpt-persona">Tutor Persona</Label>
+                    <Select
+                      value={gptTutorPersona}
+                      onValueChange={(value) => setGptTutorPersona(value as GPTTutorPersona)}
+                    >
+                      <SelectTrigger id="gpt-persona">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="generic">Generic Tutor</SelectItem>
+                        <SelectItem value="math">Math Coach</SelectItem>
+                        <SelectItem value="reading">Reading Coach</SelectItem>
+                        <SelectItem value="lifeSkills">Life Skills Coach</SelectItem>
+                        <SelectItem value="custom">Custom Persona</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gpt-max-hints">Maximum Hints per Stage</Label>
+                    <Input
+                      id="gpt-max-hints"
+                      type="number"
+                      min={0}
+                      max={10}
+                      value={gptMaxHints}
+                      onChange={(e) => setGptMaxHints(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {gptTutorPersona === "custom" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="gpt-custom-persona">Custom Tutor Instructions *</Label>
+                    <Textarea
+                      id="gpt-custom-persona"
+                      value={gptCustomPersona}
+                      onChange={(e) => setGptCustomPersona(e.target.value)}
+                      placeholder="Describe the tutor's role, tone, and instructional boundaries"
+                      rows={4}
+                    />
+                  </div>
+                )}
+
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="gpt-quiz-pass">Knowledge Check Pass %</Label>
+                    <Input
+                      id="gpt-quiz-pass"
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={gptQuizPassingPercentage}
+                      onChange={(e) => setGptQuizPassingPercentage(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gpt-rubric-pass">Rubric Threshold (0-4)</Label>
+                    <Input
+                      id="gpt-rubric-pass"
+                      type="number"
+                      min={0}
+                      max={4}
+                      value={gptRubricPassingScore}
+                      onChange={(e) => setGptRubricPassingScore(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gpt-transfer-attempts">Transfer Attempts</Label>
+                    <Input
+                      id="gpt-transfer-attempts"
+                      type="number"
+                      min={1}
+                      max={5}
+                      value={gptMaxTransferAttempts}
+                      onChange={(e) => setGptMaxTransferAttempts(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div>
+                      <Label htmlFor="gpt-consent" className="font-medium">Guardian Consent Required</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Require an approved guardian link before the learner can begin. Minor-facing lessons always require consent.
+                      </p>
+                    </div>
+                    <Switch
+                      id="gpt-consent"
+                      checked={gptAudience === "minor" || gptRequiresGuardianConsent}
+                      onCheckedChange={setGptRequiresGuardianConsent}
+                      disabled={gptAudience === "minor"}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div>
+                      <Label htmlFor="gpt-review" className="font-medium">Instructor Review Required</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Hold completion until an instructor approves the evidence
+                      </p>
+                    </div>
+                    <Switch
+                      id="gpt-review"
+                      checked={gptRequiresInstructorReview}
+                      onCheckedChange={setGptRequiresInstructorReview}
+                    />
+                  </div>
+                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  The lesson uses the provider and API key configured in Settings &gt; LLM Configuration. The key remains server-side.
+                </p>
+              </div>
+            )}
+
             {lessonContentType === "video" && (
               <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
                 <h4 className="font-medium flex items-center gap-2">
@@ -1077,7 +1352,7 @@ export default function CourseContentBuilderPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {deleteTarget?.type === "module" ? "Section" : "Lesson"}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteTarget?.title}"?
+              Are you sure you want to delete &quot;{deleteTarget?.title}&quot;?
               {deleteTarget?.type === "module" && " This will also delete all lessons in this section."}
               This action cannot be undone.
             </AlertDialogDescription>

@@ -175,7 +175,7 @@ export default function QuizIntroPage() {
                 <div>
                   <h3 className="text-xl font-semibold mb-1">Optional: Book a Strategy Call</h3>
                   <p className="text-muted-foreground">
-                    If you'd like to discuss your results and explore how Legacy 83 can help, schedule a free 30-minute strategy call with Icy.
+                    If you'd like to discuss your results and explore how AICenter4U can help, schedule a free 30-minute strategy call with Manpreet.
                   </p>
                 </div>
               </div>

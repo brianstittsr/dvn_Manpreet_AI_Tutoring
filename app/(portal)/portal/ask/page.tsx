@@ -61,19 +61,18 @@ const mockResponses: Record<string, Message> = {
     timestamp: new Date(),
     sources: ["Opportunity Pipeline", "CRM Data"],
     actions: [
-      { label: "View All Proposals", href: "/portal/opportunities?stage=proposal" },
-      { label: "Follow up with Precision Parts", href: "/portal/opportunities/3" },
+      { label: "View Projects", href: "/portal/projects" },
     ],
   },
   default: {
     id: "default",
     role: "assistant",
-    content: `I understand you're asking about business information. Let me search our systems...\n\nI found relevant information across multiple sources. Here's a summary:\n\n- **Opportunities:** 12 active in pipeline\n- **Projects:** 8 currently running\n- **Affiliates:** 24 in network\n- **Meetings:** 3 scheduled this week\n\nWould you like me to drill down into any specific area?`,
+    content: `I understand you're asking about business information. Let me search our systems...\n\nI found relevant information across multiple sources. Here's a summary:\n\n- **Projects:** 8 currently running\n- **Affiliates:** 24 in network\n- **Meetings:** 3 scheduled this week\n\nWould you like me to drill down into any specific area?`,
     timestamp: new Date(),
     sources: ["Multiple Sources"],
     actions: [
-      { label: "View Opportunities", href: "/portal/opportunities" },
       { label: "View Projects", href: "/portal/projects" },
+      { label: "View Meetings", href: "/portal/meetings" },
     ],
   },
 };

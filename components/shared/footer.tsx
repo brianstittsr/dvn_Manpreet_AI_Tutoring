@@ -44,7 +44,7 @@ export function Footer() {
           <div className="col-span-2 md:col-span-4 lg:col-span-1 space-y-4">
             <Link href="/" className="flex items-center gap-2">
               <Image
-                src="/legacy83Logo.webp"
+                src="/aicenter4u-logo.svg"
                 alt="Strategic Value+ Logo"
                 width={40}
                 height={40}
@@ -122,9 +122,9 @@ export function Footer() {
                 <span>United States</span>
               </li>
               <li>
-                <Link href="mailto:info@legacy83business.com" className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
+                <Link href="mailto:info@aicenter4u.com" className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
                   <Mail className="h-4 w-4" />
-                  info@legacy83business.com
+                  info@aicenter4u.com
                 </Link>
               </li>
               <li>
@@ -142,7 +142,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()} Legacy 83 Business Inc. All rights reserved.
+            © {new Date().getFullYear()} AICenter4U All rights reserved.
           </p>
           <div className="flex gap-6">
             {footerLinks.legal.map((link) => (

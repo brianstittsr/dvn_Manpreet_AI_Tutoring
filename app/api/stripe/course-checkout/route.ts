@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe, STRIPE_CONFIG } from "@/lib/stripe";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, addDoc, Timestamp } from "firebase/firestore";
-import { LMS_COLLECTIONS, type CourseDoc, type CoursePurchaseDoc } from "@/lib/firebase-lms";
+import { adminDb } from "@/lib/firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
+import { LMS_COLLECTIONS, type CourseDoc } from "@/lib/firebase-lms";
 import Stripe from "stripe";
+import { rateLimit } from "@/lib/rate-limit";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { scope: "stripe-course-checkout", limit: 15, windowMs: 60_000 });
+  if (limited) return limited;
   try {
     const body = await request.json();
     const {
@@ -30,7 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!db) {
+    if (!adminDb) {
       return NextResponse.json(
         { error: "Database not configured" },
         { status: 500 }
@@ -49,10 +52,10 @@ export async function POST(request: NextRequest) {
     let subtotal = 0;
 
     for (const courseId of courseIds) {
-      const courseRef = doc(db, LMS_COLLECTIONS.COURSES, courseId);
-      const courseSnap = await getDoc(courseRef);
+      const courseRef = adminDb.collection(LMS_COLLECTIONS.COURSES).doc(courseId);
+      const courseSnap = await courseRef.get();
 
-      if (!courseSnap.exists()) {
+      if (!courseSnap.exists) {
         return NextResponse.json(
           { error: `Course ${courseId} not found` },
           { status: 404 }
@@ -81,7 +84,7 @@ export async function POST(request: NextRequest) {
       
       for (const course of courses) {
         // Create purchase record
-        const purchaseData: Omit<CoursePurchaseDoc, "id"> = {
+        const purchaseData = {
           odUserId: customerInfo.userId,
           userEmail: customerInfo.email,
           userName: customerInfo.name,
@@ -100,10 +103,9 @@ export async function POST(request: NextRequest) {
           createdAt: Timestamp.now(),
         };
 
-        const purchaseRef = await addDoc(
-          collection(db, LMS_COLLECTIONS.COURSE_PURCHASES),
-          purchaseData
-        );
+        const purchaseRef = await adminDb
+          .collection(LMS_COLLECTIONS.COURSE_PURCHASES)
+          .add(purchaseData);
 
         // Create enrollment
         const enrollmentData = {
@@ -118,10 +120,9 @@ export async function POST(request: NextRequest) {
           purchaseId: purchaseRef.id,
         };
 
-        const enrollmentRef = await addDoc(
-          collection(db, LMS_COLLECTIONS.ENROLLMENTS),
-          { id: "", ...enrollmentData }
-        );
+        const enrollmentRef = await adminDb
+          .collection(LMS_COLLECTIONS.ENROLLMENTS)
+          .add({ id: "", ...enrollmentData });
 
         enrollmentIds.push(enrollmentRef.id);
       }
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest) {
     for (const course of courses) {
       if (course.isFree) continue;
 
-      const purchaseData: Omit<CoursePurchaseDoc, "id"> = {
+      const purchaseData = {
         odUserId: customerInfo.userId,
         userEmail: customerInfo.email,
         userName: customerInfo.name,
@@ -178,10 +179,9 @@ export async function POST(request: NextRequest) {
         createdAt: Timestamp.now(),
       };
 
-      const purchaseRef = await addDoc(
-        collection(db, LMS_COLLECTIONS.COURSE_PURCHASES),
-        purchaseData
-      );
+      const purchaseRef = await adminDb
+        .collection(LMS_COLLECTIONS.COURSE_PURCHASES)
+        .add(purchaseData);
       purchaseIds.push(purchaseRef.id);
     }
 
@@ -204,9 +204,8 @@ export async function POST(request: NextRequest) {
     });
 
     // Update purchase records with Stripe session ID
-    const { updateDoc } = await import("firebase/firestore");
     for (const purchaseId of purchaseIds) {
-      await updateDoc(doc(db, LMS_COLLECTIONS.COURSE_PURCHASES, purchaseId), {
+      await adminDb.collection(LMS_COLLECTIONS.COURSE_PURCHASES).doc(purchaseId).update({
         stripeSessionId: session.id,
       });
     }

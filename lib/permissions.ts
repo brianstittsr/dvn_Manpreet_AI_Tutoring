@@ -1,5 +1,5 @@
 /**
- * Role-based permissions system for Legacy 83 Business Platform
+ * Role-based permissions system for AICenter4U Platform
  * 
  * Roles hierarchy:
  * - superadmin: Full control over everything
@@ -15,8 +15,8 @@ export type UserRole = "superadmin" | "admin" | "team" | "affiliate" | "consulta
 export interface Permission {
   canViewSidebar: boolean;
   canConfigureSidebar: boolean;
-  canViewL83Tools: boolean;
-  canConfigureL83Tools: boolean;
+  canViewPlatformTools: boolean;
+  canConfigurePlatformTools: boolean;
   canManageUsers: boolean;
   canDeleteUsers: boolean;
   canDeleteSuperAdmin: boolean;
@@ -33,8 +33,8 @@ const rolePermissions: Record<UserRole, Permission> = {
   superadmin: {
     canViewSidebar: true,
     canConfigureSidebar: true,
-    canViewL83Tools: true,
-    canConfigureL83Tools: true,
+    canViewPlatformTools: true,
+    canConfigurePlatformTools: true,
     canManageUsers: true,
     canDeleteUsers: true,
     canDeleteSuperAdmin: true, // Only superadmin can delete other superadmins
@@ -48,8 +48,8 @@ const rolePermissions: Record<UserRole, Permission> = {
   admin: {
     canViewSidebar: true,
     canConfigureSidebar: false,
-    canViewL83Tools: true,
-    canConfigureL83Tools: false,
+    canViewPlatformTools: true,
+    canConfigurePlatformTools: false,
     canManageUsers: true,
     canDeleteUsers: true,
     canDeleteSuperAdmin: false, // Admin cannot delete superadmin
@@ -63,8 +63,8 @@ const rolePermissions: Record<UserRole, Permission> = {
   team: {
     canViewSidebar: true,
     canConfigureSidebar: false,
-    canViewL83Tools: true,
-    canConfigureL83Tools: false,
+    canViewPlatformTools: true,
+    canConfigurePlatformTools: false,
     canManageUsers: false,
     canDeleteUsers: false,
     canDeleteSuperAdmin: false,
@@ -78,8 +78,8 @@ const rolePermissions: Record<UserRole, Permission> = {
   affiliate: {
     canViewSidebar: true,
     canConfigureSidebar: false,
-    canViewL83Tools: true,
-    canConfigureL83Tools: false,
+    canViewPlatformTools: true,
+    canConfigurePlatformTools: false,
     canManageUsers: false,
     canDeleteUsers: false,
     canDeleteSuperAdmin: false,
@@ -93,8 +93,8 @@ const rolePermissions: Record<UserRole, Permission> = {
   consultant: {
     canViewSidebar: true,
     canConfigureSidebar: false,
-    canViewL83Tools: true,
-    canConfigureL83Tools: false,
+    canViewPlatformTools: true,
+    canConfigurePlatformTools: false,
     canManageUsers: false,
     canDeleteUsers: false,
     canDeleteSuperAdmin: false,
@@ -108,8 +108,8 @@ const rolePermissions: Record<UserRole, Permission> = {
   client: {
     canViewSidebar: true,
     canConfigureSidebar: false,
-    canViewL83Tools: false,
-    canConfigureL83Tools: false,
+    canViewPlatformTools: false,
+    canConfigurePlatformTools: false,
     canManageUsers: false,
     canDeleteUsers: false,
     canDeleteSuperAdmin: false,
@@ -197,15 +197,12 @@ export interface SidebarVisibilityConfig {
   initiatives: boolean;
   // Individual items
   commandCenter: boolean;
-  opportunities: boolean;
   projects: boolean;
   affiliates: boolean;
   organizations: boolean;
   calendar: boolean;
   meetings: boolean;
-  rocks: boolean;
   proposals: boolean;
-  goHighLevel: boolean;
   askIntellEdge: boolean;
   teamMembers: boolean;
   strategicPartners: boolean;
@@ -215,9 +212,9 @@ export interface SidebarVisibilityConfig {
 }
 
 /**
- * L83 Tools that can be controlled by superadmin
+ * Platform Tools that can be controlled by superadmin
  */
-export interface L83ToolsConfig {
+export interface PlatformToolsConfig {
   transcription: boolean;
   imageGen: boolean;
   headshot: boolean;
@@ -237,15 +234,12 @@ export const defaultSidebarVisibility: SidebarVisibilityConfig = {
   admin: true,
   initiatives: true,
   commandCenter: true,
-  opportunities: true,
   projects: true,
   affiliates: true,
   organizations: true,
   calendar: true,
   meetings: true,
-  rocks: true,
   proposals: true,
-  goHighLevel: true,
   askIntellEdge: true,
   teamMembers: true,
   strategicPartners: true,
@@ -255,9 +249,9 @@ export const defaultSidebarVisibility: SidebarVisibilityConfig = {
 };
 
 /**
- * Default L83 Tools visibility (all visible)
+ * Default Platform Tools visibility (all visible)
  */
-export const defaultL83ToolsConfig: L83ToolsConfig = {
+export const defaultPlatformToolsConfig: PlatformToolsConfig = {
   transcription: true,
   imageGen: true,
   headshot: true,

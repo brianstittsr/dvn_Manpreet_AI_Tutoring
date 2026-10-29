@@ -10,19 +10,16 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import {
   Shield,
   LayoutDashboard,
-  Target,
   FolderKanban,
   Users,
   Building,
   Calendar,
   CalendarDays,
-  CheckSquare,
   FileText,
   Sparkles,
   Settings,
@@ -40,8 +37,6 @@ import {
   Save,
   Loader2,
   AlertTriangle,
-  Network,
-  Key,
 } from "lucide-react";
 import { db, auth } from "@/lib/firebase";
 import { doc, getDoc, setDoc, Timestamp, collection, query, where, getDocs, updateDoc } from "firebase/firestore";
@@ -56,15 +51,12 @@ const SETTINGS_DOC_ID = "platform-settings";
 // Sidebar items configuration
 const sidebarItems = [
   { key: "commandCenter", label: "Command Center", icon: LayoutDashboard, section: "navigation" },
-  { key: "opportunities", label: "Opportunities", icon: Target, section: "navigation" },
   { key: "projects", label: "Projects", icon: FolderKanban, section: "navigation" },
   { key: "affiliates", label: "Affiliates", icon: Users, section: "navigation" },
   { key: "organizations", label: "Organizations", icon: Building, section: "navigation" },
   { key: "calendar", label: "Calendar", icon: Calendar, section: "work" },
   { key: "meetings", label: "Meetings", icon: CalendarDays, section: "work" },
-  { key: "rocks", label: "Rocks", icon: CheckSquare, section: "work" },
   { key: "proposals", label: "Proposals", icon: FileText, section: "work" },
-  { key: "goHighLevel", label: "GoHighLevel", icon: Sparkles, section: "work" },
   { key: "askIntellEdge", label: "Ask IntellEDGE", icon: Sparkles, section: "intelligence" },
   { key: "teamMembers", label: "Team Members", icon: Users, section: "admin" },
   { key: "strategicPartners", label: "Strategic Partners", icon: Handshake, section: "admin" },
@@ -73,8 +65,8 @@ const sidebarItems = [
   { key: "activityLog", label: "Activity Log", icon: Activity, section: "admin" },
 ];
 
-// L83 Tools configuration
-const l83Tools = [
+// Platform Tools configuration
+const platformTools = [
   { key: "transcription", label: "Audio Transcription", icon: Mic, description: "Convert audio/video to text" },
   { key: "imageGen", label: "Image Generation", icon: Image, description: "Create images from text" },
   { key: "headshot", label: "AI Headshot Generator", icon: Camera, description: "Create professional headshots" },
@@ -101,15 +93,12 @@ export default function SuperAdminPage() {
     admin: true,
     initiatives: true,
     commandCenter: true,
-    opportunities: true,
     projects: true,
     affiliates: true,
     organizations: true,
     calendar: true,
     meetings: true,
-    rocks: true,
     proposals: true,
-    goHighLevel: true,
     askIntellEdge: true,
     teamMembers: true,
     strategicPartners: true,
@@ -118,8 +107,8 @@ export default function SuperAdminPage() {
     activityLog: true,
   });
   
-  // L83 Tools visibility state
-  const [l83ToolsVisibility, setL83ToolsVisibility] = useState<Record<string, boolean>>({
+  // Platform Tools visibility state
+  const [platformToolsVisibility, setPlatformToolsVisibility] = useState<Record<string, boolean>>({
     transcription: true,
     imageGen: true,
     headshot: true,
@@ -127,12 +116,6 @@ export default function SuperAdminPage() {
     tts: true,
     crawler: true,
     pdfOcr: true,
-  });
-
-  // API Keys for integrations
-  const [apiKeys, setApiKeys] = useState<Record<string, string>>({
-    alignable: "",
-    alignableAccessToken: "",
   });
 
   // Check if user is superadmin
@@ -160,11 +143,9 @@ export default function SuperAdminPage() {
           if (data.sidebarVisibility) {
             setSidebarVisibility(prev => ({ ...prev, ...data.sidebarVisibility }));
           }
-          if (data.l83ToolsVisibility) {
-            setL83ToolsVisibility(prev => ({ ...prev, ...data.l83ToolsVisibility }));
-          }
-          if (data.apiKeys) {
-            setApiKeys(prev => ({ ...prev, ...data.apiKeys }));
+          const storedToolsVisibility = data.platformToolsVisibility ?? data.l83ToolsVisibility;
+          if (storedToolsVisibility) {
+            setPlatformToolsVisibility(prev => ({ ...prev, ...storedToolsVisibility }));
           }
         }
       } catch (error) {
@@ -190,12 +171,11 @@ export default function SuperAdminPage() {
       const docRef = doc(db, COLLECTIONS.PLATFORM_SETTINGS, SETTINGS_DOC_ID);
       await setDoc(docRef, {
         sidebarVisibility,
-        l83ToolsVisibility,
-        apiKeys,
+        platformToolsVisibility,
         updatedAt: Timestamp.now(),
         updatedBy: linkedTeamMember?.id || "unknown",
       }, { merge: true });
-      
+
       setHasChanges(false);
       toast.success("Settings saved successfully!");
     } catch (error) {
@@ -212,9 +192,9 @@ export default function SuperAdminPage() {
     setHasChanges(true);
   };
 
-  // Toggle L83 tool visibility
-  const toggleL83Tool = (key: string) => {
-    setL83ToolsVisibility(prev => ({ ...prev, [key]: !prev[key] }));
+  // Toggle Platform tool visibility
+  const togglePlatformTool = (key: string) => {
+    setPlatformToolsVisibility(prev => ({ ...prev, [key]: !prev[key] }));
     setHasChanges(true);
   };
 
@@ -229,19 +209,13 @@ export default function SuperAdminPage() {
     setHasChanges(true);
   };
 
-  // Toggle all L83 tools
-  const toggleAllL83Tools = (enabled: boolean) => {
+  // Toggle all Platform tools
+  const toggleAllPlatformTools = (enabled: boolean) => {
     const updates: Record<string, boolean> = {};
-    l83Tools.forEach(tool => {
+    platformTools.forEach(tool => {
       updates[tool.key] = enabled;
     });
-    setL83ToolsVisibility(updates);
-    setHasChanges(true);
-  };
-
-  // Update API key
-  const updateApiKey = (key: string, value: string) => {
-    setApiKeys(prev => ({ ...prev, [key]: value }));
+    setPlatformToolsVisibility(updates);
     setHasChanges(true);
   };
 
@@ -403,11 +377,7 @@ export default function SuperAdminPage() {
           </TabsTrigger>
           <TabsTrigger value="tools">
             <Wrench className="h-4 w-4 mr-2" />
-            L83 Tools
-          </TabsTrigger>
-          <TabsTrigger value="integrations">
-            <Key className="h-4 w-4 mr-2" />
-            Integrations
+            Platform Tools
           </TabsTrigger>
         </TabsList>
 
@@ -537,32 +507,32 @@ export default function SuperAdminPage() {
           </Card>
         </TabsContent>
 
-        {/* L83 Tools Tab */}
+        {/* Platform Tools Tab */}
         <TabsContent value="tools" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>L83 Tools Visibility</CardTitle>
+              <CardTitle>Platform Tools Visibility</CardTitle>
               <CardDescription>
-                Control which L83 Tools are available to users. Disabled tools will be hidden
+                Control which Platform Tools are available to users. Disabled tools will be hidden
                 from the tools section in user profiles.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between mb-4">
                 <Badge variant="outline">
-                  {Object.values(l83ToolsVisibility).filter(Boolean).length}/{l83Tools.length} tools enabled
+                  {Object.values(platformToolsVisibility).filter(Boolean).length}/{platformTools.length} tools enabled
                 </Badge>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => toggleAllL83Tools(true)}>
+                  <Button variant="outline" size="sm" onClick={() => toggleAllPlatformTools(true)}>
                     Enable All
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => toggleAllL83Tools(false)}>
+                  <Button variant="outline" size="sm" onClick={() => toggleAllPlatformTools(false)}>
                     Disable All
                   </Button>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {l83Tools.map(tool => (
+                {platformTools.map(tool => (
                   <div key={tool.key} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-primary/10 rounded-lg">
@@ -575,123 +545,9 @@ export default function SuperAdminPage() {
                     </div>
                     <Switch
                       id={tool.key}
-                      checked={l83ToolsVisibility[tool.key]}
-                      onCheckedChange={() => toggleL83Tool(tool.key)}
+                      checked={platformToolsVisibility[tool.key]}
+                      onCheckedChange={() => togglePlatformTool(tool.key)}
                     />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Integrations Tab */}
-        <TabsContent value="integrations" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Network className="h-5 w-5" />
-                Alignable Integration
-              </CardTitle>
-              <CardDescription>
-                Configure API credentials for Alignable business networking platform.
-                These keys enable connection with the Alignable API for content exchange and networking.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="alignable-api-key">Alignable API Key</Label>
-                  <Input
-                    id="alignable-api-key"
-                    type="password"
-                    placeholder="Enter your Alignable API key"
-                    value={apiKeys.alignable}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateApiKey("alignable", e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Get your API key from the{" "}
-                    <a 
-                      href="https://developers.alignable.com" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      Alignable Developer Portal
-                    </a>
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="alignable-access-token">Alignable Access Token (OAuth)</Label>
-                  <Input
-                    id="alignable-access-token"
-                    type="password"
-                    placeholder="Enter OAuth access token (optional)"
-                    value={apiKeys.alignableAccessToken}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateApiKey("alignableAccessToken", e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    OAuth token provides full access including posting and messaging. Required for complete integration.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-muted rounded-lg">
-                  <h4 className="font-medium mb-2">Integration Features</h4>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Business profile synchronization</li>
-                    <li>• Network connection management</li>
-                    <li>• Content posting and engagement</li>
-                    <li>• Recommendation exchange</li>
-                    <li>• Direct messaging capabilities</li>
-                    <li>• Analytics and insights</li>
-                  </ul>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div>
-                    <p className="text-sm font-medium">Connection Status</p>
-                    <p className="text-xs text-muted-foreground">
-                      {apiKeys.alignable || apiKeys.alignableAccessToken 
-                        ? "Credentials configured. Test connection in the Alignable admin panel."
-                        : "No credentials configured. Add API key to enable integration."}
-                    </p>
-                  </div>
-                  <Badge variant={apiKeys.alignable || apiKeys.alignableAccessToken ? "default" : "secondary"}>
-                    {apiKeys.alignable || apiKeys.alignableAccessToken ? "Configured" : "Not Configured"}
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Placeholder for future integrations */}
-          <Card className="opacity-75">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Key className="h-5 w-5" />
-                Future Integrations
-              </CardTitle>
-              <CardDescription>
-                Additional third-party integrations coming soon.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                {[
-                  { name: "LinkedIn API", status: "Planned", desc: "Professional networking and content sharing" },
-                  { name: "Facebook Business", status: "Planned", desc: "Social media management and analytics" },
-                  { name: "Twitter/X API", status: "Planned", desc: "Social engagement and monitoring" },
-                  { name: "Yelp API", status: "Planned", desc: "Review management and business listings" },
-                  { name: "Google Business", status: "Planned", desc: "Business profile and review management" },
-                  { name: "HubSpot", status: "Planned", desc: "CRM and marketing automation" },
-                ].map((integration) => (
-                  <div key={integration.name} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">{integration.name}</span>
-                      <Badge variant="outline">{integration.status}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{integration.desc}</p>
                   </div>
                 ))}
               </div>

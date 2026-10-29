@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://legacy83business.com";
+  const baseUrl = "https://aicenter4u.com";
 
   // Static pages
   const staticPages = [
@@ -30,7 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/terms",
     "/cookies",
     "/accessibility",
-    "/legacy-journal",
+    "/journal",
     "/schedule-a-call",
     "/quiz",
     "/quiz-intro",
@@ -72,7 +72,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const blogSitemap: MetadataRoute.Sitemap = blogArticles.map((article) => ({
-    url: `${baseUrl}/legacy-journal/${article.slug}`,
+    url: `${baseUrl}/journal/${article.slug}`,
     lastModified: new Date(),
     changeFrequency: "weekly",
     priority: article.priority,

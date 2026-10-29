@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getApolloApiKey } from "@/lib/openai-config";
 
 const APOLLO_API_BASE = "https://api.apollo.io/v1";
+
+async function resolveApiKey(provided: unknown): Promise<string | null> {
+  if (typeof provided === "string" && provided.trim() && provided !== "stored") {
+    return provided.trim();
+  }
+  const stored = await getApolloApiKey();
+  return stored?.apiKey ?? null;
+}
 
 // Apollo API endpoints
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { action, apiKey, searchParams } = body;
+    const { action, apiKey: providedKey, searchParams } = body;
+    const apiKey = await resolveApiKey(providedKey);
 
     if (!apiKey) {
       return NextResponse.json(
@@ -470,7 +480,7 @@ export async function POST(request: NextRequest) {
 
 // GET endpoint to check connection status
 export async function GET(request: NextRequest) {
-  const apiKey = request.headers.get("x-apollo-api-key");
+  const apiKey = await resolveApiKey(request.headers.get("x-apollo-api-key"));
 
   if (!apiKey) {
     return NextResponse.json({ connected: false, error: "No API key provided" });

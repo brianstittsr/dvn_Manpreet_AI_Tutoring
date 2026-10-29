@@ -7,7 +7,7 @@ Use this comprehensive prompt to recreate the AI Page Designer feature in anothe
 ## 🎯 Prompt for AI Assistant
 
 ```
-I need to recreate the AI Page Designer feature from the Icy Williams svp-platform site in a new svp-platform project. This is a comprehensive AI-powered page editing tool with wizard, chat interface, templates, and UX review capabilities.
+I need to recreate the AI Page Designer feature from the Manpreet Hundal svp-platform site in a new svp-platform project. This is a comprehensive AI-powered page editing tool with wizard, chat interface, templates, and UX review capabilities.
 
 ## 📋 Overview
 

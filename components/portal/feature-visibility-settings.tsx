@@ -38,10 +38,10 @@ import {
   UserRole,
   FeatureKey,
   SectionKey,
-  L83ToolKey,
+  PlatformToolKey,
   SIDEBAR_FEATURES,
   SECTIONS,
-  L83_TOOLS,
+  PLATFORM_TOOLS,
   DEFAULT_ROLE_VISIBILITY,
   FeatureVisibilitySettings as FeatureVisibilitySettingsType,
   getFeatureVisibilitySettings,
@@ -59,7 +59,7 @@ const ROLE_INFO: Record<UserRole, { label: string; icon: React.ElementType; desc
 };
 
 const SECTION_ICONS: Record<SectionKey, React.ElementType> = {
-  icyFocused: Snowflake,
+  adminFocused: Snowflake,
   navigation: LayoutDashboard,
   work: Briefcase,
   intelligence: Brain,
@@ -89,7 +89,7 @@ function SectionCollapsible({
   roleSettings: {
     features: Record<FeatureKey, boolean>;
     sections: Record<SectionKey, boolean>;
-    l83Tools: Record<L83ToolKey, boolean>;
+    platformTools: Record<PlatformToolKey, boolean>;
   };
   toggleSection: (role: UserRole, sectionKey: SectionKey) => void;
   toggleAllInSection: (role: UserRole, sectionKey: SectionKey, enabled: boolean) => void;
@@ -278,8 +278,8 @@ export function FeatureVisibilitySettings() {
     setHasChanges(true);
   };
 
-  // Toggle an L83 tool for a role
-  const toggleL83Tool = (role: UserRole, toolKey: L83ToolKey) => {
+  // Toggle an Platform tool for a role
+  const togglePlatformTool = (role: UserRole, toolKey: PlatformToolKey) => {
     if (!canEdit || role === "superadmin") return;
 
     setSettings((prev) => ({
@@ -288,9 +288,9 @@ export function FeatureVisibilitySettings() {
         ...prev.roleVisibility,
         [role]: {
           ...prev.roleVisibility[role],
-          l83Tools: {
-            ...prev.roleVisibility[role].l83Tools,
-            [toolKey]: !prev.roleVisibility[role].l83Tools[toolKey],
+          platformTools: {
+            ...prev.roleVisibility[role].platformTools,
+            [toolKey]: !prev.roleVisibility[role].platformTools[toolKey],
           },
         },
       },
@@ -326,13 +326,13 @@ export function FeatureVisibilitySettings() {
     setHasChanges(true);
   };
 
-  // Enable/disable all L83 tools for a role
-  const toggleAllL83Tools = (role: UserRole, enabled: boolean) => {
+  // Enable/disable all Platform tools for a role
+  const toggleAllPlatformTools = (role: UserRole, enabled: boolean) => {
     if (!canEdit || role === "superadmin") return;
 
     setSettings((prev) => {
-      const newTools = { ...prev.roleVisibility[role].l83Tools };
-      (Object.keys(L83_TOOLS) as L83ToolKey[]).forEach((key) => {
+      const newTools = { ...prev.roleVisibility[role].platformTools };
+      (Object.keys(PLATFORM_TOOLS) as PlatformToolKey[]).forEach((key) => {
         newTools[key] = enabled;
       });
 
@@ -342,7 +342,7 @@ export function FeatureVisibilitySettings() {
           ...prev.roleVisibility,
           [role]: {
             ...prev.roleVisibility[role],
-            l83Tools: newTools,
+            platformTools: newTools,
           },
         },
       };
@@ -387,11 +387,11 @@ export function FeatureVisibilitySettings() {
     return { visible: visibleCount, total: featuresInSection.length };
   };
 
-  // Count visible L83 tools
-  const getVisibleL83Count = () => {
-    const total = Object.keys(L83_TOOLS).length;
-    const visible = (Object.keys(L83_TOOLS) as L83ToolKey[]).filter(
-      (key) => roleSettings.l83Tools[key]
+  // Count visible Platform tools
+  const getVisiblePlatformCount = () => {
+    const total = Object.keys(PLATFORM_TOOLS).length;
+    const visible = (Object.keys(PLATFORM_TOOLS) as PlatformToolKey[]).filter(
+      (key) => roleSettings.platformTools[key]
     ).length;
     return { visible, total };
   };
@@ -495,7 +495,7 @@ export function FeatureVisibilitySettings() {
             <Tabs defaultValue="sidebar" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="sidebar">Sidebar Features</TabsTrigger>
-                <TabsTrigger value="l83tools">L83 Tools</TabsTrigger>
+                <TabsTrigger value="platformtools">Platform Tools</TabsTrigger>
               </TabsList>
 
               {/* Sidebar Features Tab */}
@@ -529,23 +529,23 @@ export function FeatureVisibilitySettings() {
                 </ScrollArea>
               </TabsContent>
 
-              {/* L83 Tools Tab */}
-              <TabsContent value="l83tools" className="mt-4">
+              {/* Platform Tools Tab */}
+              <TabsContent value="platformtools" className="mt-4">
                 <ScrollArea className="h-[600px] pr-4">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Wrench className="h-4 w-4" />
-                        <span className="font-medium">L83 Tools</span>
+                        <span className="font-medium">Platform Tools</span>
                         <Badge variant="outline">
-                          {getVisibleL83Count().visible}/{getVisibleL83Count().total} enabled
+                          {getVisiblePlatformCount().visible}/{getVisiblePlatformCount().total} enabled
                         </Badge>
                       </div>
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => toggleAllL83Tools(selectedRole, true)}
+                          onClick={() => toggleAllPlatformTools(selectedRole, true)}
                         >
                           <Eye className="mr-1 h-3 w-3" />
                           Enable All
@@ -553,7 +553,7 @@ export function FeatureVisibilitySettings() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => toggleAllL83Tools(selectedRole, false)}
+                          onClick={() => toggleAllPlatformTools(selectedRole, false)}
                         >
                           <EyeOff className="mr-1 h-3 w-3" />
                           Disable All
@@ -562,22 +562,22 @@ export function FeatureVisibilitySettings() {
                     </div>
 
                     <div className="grid gap-3">
-                      {(Object.entries(L83_TOOLS) as [L83ToolKey, typeof L83_TOOLS[L83ToolKey]][]).map(
+                      {(Object.entries(PLATFORM_TOOLS) as [PlatformToolKey, typeof PLATFORM_TOOLS[PlatformToolKey]][]).map(
                         ([toolKey, tool]) => (
                           <div
                             key={toolKey}
                             className="flex items-center justify-between p-3 border rounded-lg"
                           >
                             <div>
-                              <Label htmlFor={`${selectedRole}-l83-${toolKey}`} className="cursor-pointer font-medium">
+                              <Label htmlFor={`${selectedRole}-platform-${toolKey}`} className="cursor-pointer font-medium">
                                 {tool.label}
                               </Label>
                               <p className="text-xs text-muted-foreground">{tool.description}</p>
                             </div>
                             <Switch
-                              id={`${selectedRole}-l83-${toolKey}`}
-                              checked={roleSettings.l83Tools[toolKey]}
-                              onCheckedChange={() => toggleL83Tool(selectedRole, toolKey)}
+                              id={`${selectedRole}-platform-${toolKey}`}
+                              checked={roleSettings.platformTools[toolKey]}
+                              onCheckedChange={() => togglePlatformTool(selectedRole, toolKey)}
                             />
                           </div>
                         )

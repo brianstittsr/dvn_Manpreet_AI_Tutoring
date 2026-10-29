@@ -17,9 +17,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Events & Community | Legacy 83 Business",
+  title: "Events & Community | AICenter4U",
   description:
-    "Join Legacy 83 events, workshops, and community gatherings. Connect with fellow business owners committed to building lasting legacies.",
+    "Join AICenter4U events, workshops, and community gatherings. Connect with fellow business owners committed to building lasting legacies.",
 };
 
 const upcomingEvents = [
@@ -31,7 +31,7 @@ const upcomingEvents = [
     time: "12:00 PM - 1:00 PM EST",
     location: "Virtual (Zoom)",
     description:
-      "Learn the 5 key elements every business needs to thrive beyond its founder. Icy Williams shares insights from 20+ years of helping business owners prepare for succession.",
+      "Learn the 5 key elements every business needs to thrive beyond its founder. Manpreet Hundal shares insights from 20+ years of helping business owners prepare for succession.",
     spots: 47,
     icon: Video,
     featured: true,
@@ -62,13 +62,13 @@ const upcomingEvents = [
   },
   {
     id: 4,
-    title: "Ask Icy: Live Q&A Session",
+    title: "Ask Manpreet: Live Q&A Session",
     type: "Live Q&A",
     date: "February 12, 2026",
     time: "12:00 PM - 12:45 PM EST",
     location: "Virtual (Zoom)",
     description:
-      "Bring your toughest business questions. Icy answers live and provides actionable advice you can implement immediately.",
+      "Bring your toughest business questions. Manpreet answers live and provides actionable advice you can implement immediately.",
     spots: 100,
     icon: Mic,
   },
@@ -99,7 +99,7 @@ const communityBenefits = [
   },
   {
     title: "Exclusive Webinars",
-    description: "Access to members-only training and Q&A sessions with Icy.",
+    description: "Access to members-only training and Q&A sessions with Manpreet.",
   },
   {
     title: "Resource Library",

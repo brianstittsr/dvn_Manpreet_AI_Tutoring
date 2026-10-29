@@ -183,7 +183,7 @@ export async function showBrowserNotification(
 
   const notification = new Notification(title, {
     body: message,
-    icon: options?.icon || "/legacy83Logo.webp",
+    icon: options?.icon || "/aicenter4u-logo.svg",
     tag: options?.tag,
   });
 
@@ -392,58 +392,6 @@ export const NotificationHelpers = {
     });
   },
 
-  // Rocks
-  rockDue: (rock: { title: string; dueDate: Date }) => {
-    showPopupNotification("rock_due", "Rock Due Soon", rock.title, {
-      priority: "high",
-      action: {
-        label: "View",
-        onClick: () => (window.location.href = "/portal/rocks"),
-      },
-    });
-  },
-
-  rockStatusChange: (rock: { title: string; status: string }) => {
-    showPopupNotification("rock_status", "Rock Status Updated", `${rock.title} is now ${rock.status}`, {
-      priority: "medium",
-    });
-  },
-
-  // Todos
-  todoOverdue: (todo: { title: string }) => {
-    showPopupNotification("todo_overdue", "Overdue Todo", todo.title, {
-      priority: "urgent",
-      action: {
-        label: "Complete",
-        onClick: () => (window.location.href = "/portal/rocks"),
-      },
-    });
-  },
-
-  // Issues
-  issueCreated: (issue: { title: string; priority: string }) => {
-    showPopupNotification("issue_created", "New Issue", issue.title, {
-      priority: issue.priority === "high" ? "high" : "medium",
-    });
-  },
-
-  issueResolved: (issue: { title: string }) => {
-    showPopupNotification("issue_resolved", "Issue Resolved", issue.title, {
-      priority: "low",
-    });
-  },
-
-  // Opportunities
-  opportunityUpdate: (opp: { title: string; stage: string }) => {
-    showPopupNotification("opportunity_update", "Opportunity Update", `${opp.title} moved to ${opp.stage}`, {
-      priority: "medium",
-      action: {
-        label: "View",
-        onClick: () => (window.location.href = "/portal/opportunities"),
-      },
-    });
-  },
-
   // Projects
   projectUpdate: (project: { title: string; update: string }) => {
     showPopupNotification("project_update", "Project Update", `${project.title}: ${project.update}`, {
@@ -451,17 +399,6 @@ export const NotificationHelpers = {
       action: {
         label: "View",
         onClick: () => (window.location.href = "/portal/projects"),
-      },
-    });
-  },
-
-  // Deals
-  dealUpdate: (deal: { title: string; status: string }) => {
-    showPopupNotification("deal_update", "Deal Update", `${deal.title} - ${deal.status}`, {
-      priority: "medium",
-      action: {
-        label: "View",
-        onClick: () => (window.location.href = "/portal/deals"),
       },
     });
   },

@@ -6,18 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, Video, FileText, Download, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Resources | Legacy 83 Business",
+  title: "Resources | AICenter4U",
   description:
     "Free resources, guides, and tools to help you build a lasting business legacy. Download our playbooks, read articles, and watch educational content.",
 };
 
 const resources = [
   {
-    id: "legacy-journal",
+    id: "journal",
     icon: BookOpen,
-    title: "The Legacy Journal",
+    title: "The Journal",
     description: "Practical strategies, honest insights, and real stories to help you build a business that thrives today and endures for generations.",
-    link: "/legacy-journal",
+    link: "/journal",
     cta: "Read Articles",
   },
   {

@@ -163,40 +163,6 @@ export default function QuizResultsPage() {
           }
         }
 
-        // Send quiz lead data to LeadConnector webhook
-        try {
-          await fetch("https://services.leadconnectorhq.com/hooks/o1rlj177UVXuz2i8tHHJ/webhook-trigger/8RIbOCvZ24D7BqqBK5L0", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              submissionId: currentSubmissionId,
-              firstName: formData.firstName,
-              lastName: formData.lastName,
-              email: formData.email,
-              phone: formData.phone || undefined,
-              company: formData.company || undefined,
-              quizName: "Legacy Growth IQ Assessment",
-              totalScore: results.totalScore,
-              maxScore: results.maxScore,
-              percentage: results.percentage,
-              scoreLevel: results.scoreRange.level,
-              topStrength: results.topStrength.label,
-              priorityArea: results.topWeakness.label,
-              categoryScores: results.categoryScores.map((cat) => ({
-                category: cat.category,
-                label: cat.label,
-                score: cat.score,
-                maxScore: cat.maxScore,
-                percentage: cat.percentage,
-              })),
-              source: "quiz-results-page",
-              submittedAt: new Date().toISOString(),
-            }),
-          });
-        } catch (webhookError) {
-          console.error("Error sending quiz lead to LeadConnector webhook:", webhookError);
-          // Continue showing results even if webhook fails
-        }
       }
       
       // Store lead info locally as well
@@ -397,7 +363,7 @@ export default function QuizResultsPage() {
                 </Button>
 
                 <p className="text-xs text-gray-500 text-center">
-                  By submitting, you agree to receive your results and occasional insights from Legacy 83. 
+                  By submitting, you agree to receive your results and occasional insights from AICenter4U. 
                   We respect your privacy and will never spam you.
                 </p>
               </form>
@@ -546,7 +512,7 @@ export default function QuizResultsPage() {
               Ready to Build Your Legacy?
             </h2>
             <p className="text-amber-100 mb-6 max-w-xl mx-auto">
-              Schedule a free 30-minute strategy call with Icy Williams to discuss your results 
+              Schedule a free 30-minute strategy call with Manpreet Hundal to discuss your results 
               and create a personalized action plan for your business.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">

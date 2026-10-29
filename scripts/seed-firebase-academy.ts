@@ -2,7 +2,7 @@
  * Firebase Academy Seed Script
  * Run with: npx ts-node scripts/seed-firebase-academy.ts
  * 
- * Seeds the Firestore database with initial Legacy 83 Academy data
+ * Seeds the Firestore database with initial AICenter4U Academy data
  */
 
 import { initializeApp, cert } from "firebase-admin/app";
@@ -35,7 +35,7 @@ const subscriptionTiers = [
     priceMonthly: 49,
     priceAnnual: 470,
     features: [
-      "Access to Legacy Journal articles",
+      "Access to Journal articles",
       "Monthly newsletter",
       "Community forum access",
       "1 free workshop per quarter",
@@ -134,11 +134,11 @@ const courses = [
     id: "grows-framework-masterclass",
     title: "The G.R.O.W.S. Framework Masterclass",
     slug: "grows-framework-masterclass",
-    description: "Master the complete Legacy 83 methodology for building a business that thrives beyond you. This comprehensive course covers all five pillars of the G.R.O.W.S. framework with practical exercises and real-world case studies.",
-    shortDescription: "Master the complete Legacy 83 methodology for building a business that thrives beyond you.",
+    description: "Master the complete AICenter4U methodology for building a business that thrives beyond you. This comprehensive course covers all five pillars of the G.R.O.W.S. framework with practical exercises and real-world case studies.",
+    shortDescription: "Master the complete AICenter4U methodology for building a business that thrives beyond you.",
     categoryId: "goals-vision",
-    instructorName: "Icy Williams",
-    instructorBio: "Founder & CEO of Legacy 83 Business with over two decades of experience helping business leaders unlock their potential.",
+    instructorName: "Manpreet Hundal",
+    instructorBio: "Founder & CEO of AICenter4U with over two decades of experience helping business leaders unlock their potential.",
     difficultyLevel: "intermediate",
     estimatedDurationMinutes: 480,
     minSubscriptionTierId: "legacy-builder",
@@ -160,7 +160,7 @@ const courses = [
     description: "Create a comprehensive succession plan that protects your legacy and maximizes business value. Learn the key steps to prepare your business for transition.",
     shortDescription: "Create a comprehensive succession plan that protects your legacy and maximizes business value.",
     categoryId: "succession-legacy",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     difficultyLevel: "advanced",
     estimatedDurationMinutes: 240,
     minSubscriptionTierId: "legacy-builder",
@@ -182,7 +182,7 @@ const courses = [
     description: "Develop leadership skills that empower your team and create lasting organizational culture. Transform from operator to true leader.",
     shortDescription: "Develop leadership skills that empower your team and create lasting organizational culture.",
     categoryId: "workforce-leadership",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     difficultyLevel: "intermediate",
     estimatedDurationMinutes: 360,
     minSubscriptionTierId: "legacy-builder",
@@ -204,7 +204,7 @@ const courses = [
     description: "Build systems and processes that run without you—the key to true business freedom. Document, optimize, and scale your operations.",
     shortDescription: "Build systems and processes that run without you—the key to true business freedom.",
     categoryId: "operations",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     difficultyLevel: "beginner",
     estimatedDurationMinutes: 300,
     minSubscriptionTierId: "legacy-builder",
@@ -226,7 +226,7 @@ const courses = [
     description: "Proven strategies to increase revenue, improve margins, and scale your business sustainably without burning out.",
     shortDescription: "Proven strategies to increase revenue, improve margins, and scale your business sustainably.",
     categoryId: "revenue-growth",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     difficultyLevel: "intermediate",
     estimatedDurationMinutes: 360,
     minSubscriptionTierId: "legacy-builder",
@@ -252,7 +252,7 @@ const workshops = [
     shortDescription: "Break down your annual goals into quarterly rocks and weekly priorities.",
     workshopType: "live",
     categoryId: "goals-vision",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     scheduledStart: Timestamp.fromDate(new Date("2025-01-15T14:00:00-05:00")),
     scheduledEnd: Timestamp.fromDate(new Date("2025-01-15T16:00:00-05:00")),
     timezone: "America/New_York",
@@ -269,7 +269,7 @@ const workshops = [
     shortDescription: "Prepare your business for sale and maximize valuation.",
     workshopType: "live",
     categoryId: "succession-legacy",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     scheduledStart: Timestamp.fromDate(new Date("2025-01-22T13:00:00-05:00")),
     scheduledEnd: Timestamp.fromDate(new Date("2025-01-22T15:30:00-05:00")),
     timezone: "America/New_York",
@@ -286,7 +286,7 @@ const workshops = [
     shortDescription: "Implement proven accountability structures for your team.",
     workshopType: "live",
     categoryId: "workforce-leadership",
-    instructorName: "Icy Williams",
+    instructorName: "Manpreet Hundal",
     scheduledStart: Timestamp.fromDate(new Date("2025-01-29T15:00:00-05:00")),
     scheduledEnd: Timestamp.fromDate(new Date("2025-01-29T17:00:00-05:00")),
     timezone: "America/New_York",

@@ -20,7 +20,7 @@ import {
 export const metadata: Metadata = {
   title: "Core Team",
   description:
-    "Meet the Legacy 83 team - veteran experts with complementary expertise in business consulting, finance, international business, and technology.",
+    "Meet the AICenter4U team - veteran experts with complementary expertise in business consulting, finance, international business, and technology.",
 };
 
 const expertiseAreas = [
@@ -79,7 +79,7 @@ const values = [
     icon: Target,
     title: "Dedication to Your Success",
     description:
-      "We don't just consult—we partner with you. Our team is deeply invested in your success, and we take pride in seeing your business thrive. With Legacy 83, you gain trusted advisors committed to driving your business forward.",
+      "We don't just consult—we partner with you. Our team is deeply invested in your success, and we take pride in seeing your business thrive. With AICenter4U, you gain trusted advisors committed to driving your business forward.",
   },
 ];
 

@@ -367,7 +367,7 @@ export default function SuccessStoriesAdminPage() {
               <Label htmlFor="solution">The Solution (for featured stories)</Label>
               <Textarea
                 id="solution"
-                placeholder="How did Legacy 83 help? (Optional for non-featured stories)"
+                placeholder="How did AICenter4U help? (Optional for non-featured stories)"
                 value={formData.solution}
                 onChange={(e) => updateField("solution", e.target.value)}
                 rows={4}

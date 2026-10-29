@@ -1,5 +1,5 @@
 /**
- * Database Type Definitions for Legacy83 Platform
+ * Database Type Definitions for AICenter4U Platform
  * 
  * This file contains TypeScript types for the Supabase database schema.
  * These types provide type safety when querying the database.
@@ -14,7 +14,7 @@ export type Json =
   | Json[]
 
 export interface Database {
-  legacy83: {
+  aicenter4u: {
     Tables: {
       users: {
         Row: {

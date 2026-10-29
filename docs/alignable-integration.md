@@ -2,7 +2,7 @@
 
 ## Overview
 
-Alignable integration allows Legacy 83 Business to connect with the Alignable business networking platform, enabling:
+Alignable integration allows AICenter4U to connect with the Alignable business networking platform, enabling:
 
 - **Business Profile Sync** - Manage your Alignable presence
 - **Content Exchange** - Post updates and engage with your network
@@ -201,7 +201,7 @@ POST /api/alignable
 ```json
 {
   "id": "business_id",
-  "business_name": "Legacy 83 Business",
+  "business_name": "AICenter4U",
   "connection_count": 150,
   "recommendation_count": 24
 }

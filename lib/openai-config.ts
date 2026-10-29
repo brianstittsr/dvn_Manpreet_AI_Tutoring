@@ -1,7 +1,41 @@
 import OpenAI from "openai";
+import type { PlatformSettingsDoc } from "@/lib/schema";
+
+type StoredLLMConfig = NonNullable<PlatformSettingsDoc["llmConfig"]> & {
+  apiKeyStoredSeparately?: boolean;
+  migratedFromPlatformSettings?: boolean;
+};
+
+interface LinkedInIntegrationConfig {
+  apiKey?: string;
+  clientId?: string;
+  clientSecret?: string;
+  organizationId?: string;
+}
+
+type SettingsDoc = PlatformSettingsDoc & {
+  integrations?:
+    | (NonNullable<PlatformSettingsDoc["integrations"]> & {
+        linkedin?: LinkedInIntegrationConfig;
+      })
+    | undefined;
+};
+
+interface SecretSettingsDoc {
+  llmConfig?: StoredLLMConfig;
+}
+
+async function getIntegrationSecrets(provider: string): Promise<Record<string, string>> {
+  try {
+    const { getIntegrationSecrets: load } = await import("@/lib/integration-secrets");
+    return await load(provider);
+  } catch {
+    return {};
+  }
+}
 
 // Cache settings to avoid repeated Firebase reads
-let cachedSettings: any = null;
+let cachedSettings: SettingsDoc | null = null;
 let cacheTimestamp: number = 0;
 const CACHE_DURATION = 60000; // 1 minute cache
 
@@ -10,11 +44,32 @@ const CACHE_DURATION = 60000; // 1 minute cache
  * Uses dynamic import to avoid issues with Firebase in API routes
  * Falls back to Firebase Admin SDK for server-side access
  */
-async function getSettings(): Promise<any | null> {
+async function getSettings(): Promise<SettingsDoc | null> {
   // Check cache first
   if (cachedSettings && Date.now() - cacheTimestamp < CACHE_DURATION) {
     console.log("[openai-config] Using cached settings");
     return cachedSettings;
+  }
+
+  // On the server, go straight to the Admin SDK. The client SDK would issue an
+  // unauthenticated request that Firestore rules now correctly deny.
+  if (typeof window === "undefined") {
+    try {
+      const { adminDb } = await import("@/lib/firebase-admin");
+      const { COLLECTIONS } = await import("@/lib/schema");
+
+      if (adminDb) {
+        const docSnap = await adminDb.collection(COLLECTIONS.PLATFORM_SETTINGS).doc("global").get();
+        if (docSnap.exists) {
+          cachedSettings = docSnap.data() as SettingsDoc;
+          cacheTimestamp = Date.now();
+          return cachedSettings;
+        }
+      }
+    } catch (adminError) {
+      console.error("[openai-config] Error fetching settings via Admin SDK:", adminError);
+    }
+    return null;
   }
 
   // Try Firebase Client SDK first
@@ -32,7 +87,7 @@ async function getSettings(): Promise<any | null> {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        cachedSettings = docSnap.data();
+        cachedSettings = docSnap.data() as SettingsDoc;
         cacheTimestamp = Date.now();
         console.log("[openai-config] Settings fetched successfully via client SDK, has llmConfig:", !!cachedSettings?.llmConfig);
         return cachedSettings;
@@ -61,7 +116,7 @@ async function getSettings(): Promise<any | null> {
       const docSnap = await docRef.get();
 
       if (docSnap.exists) {
-        cachedSettings = docSnap.data();
+        cachedSettings = docSnap.data() as SettingsDoc;
         cacheTimestamp = Date.now();
         console.log("[openai-config] Settings fetched successfully via Admin SDK, has llmConfig:", !!cachedSettings?.llmConfig);
         return cachedSettings;
@@ -79,6 +134,44 @@ async function getSettings(): Promise<any | null> {
   return null;
 }
 
+async function getServerLLMSettings(): Promise<SecretSettingsDoc | null> {
+  try {
+    const { adminDb } = await import("@/lib/firebase-admin");
+    if (!adminDb) return null;
+
+    const secretSnap = await adminDb.collection("platformSecrets").doc("global").get();
+    if (secretSnap.exists) {
+      return (secretSnap.data() || null) as SecretSettingsDoc | null;
+    }
+
+    const settingsSnap = await adminDb.collection("platformSettings").doc("global").get();
+    if (!settingsSnap.exists) return null;
+    const settings = settingsSnap.data() as PlatformSettingsDoc;
+    const legacyConfig = settings.llmConfig;
+    if (!legacyConfig?.apiKey) return { llmConfig: legacyConfig };
+
+    const secretConfig: StoredLLMConfig = { ...legacyConfig, migratedFromPlatformSettings: true };
+    await adminDb.collection("platformSecrets").doc("global").set(
+      { llmConfig: secretConfig, updatedAt: new Date() },
+      { merge: true }
+    );
+    await adminDb.collection("platformSettings").doc("global").set(
+      {
+        llmConfig: {
+          ...legacyConfig,
+          apiKey: "",
+          apiKeyStoredSeparately: true,
+        },
+      },
+      { merge: true }
+    );
+    return { llmConfig: secretConfig };
+  } catch (error) {
+    console.error("[openai-config] Error fetching server-side LLM settings:", error);
+    return null;
+  }
+}
+
 /**
  * Get LLM configuration from Firebase settings (Settings > LLM Configuration, primary) or
  * environment variables (fallback). Returns full configuration including provider, API key,
@@ -90,18 +183,12 @@ export async function getLLMConfig(): Promise<{
   baseUrl?: string;
   model?: string;
 } | null> {
-  console.log("[getLLMConfig] Checking Firebase settings...");
+  console.log("[getLLMConfig] Checking server-side Firebase settings...");
 
-  // Primary: Firebase settings (Settings > LLM Configuration), since this is what
-  // admins explicitly configure via the UI and expect to take effect immediately.
   try {
-    const settings = await getSettings();
-    console.log("[getLLMConfig] Settings fetched:", !!settings);
-    console.log("[getLLMConfig] llmConfig exists:", !!settings?.llmConfig);
-
+    const settings = await getServerLLMSettings();
     const llmConfig = settings?.llmConfig;
     if (llmConfig?.apiKey && llmConfig.apiKey.trim().length > 0) {
-      console.log("[getLLMConfig] Using Firebase settings");
       return {
         provider: llmConfig.provider || "openai",
         apiKey: llmConfig.apiKey,
@@ -109,7 +196,6 @@ export async function getLLMConfig(): Promise<{
         model: llmConfig.model || "gpt-4o",
       };
     }
-    console.log("[getLLMConfig] Firebase key is empty or not set");
   } catch (error) {
     console.error("[getLLMConfig] Error fetching from Firebase:", error);
   }
@@ -151,12 +237,13 @@ export async function getOpenAIApiKey(): Promise<string | null> {
  * Get Apollo API key from Firebase settings
  */
 export async function getApolloApiKey(): Promise<{ apiKey: string; accountId?: string } | null> {
-  const settings = await getSettings();
-  
-  if (settings?.integrations?.apollo?.apiKey) {
+  const [settings, secrets] = await Promise.all([getSettings(), getIntegrationSecrets("apollo")]);
+
+  const apiKey = secrets.apiKey || settings?.integrations?.apollo?.apiKey;
+  if (apiKey) {
     return {
-      apiKey: settings.integrations.apollo.apiKey,
-      accountId: settings.integrations.apollo.accountId,
+      apiKey,
+      accountId: settings?.integrations?.apollo?.accountId,
     };
   }
 
@@ -172,70 +259,17 @@ export async function getApolloApiKey(): Promise<{ apiKey: string; accountId?: s
 }
 
 /**
- * Get GoHighLevel API key from Firebase settings
- */
-export async function getGoHighLevelApiKey(): Promise<{ apiKey: string; locationId?: string; agencyId?: string } | null> {
-  const settings = await getSettings();
-  
-  if (settings?.integrations?.gohighlevel?.apiKey) {
-    return {
-      apiKey: settings.integrations.gohighlevel.apiKey,
-      locationId: settings.integrations.gohighlevel.locationId,
-      agencyId: settings.integrations.gohighlevel.agencyId,
-    };
-  }
-
-  // Fallback: Environment variable
-  if (process.env.GOHIGHLEVEL_API_KEY) {
-    return {
-      apiKey: process.env.GOHIGHLEVEL_API_KEY,
-      locationId: process.env.GOHIGHLEVEL_LOCATION_ID,
-      agencyId: process.env.GOHIGHLEVEL_AGENCY_ID,
-    };
-  }
-
-  return null;
-}
-
-/**
- * Get Mattermost config from Firebase settings
- */
-export async function getMattermostConfig(): Promise<{ apiKey: string; webhookUrl?: string; serverUrl?: string; teamId?: string } | null> {
-  const settings = await getSettings();
-  
-  if (settings?.integrations?.mattermost?.apiKey) {
-    return {
-      apiKey: settings.integrations.mattermost.apiKey,
-      webhookUrl: settings.integrations.mattermost.webhookUrl,
-      serverUrl: settings.integrations.mattermost.serverUrl,
-      teamId: settings.integrations.mattermost.teamId,
-    };
-  }
-
-  // Fallback: Environment variables
-  if (process.env.MATTERMOST_TOKEN) {
-    return {
-      apiKey: process.env.MATTERMOST_TOKEN,
-      webhookUrl: process.env.MATTERMOST_WEBHOOK_URL,
-      serverUrl: process.env.MATTERMOST_SERVER_URL,
-      teamId: process.env.MATTERMOST_TEAM_ID,
-    };
-  }
-
-  return null;
-}
-
-/**
  * Get Zoom config from Firebase settings
  */
 export async function getZoomConfig(): Promise<{ apiKey: string; apiSecret?: string; accountId?: string } | null> {
-  const settings = await getSettings();
-  
-  if (settings?.integrations?.zoom?.apiKey) {
+  const [settings, secrets] = await Promise.all([getSettings(), getIntegrationSecrets("zoom")]);
+
+  const apiKey = secrets.apiKey || settings?.integrations?.zoom?.apiKey;
+  if (apiKey) {
     return {
-      apiKey: settings.integrations.zoom.apiKey,
-      apiSecret: settings.integrations.zoom.apiSecret,
-      accountId: settings.integrations.zoom.accountId,
+      apiKey,
+      apiSecret: secrets.apiSecret || settings?.integrations?.zoom?.apiSecret,
+      accountId: settings?.integrations?.zoom?.accountId,
     };
   }
 
@@ -255,12 +289,13 @@ export async function getZoomConfig(): Promise<{ apiKey: string; apiSecret?: str
  * Get DocuSeal config from Firebase settings
  */
 export async function getDocuSealConfig(): Promise<{ apiKey: string; webhookSecret?: string } | null> {
-  const settings = await getSettings();
-  
-  if (settings?.integrations?.docuseal?.apiKey) {
+  const [settings, secrets] = await Promise.all([getSettings(), getIntegrationSecrets("docuseal")]);
+
+  const apiKey = secrets.apiKey || settings?.integrations?.docuseal?.apiKey;
+  if (apiKey) {
     return {
-      apiKey: settings.integrations.docuseal.apiKey,
-      webhookSecret: settings.integrations.docuseal.webhookSecret,
+      apiKey,
+      webhookSecret: secrets.webhookSecret || settings?.integrations?.docuseal?.webhookSecret,
     };
   }
 
@@ -279,14 +314,15 @@ export async function getDocuSealConfig(): Promise<{ apiKey: string; webhookSecr
  * Get LinkedIn config from Firebase settings
  */
 export async function getLinkedInConfig(): Promise<{ accessToken: string; clientId?: string; clientSecret?: string; organizationId?: string } | null> {
-  const settings = await getSettings();
-  
-  if (settings?.integrations?.linkedin?.apiKey) {
+  const [settings, secrets] = await Promise.all([getSettings(), getIntegrationSecrets("linkedin")]);
+
+  const accessToken = secrets.apiKey || settings?.integrations?.linkedin?.apiKey;
+  if (accessToken) {
     return {
-      accessToken: settings.integrations.linkedin.apiKey,
-      clientId: settings.integrations.linkedin.clientId,
-      clientSecret: settings.integrations.linkedin.clientSecret,
-      organizationId: settings.integrations.linkedin.organizationId,
+      accessToken,
+      clientId: settings?.integrations?.linkedin?.clientId,
+      clientSecret: secrets.clientSecret || settings?.integrations?.linkedin?.clientSecret,
+      organizationId: settings?.integrations?.linkedin?.organizationId,
     };
   }
 
@@ -317,7 +353,11 @@ export async function createOpenAIClient(): Promise<OpenAI | null> {
 
     console.log("[createOpenAIClient] Creating client with provider:", config.provider, "baseUrl:", config.baseUrl);
 
-    const clientConfig: any = { apiKey: config.apiKey };
+    const clientConfig: {
+      apiKey: string;
+      baseURL?: string;
+      defaultHeaders?: Record<string, string>;
+    } = { apiKey: config.apiKey };
     
     // Add base URL for OpenAI-compatible endpoints
     if (config.baseUrl && config.provider !== "openai") {

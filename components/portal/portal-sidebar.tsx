@@ -95,8 +95,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Icy Focused — Platform Management
-const icyPlatformManagementItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
+// Admin Focused — Platform Management
+const adminPlatformManagementItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
   { title: "Bug Tracker", href: "/portal/bug-tracker", icon: Bug, featureKey: "bugTracker" },
   { title: "Command Center", href: "/portal/command-center", icon: Rocket, featureKey: "commandCenter" },
   { title: "Academy Admin", href: "/portal/admin/academy", icon: GraduationCap, featureKey: "academyAdmin" },
@@ -104,27 +104,23 @@ const icyPlatformManagementItems: { title: string; href: string; icon: React.Ele
   { title: "Hero Carousel", href: "/portal/admin/hero", icon: Presentation, featureKey: "heroManagement" },
 ];
 
-// Icy Focused — Deal Management
-const icyDealManagementItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
+// Admin Focused — Deal Management
+const adminDealManagementItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
   { title: "Proposal Creator", href: "/portal/proposals", icon: FileText, badge: "AI", featureKey: "proposals" },
-  { title: "Opportunities", href: "/portal/opportunities", icon: Target, featureKey: "opportunities" },
   { title: "Team Members", href: "/portal/admin/team-members", icon: UserCog, featureKey: "teamMembers" },
-  { title: "Customers / GHL Contacts", href: "/portal/customers", icon: Building, featureKey: "customers" },
+  { title: "Customers", href: "/portal/customers", icon: Building, featureKey: "customers" },
 ];
 
-// Icy Focused — Project Management
-const icyProjectManagementItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
-  { title: "Supplier Search", href: "/portal/supplier-search", icon: Factory, badge: "AI", featureKey: "supplierSearch" },
+// Admin Focused — Project Management
+const adminProjectManagementItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
   { title: "Projects", href: "/portal/projects", icon: FolderKanban, featureKey: "projects" },
   { title: "Calendar", href: "/portal/calendar", icon: Calendar, featureKey: "calendar" },
   { title: "Meetings", href: "/portal/meetings", icon: Users, featureKey: "meetings" },
   { title: "Availability", href: "/portal/availability", icon: CalendarDays, featureKey: "availability" },
 ];
 
-// Icy Focused — Marketing
-const icyMarketingItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
-  { title: "Alignable", href: "/portal/admin/alignable", icon: Network, featureKey: "alignable" },
-  { title: "Deal Tracking", href: "/portal/deals", icon: DollarSign, featureKey: "deals" },
+// Admin Focused — Marketing
+const adminMarketingItems: { title: string; href: string; icon: React.ElementType; badge?: string; featureKey: FeatureKey }[] = [
   { title: "LinkedIn Posting", href: "/portal/linkedin-content", icon: Linkedin, featureKey: "linkedinContent" },
 ];
 
@@ -149,7 +145,6 @@ export function PortalSidebar() {
   const { getDisplayName, getInitials, profile, linkedTeamMember } = useUserProfile();
   const { canSeeFeature, canSeeSection, isPreviewMode } = useFeatureVisibility();
   const [bookCallLeadsCount, setBookCallLeadsCount] = useState(0);
-  const [opportunitiesCount, setOpportunitiesCount] = useState(0);
   const [projectsCount, setProjectsCount] = useState(0);
   const currentUserRole = linkedTeamMember?.role || "affiliate";
   const showSuperAdminLink = isSuperAdmin(currentUserRole);
@@ -205,22 +200,6 @@ export function PortalSidebar() {
     return () => unsubscribe();
   }, []);
 
-  // Subscribe to Opportunities count (active opportunities)
-  useEffect(() => {
-    if (!db) return;
-    
-    const q = query(
-      collection(db, COLLECTIONS.OPPORTUNITIES),
-      where("status", "in", ["new", "contacted", "qualified", "proposal", "negotiation"])
-    );
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setOpportunitiesCount(snapshot.size);
-    });
-    
-    return () => unsubscribe();
-  }, []);
-
   // Subscribe to Projects count (active projects)
   useEffect(() => {
     if (!db) return;
@@ -239,7 +218,7 @@ export function PortalSidebar() {
   
   // Collapsible state for each section
   const [openSections, setOpenSections] = useState({
-    icyFocused: true,
+    adminFocused: true,
     systemManagement: true,
     people: false,
     productivity: false,
@@ -253,7 +232,6 @@ export function PortalSidebar() {
 
   // Get dynamic count for specific items
   const getDynamicCount = (href: string): number | null => {
-    if (href === "/portal/opportunities") return opportunitiesCount > 0 ? opportunitiesCount : null;
     if (href === "/portal/projects") return projectsCount > 0 ? projectsCount : null;
     return null;
   };
@@ -322,13 +300,9 @@ export function PortalSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border">
         <Link href="/portal" className="flex items-center gap-2 px-2 py-4">
-          <NextImage
-            src="/legacy83Logo.webp"
-            alt="Legacy 83 Business Inc"
-            width={160}
-            height={53}
-            className="h-10 w-auto"
-          />
+          <span className="text-xl font-bold tracking-tight">
+            AICenter<span className="text-amber-500">4U</span>
+          </span>
         </Link>
       </SidebarHeader>
 
@@ -342,17 +316,17 @@ export function PortalSidebar() {
           </div>
         )}
 
-        {/* Icy Focused */}
-        {canSeeSection("icyFocused") && (
-          <Collapsible open={openSections.icyFocused} onOpenChange={() => toggleSection("icyFocused")}>
+        {/* Manpreet Focused */}
+        {canSeeSection("adminFocused") && (
+          <Collapsible open={openSections.adminFocused} onOpenChange={() => toggleSection("adminFocused")}>
             <SidebarGroup>
               <CollapsibleTrigger asChild>
                 <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md flex items-center justify-between pr-2">
                   <span className="flex items-center gap-1.5">
                     <Snowflake className="h-3.5 w-3.5 text-cyan-500" />
-                    Icy Focused
+                    Admin Focused
                   </span>
-                  {openSections.icyFocused ? (
+                  {openSections.adminFocused ? (
                     <ChevronDown className="h-4 w-4 text-sidebar-foreground/60" />
                   ) : (
                     <ChevronRight className="h-4 w-4 text-sidebar-foreground/60" />
@@ -362,43 +336,43 @@ export function PortalSidebar() {
               <CollapsibleContent>
                 <SidebarGroupContent>
                   {/* Platform Management */}
-                  {icyPlatformManagementItems.filter(item => canSeeFeature(item.featureKey)).length > 0 && (
+                  {adminPlatformManagementItems.filter(item => canSeeFeature(item.featureKey)).length > 0 && (
                     <div className="mb-1">
                       <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40 flex items-center gap-1">
                         <Wrench className="h-3 w-3" />
                         Platform Management
                       </p>
-                      {renderMenuItems(icyPlatformManagementItems.filter(item => canSeeFeature(item.featureKey)))}
+                      {renderMenuItems(adminPlatformManagementItems.filter(item => canSeeFeature(item.featureKey)))}
                     </div>
                   )}
                   {/* Deal Management */}
-                  {icyDealManagementItems.filter(item => canSeeFeature(item.featureKey)).length > 0 && (
+                  {adminDealManagementItems.filter(item => canSeeFeature(item.featureKey)).length > 0 && (
                     <div className="mb-1">
                       <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40 flex items-center gap-1">
                         <BarChart3 className="h-3 w-3" />
                         Deal Management
                       </p>
-                      {renderMenuItems(icyDealManagementItems.filter(item => canSeeFeature(item.featureKey)))}
+                      {renderMenuItems(adminDealManagementItems.filter(item => canSeeFeature(item.featureKey)))}
                     </div>
                   )}
                   {/* Project Management */}
-                  {icyProjectManagementItems.filter(item => canSeeFeature(item.featureKey)).length > 0 && (
+                  {adminProjectManagementItems.filter(item => canSeeFeature(item.featureKey)).length > 0 && (
                     <div className="mb-1">
                       <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40 flex items-center gap-1">
                         <FolderKanban className="h-3 w-3" />
                         Project Management
                       </p>
-                      {renderMenuItems(icyProjectManagementItems.filter(item => canSeeFeature(item.featureKey)))}
+                      {renderMenuItems(adminProjectManagementItems.filter(item => canSeeFeature(item.featureKey)))}
                     </div>
                   )}
                   {/* Marketing */}
-                  {icyMarketingItems.filter(item => canSeeFeature(item.featureKey)).length > 0 && (
+                  {adminMarketingItems.filter(item => canSeeFeature(item.featureKey)).length > 0 && (
                     <div className="mb-1">
                       <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40 flex items-center gap-1">
                         <Megaphone className="h-3 w-3" />
                         Marketing
                       </p>
-                      {renderMenuItems(icyMarketingItems.filter(item => canSeeFeature(item.featureKey)))}
+                      {renderMenuItems(adminMarketingItems.filter(item => canSeeFeature(item.featureKey)))}
                     </div>
                   )}
                 </SidebarGroupContent>

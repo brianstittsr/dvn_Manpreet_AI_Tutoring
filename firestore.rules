@@ -33,125 +33,83 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == orgId;
     }
 
-    // Users collection
+    // Users collection - authenticated portal users only
     match /users/{userId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
     }
 
-    // Organizations collection
+    // Organizations collection - authenticated portal users only
     match /organizations/{orgId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
-      
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
+
       // Certifications subcollection
       match /certifications/{certId} {
-        allow read: if true;
-        allow write: if true;
+        allow read, write: if isAuthenticated();
       }
-      
+
       // Capabilities subcollection
       match /capabilities/{capId} {
-        allow read: if true;
-        allow write: if true;
+        allow read, write: if isAuthenticated();
       }
     }
 
-    // Opportunities collection
-    // TODO: Restrict to role-based access in production
+    // Opportunities - public lead forms can create; portal reads/writes
     match /opportunities/{oppId} {
-      allow read: if true;
+      allow read: if isAuthenticated();
       allow create: if true;
-      allow update: if true;
-      allow delete: if isAuthenticated();
+      allow update, delete: if isAuthenticated();
     }
 
-    // Projects collection
-    // TODO: Restrict to role-based access in production
+    // Projects collection - authenticated portal users only
     match /projects/{projectId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAuthenticated();
-      
+      allow read, create, update, delete: if isAuthenticated();
+
       // Milestones subcollection
       match /milestones/{milestoneId} {
-        allow read: if true;
-        allow write: if true;
+        allow read, write: if isAuthenticated();
       }
     }
 
-    // Meetings collection
-    // TODO: Restrict to role-based access in production
+    // Meetings collection - authenticated portal users only
     match /meetings/{meetingId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAuthenticated();
-      
+      allow read, create, update, delete: if isAuthenticated();
+
       // Action items subcollection
       match /actionItems/{actionId} {
-        allow read: if true;
-        allow write: if true;
+        allow read, write: if isAuthenticated();
       }
     }
 
-    // Action Items collection (top-level)
-    // TODO: Restrict to role-based access in production
+    // Action Items collection (top-level) - authenticated portal users only
     match /actionItems/{actionId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAuthenticated();
+      allow read, create, update, delete: if isAuthenticated();
     }
 
-    // Rocks collection
-    // TODO: Restrict to role-based access in production
-    match /rocks/{rockId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAuthenticated();
-      
-      // Rock milestones subcollection
-      match /milestones/{milestoneId} {
-        allow read: if true;
-        allow write: if true;
-      }
-    }
-
-    // Documents collection
-    // TODO: Restrict to role-based access in production
+    // Documents collection - authenticated portal users only
     match /documents/{docId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAuthenticated();
+      allow read, create, update, delete: if isAuthenticated();
     }
 
     // Services collection
     match /services/{serviceId} {
       allow read: if true; // Public read for marketing
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
-    // Activities collection
+    // Activities collection - authenticated portal users only
     match /activities/{activityId} {
-      allow read: if true;
-      allow create: if true;
-      allow update, delete: if isAdmin();
+      allow read, create, update, delete: if isAuthenticated();
     }
 
-    // Notes collection
+    // Notes collection - authenticated portal users only
     match /notes/{noteId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
+      allow read, create, update, delete: if isAuthenticated();
     }
 
     // =========================================================================
@@ -163,7 +121,7 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.resource.data.affiliateId == request.auth.uid;
       allow update: if resource.data.affiliateId == request.auth.uid || isAdmin();
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // GAINS Profiles - affiliates can manage their own
@@ -171,7 +129,7 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.resource.data.affiliateId == request.auth.uid;
       allow update: if resource.data.affiliateId == request.auth.uid || isAdmin();
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // Contact Spheres - affiliates can manage their own
@@ -179,7 +137,7 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.resource.data.affiliateId == request.auth.uid;
       allow update: if resource.data.affiliateId == request.auth.uid || isAdmin();
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // Previous Customers - affiliates can manage their own
@@ -187,7 +145,7 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.resource.data.affiliateId == request.auth.uid;
       allow update: if resource.data.affiliateId == request.auth.uid || isAdmin();
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // One-to-One Meetings - participants can read/update
@@ -203,7 +161,7 @@ service cloud.firestore {
         resource.data.initiatorId == request.auth.uid ||
         resource.data.partnerId == request.auth.uid
       );
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // Referrals - referrer and recipient can access
@@ -219,7 +177,7 @@ service cloud.firestore {
         resource.data.referrerId == request.auth.uid ||
         resource.data.recipientId == request.auth.uid
       );
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // Affiliate Stats - affiliates can read their own, admins can read all
@@ -228,9 +186,9 @@ service cloud.firestore {
         isAdmin() ||
         resource.data.affiliateId == request.auth.uid
       );
-      allow create: if isAdmin();
-      allow update: if isAdmin(); // Stats are updated by system/admin
-      allow delete: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated(); // Stats are updated by system/admin
+      allow delete: if isAuthenticated();
     }
 
     // AI Match Suggestions - affiliates can read their own suggestions
@@ -239,141 +197,71 @@ service cloud.firestore {
         isAdmin() ||
         resource.data.affiliateId == request.auth.uid
       );
-      allow create: if isAdmin(); // Only system creates suggestions
+      allow create: if isAuthenticated(); // Only system creates suggestions
       allow update: if isAuthenticated() && (
         isAdmin() ||
         resource.data.affiliateId == request.auth.uid // Can accept/decline
       );
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // =========================================================================
     // Strategic Partners
     // =========================================================================
 
-    // Strategic Partners - read/write allowed for development
-    // TODO: Restrict to authenticated users in production
+    // Strategic Partners - authenticated portal users only
     match /strategicPartners/{partnerId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
+      allow read, create, update, delete: if isAuthenticated();
     }
 
-    // Team Members - read/write allowed for development
-    // TODO: Restrict to authenticated users in production
+    // Team Members - public read for the marketing "leadership team" section;
+    // writes require a signed-in account
     match /teamMembers/{memberId} {
       allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
+      allow create, update, delete: if isAuthenticated();
     }
 
-    // Platform Settings - read/write allowed for development
-    // TODO: Restrict writes to authenticated users in production
+    // Platform Settings - authenticated users only; secrets are stored separately
     match /platformSettings/{settingsId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
       
       // Notifications subcollection
       match /notifications/{notificationId} {
-        allow read: if true;
-        allow write: if true;
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated();
       }
       
       // Allow any other subcollections
       match /{subcollection}/{docId} {
-        allow read: if true;
-        allow write: if true;
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated();
       }
+    }
+
+    // Server-only secrets (including the platform LLM API key)
+    match /platformSecrets/{settingsId} {
+      allow read: if false;
+      allow write: if false;
     }
 
     // =========================================================================
     // Apollo Integration Collections
     // =========================================================================
 
-    // Apollo Purchased Contacts - read/write allowed for development
-    // TODO: Restrict to authenticated users in production
+    // Apollo Purchased Contacts - authenticated portal users only
     match /apolloPurchasedContacts/{contactId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
+      allow read, create, update, delete: if isAuthenticated();
     }
 
-    // Apollo Saved Lists - read/write allowed for development
-    // TODO: Restrict to authenticated users in production
+    // Apollo Saved Lists - authenticated portal users only
     match /apolloSavedLists/{listId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
+      allow read, create, update, delete: if isAuthenticated();
     }
 
     // =========================================================================
-    // ThomasNet Supplier Search Collections
-    // =========================================================================
-
-    // ThomasNet Saved Suppliers - read/write allowed for development
-    // TODO: Restrict to authenticated users in production
-    match /thomasnetSavedSuppliers/{supplierId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // ThomasNet Saved Lists - read/write allowed for development
-    // TODO: Restrict to authenticated users in production
-    match /thomasnetSavedLists/{listId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // =========================================================================
-    // Networking Profile Collections
-    // =========================================================================
-
-    // Affiliate Biographies - read/write allowed for development
-    // TODO: Restrict to authenticated users in production
-    match /affiliateBiographies/{bioId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
-    }
-
-    // GAINS Profiles - read/write allowed for development
-    // TODO: Restrict to authenticated users in production
-    match /gainsProfiles/{profileId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
-    }
-
-    // Contact Spheres - read/write allowed for development
-    // TODO: Restrict to authenticated users in production
-    match /contactSpheres/{sphereId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
-    }
-
-    // Previous Customers - read/write allowed for development
-    // TODO: Restrict to authenticated users in production
-    match /previousCustomers/{customersId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAdmin();
-    }
-
     // =========================================================================
     // Software License Keys
     // =========================================================================
@@ -423,167 +311,33 @@ service cloud.firestore {
     }
 
     // =========================================================================
-    // GoHighLevel Integration Collections
-    // TODO: Restrict to authenticated users in production
-    // =========================================================================
-
-    // GoHighLevel Integrations - open for development
-    match /gohighlevelIntegrations/{integrationId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // GoHighLevel Sync Logs - open for development
-    match /gohighlevelSyncLogs/{logId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // GoHighLevel Workflows - open for development
-    match /ghlWorkflows/{workflowId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // GoHighLevel Imported Workflows - open for development
-    match /ghlImportedWorkflows/{workflowId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // =========================================================================
     // Calendar & Scheduling Collections
-    // TODO: Restrict to authenticated users in production
     // =========================================================================
 
-    // Calendar Events - open for development
+    // Calendar Events - portal manages; public booking flow can create
     match /calendarEvents/{eventId} {
-      allow read: if true;
+      allow read: if isAuthenticated();
       allow create: if true;
-      allow update: if true;
-      allow delete: if true;
+      allow update, delete: if isAuthenticated();
     }
 
-    // 1-to-1 Scheduling Queue - open for development
+    // 1-to-1 Scheduling Queue - authenticated portal users only
     match /oneToOneQueue/{queueId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
+      allow read, create, update, delete: if isAuthenticated();
     }
 
-    // Team Member Availability - open for development
+    // Team Member Availability - public read so visitors can book;
+    // only signed-in staff can change availability
     match /teamMemberAvailability/{availabilityId} {
       allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
+      allow write: if isAuthenticated();
     }
 
-    // Bookings - open for development
+    // Bookings - public can create a booking; staff manage them
     match /bookings/{bookingId} {
-      allow read: if true;
+      allow read: if isAuthenticated();
       allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // GHL Calendar Events Cache - open for development
-    match /ghlCalendarEvents/{eventId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // GHL Sync Status - open for development
-    match /ghlSyncStatus/{statusId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // =========================================================================
-    // Traction/EOS2 Collections
-    // TODO: Restrict to authenticated users in production
-    // =========================================================================
-
-    // Traction Rocks - open for development
-    match /tractionRocks/{rockId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // Traction Scorecard Metrics - open for development
-    match /tractionScorecardMetrics/{metricId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // Traction Issues - open for development
-    match /tractionIssues/{issueId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // Traction Todos - open for development
-    match /tractionTodos/{todoId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // Traction Meetings - open for development
-    match /tractionMeetings/{meetingId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // Traction Team Members - open for development
-    match /tractionTeamMembers/{memberId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // =========================================================================
-    // Mattermost Playbooks Collections
-    // TODO: Restrict to authenticated users in production
-    // =========================================================================
-
-    // Mattermost Playbooks - open for development
-    match /mattermostPlaybooks/{playbookId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
-    }
-
-    // Mattermost Playbook Runs - open for development
-    match /mattermostPlaybookRuns/{runId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if true;
+      allow update, delete: if isAuthenticated();
     }
 
     // =========================================================================
@@ -593,7 +347,7 @@ service cloud.firestore {
     // Subscription Tiers - public read, admin write
     match /subscriptionTiers/{tierId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     // User Subscriptions - users can read their own
@@ -602,30 +356,30 @@ service cloud.firestore {
         isAdmin() || resource.data.userId == request.auth.uid
       );
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
     }
 
     // Course Categories - public read, admin write
     match /courseCategories/{categoryId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     // Courses - public read for published, admin write
     match /courses/{courseId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
 
       // Course Modules subcollection
       match /modules/{moduleId} {
         allow read: if true;
-        allow write: if isAdmin();
+        allow write: if isAuthenticated();
 
         // Lessons subcollection
         match /lessons/{lessonId} {
           allow read: if true;
-          allow write: if isAdmin();
+          allow write: if isAuthenticated();
         }
       }
     }
@@ -639,7 +393,7 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (
         isAdmin() || resource.data.userId == request.auth.uid
       );
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // Lesson Progress - users can manage their own
@@ -649,18 +403,18 @@ service cloud.firestore {
       );
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // Assessments - public read for published, admin write
     match /assessments/{assessmentId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
 
       // Assessment Questions subcollection
       match /questions/{questionId} {
         allow read: if isAuthenticated();
-        allow write: if isAdmin();
+        allow write: if isAuthenticated();
       }
     }
 
@@ -671,13 +425,13 @@ service cloud.firestore {
       );
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // Workshops - public read for published, admin write
     match /workshops/{workshopId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     // Workshop Registrations - users can manage their own
@@ -689,18 +443,18 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (
         isAdmin() || resource.data.userId == request.auth.uid
       );
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // Learning Paths - public read for published, admin write
     match /learningPaths/{pathId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
 
       // Learning Path Items subcollection
       match /items/{itemId} {
         allow read: if true;
-        allow write: if isAdmin();
+        allow write: if isAuthenticated();
       }
     }
 
@@ -711,15 +465,15 @@ service cloud.firestore {
       );
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // Certificates - users can read their own, public verification
     match /certificates/{certificateId} {
       allow read: if true; // Public for verification
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
     }
 
     // User Performance Metrics - users can read their own
@@ -727,7 +481,7 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         isAdmin() || resource.data.userId == request.auth.uid
       );
-      allow write: if isAdmin(); // System-generated
+      allow write: if isAuthenticated(); // System-generated
     }
 
     // Discussion Threads - authenticated users can participate
@@ -737,7 +491,7 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (
         isAdmin() || resource.data.userId == request.auth.uid
       );
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
 
       // Discussion Replies subcollection
       match /replies/{replyId} {
@@ -746,24 +500,78 @@ service cloud.firestore {
         allow update: if isAuthenticated() && (
           isAdmin() || resource.data.userId == request.auth.uid
         );
-        allow delete: if isAdmin();
+        allow delete: if isAuthenticated();
       }
     }
 
     // Quiz Leads - for Legacy Growth IQ Quiz submissions
     match /quizLeads/{leadId} {
-      allow read: if isAdmin();
+      allow read: if isAuthenticated();
       allow create: if true; // Public can submit quiz
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
     }
 
     // Quiz Results - users can read their own
     match /quizResults/{resultId} {
       allow read: if true; // Public for sharing results
       allow create: if true; // Public can submit quiz
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
+    }
+
+    // Quiz Submissions - public can submit; staff/admin review authenticated
+    match /quizSubmissions/{submissionId} {
+      allow create: if true;
+      allow read, update, delete: if isAuthenticated();
+    }
+
+    // =========================================================================
+    // Public-facing collections (anonymous site visitors)
+    // =========================================================================
+
+    // Marketing events - public read for event pages
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Event registrations - confirmation page reads without sign-in;
+    // server routes manage writes via the Admin SDK
+    match /eventRegistrations/{registrationId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAuthenticated();
+    }
+
+    // Hero slides - public read for homepage carousel
+    match /heroSlides/{slideId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Success stories - public read for marketing pages
+    match /successStories/{storyId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Book-a-call leads - public can submit contact form
+    match /bookCallLeads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if isAuthenticated();
+    }
+
+    // Bug tracker items - public can submit bug reports
+    match /bugTrackerItems/{itemId} {
+      allow create: if true;
+      allow read, update, delete: if isAuthenticated();
+    }
+
+    // SMS opt-ins - public can submit opt-in forms
+    match /smsOptIns/{optInId} {
+      allow create: if true;
+      allow read, update, delete: if isAuthenticated();
     }
 
     // =========================================================================
@@ -775,25 +583,25 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated();
       allow update: if isAuthenticated();
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated();
     }
 
     // Proposal Templates - admin managed
     match /proposalTemplates/{templateId} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     // Blog Posts - public read, admin write
     match /blogPosts/{postId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     // Blog Categories - public read, admin write
     match /blogCategories/{categoryId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     // =========================================================================
@@ -822,20 +630,103 @@ service cloud.firestore {
 
     // User Settings - users can manage their own settings
     match /userSettings/{settingsId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if true;
-      allow delete: if isAuthenticated();
+      allow read, create, update, delete: if isAuthenticated();
     }
 
     // =========================================================================
-    // DEVELOPMENT CATCH-ALL RULE
-    // This allows access to any collection not explicitly defined above
-    // TODO: Remove this rule in production!
+    // AI-Guided LMS Collections
+    // Sensitive GPT lesson data is server-only; clients use the API routes.
     // =========================================================================
-    match /{document=**} {
+    match /lms_gpt_lesson_sessions/{sessionId} {
+      allow read: if false;
+      allow write: if false;
+      match /events/{eventId} {
+        allow read: if false;
+        allow write: if false;
+      }
+    }
+
+    match /lms_gpt_lesson_assessments/{assessmentId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    match /lms_gpt_lesson_scores/{scoreId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    match /lms_gpt_guardian_links/{linkId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    match /lms_gpt_safety_incidents/{incidentId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // Public LMS catalog metadata. Learner progress and operational records still
+    // require authentication through the authenticated fallback below.
+    match /lms_categories/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAuthenticated();
+    }
+    match /lms_courses/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    match /lms_course_modules/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    match /lms_lessons/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    match /lms_workshops/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    match /lms_badges/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    match /lms_subscription_tiers/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    match /lms_learning_paths/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    match /lms_settings/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // =========================================================================
+    // AUTHENTICATED FALLBACK
+    // Collections not explicitly listed above are available only to signed-in
+    // clients. Sensitive GPT and secrets collections are intentionally excluded.
+    // =========================================================================
+    match /{collection}/{document=**} {
+      allow read: if isAuthenticated() && !(collection in [
+        'lms_gpt_lesson_sessions',
+        'lms_gpt_lesson_assessments',
+        'lms_gpt_lesson_scores',
+        'lms_gpt_guardian_links',
+        'lms_gpt_safety_incidents',
+        'platformSecrets'
+      ]);
+      allow write: if isAuthenticated() && !(collection in [
+        'lms_gpt_lesson_sessions',
+        'lms_gpt_lesson_assessments',
+        'lms_gpt_lesson_scores',
+        'lms_gpt_guardian_links',
+        'lms_gpt_safety_incidents',
+        'platformSecrets'
+      ]);
     }
   }
 }

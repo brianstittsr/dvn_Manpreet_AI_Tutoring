@@ -393,43 +393,33 @@ export default function ApolloSearchPage() {
     scrollToBottom();
   }, [messages]);
   
-  // Load Apollo API key from Firebase settings and check connection
+  // Check the server-stored Apollo credential and test the connection.
+  // The API key itself stays server-side; "stored" tells /api/apollo to use it.
   useEffect(() => {
     const loadApolloSettings = async () => {
       setConnectionStatus("checking");
       try {
-        if (!db) {
-          setConnectionStatus("error");
-          setConnectionError("Firebase not initialized");
-          return;
-        }
-        
-        const docRef = doc(db, COLLECTIONS.PLATFORM_SETTINGS, "global");
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          const apiKey = data?.integrations?.apollo?.apiKey;
-          
-          if (apiKey && apiKey.trim() !== "") {
-            setApolloApiKey(apiKey);
-            // Test the connection
-            await testApolloConnection(apiKey);
-          } else {
-            setConnectionStatus("no_key");
-            setConnectionError("Apollo API key not configured");
-          }
+        const response = await fetch("/api/apollo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "test_connection", apiKey: "stored" }),
+        });
+        const result = await response.json();
+
+        if (result.connected) {
+          setApolloApiKey("stored");
+          setConnectionStatus("connected");
         } else {
-          setConnectionStatus("no_key");
-          setConnectionError("Settings not found. Configure Apollo in Settings.");
+          setConnectionStatus(response.status === 400 ? "no_key" : "error");
+          setConnectionError(result.error || "Apollo API key not configured");
         }
       } catch (error) {
-        console.error("Error loading Apollo settings:", error);
+        console.error("Error checking Apollo connection:", error);
         setConnectionStatus("error");
-        setConnectionError("Failed to load settings");
+        setConnectionError("Failed to check Apollo connection");
       }
     };
-    
+
     loadApolloSettings();
   }, []);
   
@@ -717,7 +707,25 @@ export default function ApolloSearchPage() {
       
       if (data.connected && data.results) {
         // Transform Apollo results to our format
-        return data.results.map((person: any) => ({
+        interface ApolloPerson {
+          id?: string;
+          first_name?: string;
+          last_name?: string;
+          title?: string;
+          city?: string;
+          state?: string;
+          country?: string;
+          email?: string;
+          linkedin_url?: string;
+          phone_numbers?: { sanitized_number?: string }[];
+          organization?: {
+            id?: string;
+            name?: string;
+            industry?: string;
+            estimated_num_employees?: number;
+          };
+        }
+        return (data.results as ApolloPerson[]).map((person) => ({
           id: person.id || Math.random().toString(),
           name: `${person.first_name || ""} ${person.last_name || ""}`.trim(),
           firstName: person.first_name || "",
@@ -2023,7 +2031,7 @@ export default function ApolloSearchPage() {
                       <ListFilter className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                       <h3 className="text-lg font-medium">No saved lists yet</h3>
                       <p className="text-sm text-muted-foreground">
-                        Use the "Add to List" button in the Results tab to create lists
+                        Use the &quot;Add to List&quot; button in the Results tab to create lists
                       </p>
                     </div>
                   ) : (

@@ -7,44 +7,71 @@ import { Badge } from "@/components/ui/badge";
 import {
   Target,
   Eye,
+  ShieldCheck,
   Heart,
   Users,
   Sparkles,
-  TrendingUp,
   ArrowRight,
   Quote,
+  Calculator,
+  BookOpen,
+  Sprout,
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "About Icy Williams | Legacy 83 Business",
+  title: "About AICenter4U | Learn, Believe, Grow",
   description:
-    "Meet Icy Williams, founder of Legacy 83 Business. With 20+ years of experience, she helps business leaders build wealth, inspire teams, and leave lasting legacies.",
+    "AICenter4U is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
 };
 
 const values = [
   {
     icon: Heart,
-    title: "Empathy",
+    title: "Understanding First",
     description:
-      "We understand the unique challenges of entrepreneurship. Your struggles are valid, and we meet you where you are.",
+      "We never rush to the answer. Kids learn to think, try, and explain their ideas.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Safety Always",
+    description:
+      "Parents approve access, see progress, and can reach a real person anytime.",
+  },
+  {
+    icon: Users,
+    title: "Every Kid Belongs",
+    description:
+      "Made for all kinds of learners, on any device, at any reading level.",
   },
   {
     icon: Sparkles,
-    title: "Courage",
+    title: "Proof, Not Guesses",
     description:
-      "Bold decisions create breakthrough results. We help you find the courage to make the changes your business needs.",
+      "Kids show what they can do on their own. Parents see real evidence of learning.",
+  },
+];
+
+const coaches = [
+  {
+    icon: Calculator,
+    name: "Coach Maya",
+    subject: "Math",
+    description:
+      "Helps kids work through math step by step. She asks the right question at the right time - so kids solve problems on their own.",
   },
   {
-    icon: Target,
-    title: "Accountability",
+    icon: BookOpen,
+    name: "Story Explorer",
+    subject: "Reading",
     description:
-      "Growth happens when we own our outcomes. We hold ourselves—and you—to the highest standards.",
+      "Turns every story into a detective adventure. Kids learn to find clues in the text and explain their ideas.",
   },
   {
-    icon: TrendingUp,
-    title: "Growth",
+    icon: Sprout,
+    name: "Growth & Glow",
+    subject: "Life Skills",
     description:
-      "Continuous improvement in all aspects of business and life. We believe there's always room to grow.",
+      "Sets a fun challenge each month. Kids plan, practice a real-world skill, and share how it went.",
   },
 ];
 
@@ -56,68 +83,68 @@ export default function AboutPage() {
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <Badge variant="outline" className="mb-6 border-amber-500/50 text-amber-400">
-              About Legacy 83 Business
+              About AICenter4U
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-              Legacy is Built on Purpose,{" "}
-              <span className="text-amber-400">Not Luck</span>
+              Learn. Believe.{" "}
+              <span className="text-amber-400">Grow.</span>
             </h1>
             <p className="mt-6 text-lg text-gray-300 max-w-2xl mx-auto">
-              We believe every business owner has the potential to create something extraordinary—
-              a legacy that outlasts them and impacts generations.
+              We built AICenter4U for one simple reason: kids learn best when they
+              figure things out for themselves - with a patient guide by their side.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Meet Icy Williams */}
+      {/* Why We Exist */}
       <section className="py-20 md:py-28">
         <div className="container">
           <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             <div className="relative">
-              <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
-                  src="/images/IcyWilliams.jpg"
-                  alt="Icy Williams - Founder & Lead Coach of Legacy 83 Business"
+                  src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=80&auto=format&fit=crop"
+                  alt="Children learning together at a table"
                   fill
-                  className="object-cover object-top"
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  className="object-cover"
                   priority
                 />
               </div>
               <div className="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-xl p-4 max-w-xs">
                 <Quote className="h-6 w-6 text-amber-400 mb-2" />
                 <p className="text-sm text-muted-foreground italic">
-                  "Your business should be a vehicle for your legacy, not a prison that holds you captive."
+                  &quot;Kids don&apos;t need more answers. They need better questions.&quot;
                 </p>
               </div>
             </div>
-            
+
             <div>
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
-                Meet Icy Williams
+                Why AICenter4U Exists
               </h2>
               <div className="space-y-4 text-muted-foreground">
                 <p className="text-lg">
-                  For over two decades, Icy Williams has been helping business leaders unlock 
-                  their potential and build lasting legacies. After witnessing countless talented 
-                  entrepreneurs struggle—not from lack of vision, but from lack of strategic 
-                  execution—Icy founded Legacy 83 to bridge that gap.
+                  Most learning apps work the same way. A kid gets stuck, the app gives
+                  the answer, and everyone moves on. It looks like learning - but nothing
+                  really stuck.
                 </p>
                 <p>
-                  Legacy 83 partners with small business owners and solo entrepreneurs to create 
-                  sustainable growth strategies that honor both profit and purpose. We believe 
-                  that building a legacy isn't about working harder—it's about working smarter, 
-                  leading better, and planning for what comes next.
+                  AICenter4U works differently. Our AI coaches ask questions and give
+                  hints, so kids do the thinking. Then, at the end of every lesson, kids
+                  solve a new problem all by themselves - no help allowed. That&apos;s how we
+                  know (and how you know) they really learned it.
                 </p>
                 <p>
-                  Based in Cincinnati, Ohio, Icy works with business owners across the country 
-                  who are ready to stop being the bottleneck in their own businesses and start 
-                  building something that will outlast them.
+                  And because kids come first, safety is built in from the start.
+                  Parents approve access, get simple progress updates, and can always
+                  ask for a real person to step in.
                 </p>
               </div>
               <Button className="mt-8 bg-amber-500 hover:bg-amber-600 text-slate-900" asChild>
-                <Link href="/schedule-a-call">
-                  Schedule a Call with Icy
+                <Link href="/contact">
+                  Talk to Our Team
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -137,9 +164,9 @@ export default function AboutPage() {
                 </div>
                 <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
                 <p className="text-muted-foreground">
-                  Empowering business leaders to build wealth, inspire teams, and leave 
-                  lasting legacies. We help entrepreneurs create businesses that thrive 
-                  today and endure for generations.
+                  To give every child a patient, encouraging guide that helps them
+                  truly understand - not just finish the worksheet. We help kids learn
+                  to think, believe in themselves, and grow.
                 </p>
               </CardContent>
             </Card>
@@ -151,9 +178,9 @@ export default function AboutPage() {
                 </div>
                 <h2 className="text-2xl font-bold mb-4">Our Vision</h2>
                 <p className="text-muted-foreground">
-                  A world where every business owner has the clarity, confidence, and 
-                  support to build a company that reflects their values, serves their 
-                  community, and creates a legacy worth leaving behind.
+                  A world where every kid - no matter where they live or how they
+                  learn - has a coach who believes in them, and every parent can see
+                  real proof of progress.
                 </p>
               </CardContent>
             </Card>
@@ -161,44 +188,81 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Our Story */}
+      {/* Meet the Coaches */}
       <section className="py-20 md:py-28">
         <div className="container">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <Badge variant="outline" className="mb-4 border-amber-500/50 text-amber-600">
-                Our Story
-              </Badge>
-              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Why "Legacy 83"?
-              </h2>
+          <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 border-amber-500/50 text-amber-600">
+              Meet the Coaches
+            </Badge>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Three Coaches. One Goal: Understanding.
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              Each coach guides kids the same friendly way - one question at a time,
+              never just the answer.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {coaches.map((coach) => (
+              <Card key={coach.name} className="text-center border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+                    <coach.icon className="h-7 w-7 text-amber-600" />
+                  </div>
+                  <Badge variant="outline" className="mb-2 border-amber-500/50 text-amber-600">
+                    {coach.subject}
+                  </Badge>
+                  <h3 className="text-xl font-semibold mb-2">{coach.name}</h3>
+                  <p className="text-muted-foreground text-sm">{coach.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* The Learning Cycle */}
+      <section className="py-20 md:py-28 bg-slate-50">
+        <div className="container">
+          <div className="max-w-4xl mx-auto text-center">
+            <Badge variant="outline" className="mb-4 border-amber-500/50 text-amber-600">
+              Our Approach
+            </Badge>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
+              The Six-Step Learning Cycle
+            </h2>
+            <p className="text-lg text-muted-foreground mb-12">
+              Every lesson follows the same simple path. Kids always know what&apos;s next -
+              and the last step proves they can do it alone.
+            </p>
+
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mb-12">
+              {["Notice", "Try", "Challenge", "Verify", "Reflect", "Transfer"].map((step) => (
+                <div key={step} className="text-center">
+                  <div className="w-16 h-16 rounded-full bg-amber-500 flex items-center justify-center mx-auto mb-2">
+                    <span className="text-sm font-bold text-white">{step[0]}</span>
+                  </div>
+                  <div className="text-sm font-medium text-muted-foreground">
+                    {step}
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="prose prose-lg max-w-none">
-              <p className="text-muted-foreground text-lg leading-relaxed">
-                The name "Legacy 83" represents a deeply personal commitment. 83 symbolizes 
-                the year that shaped Icy's understanding of what it means to build something 
-                that lasts—a reminder that legacy isn't about what you accumulate, but what 
-                you leave behind.
-              </p>
-              <p className="text-muted-foreground text-lg leading-relaxed mt-6">
-                Too many business owners pour their hearts into building companies, only to 
-                realize they've created a job they can't escape rather than a business that 
-                serves them. They work 60+ hours a week, can't take vacations, and have no 
-                idea how they'll ever step away.
-              </p>
-              <p className="text-muted-foreground text-lg leading-relaxed mt-6">
-                Legacy 83 was founded to change that story. We help business owners transform 
-                their companies into assets that work for them—businesses with strong teams, 
-                solid systems, and clear succession plans. Because your business should be a 
-                vehicle for your legacy, not a prison that holds you captive.
-              </p>
-            </div>
+
+            <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-slate-900" asChild>
+              <Link href="/academy">
+                Explore Our Courses
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Values */}
-      <section className="py-20 md:py-28 bg-slate-50">
+      <section className="py-20 md:py-28">
         <div className="container">
           <div className="text-center mb-16">
             <Badge variant="outline" className="mb-4 border-amber-500/50 text-amber-600">
@@ -206,7 +270,7 @@ export default function AboutPage() {
             </Badge>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Our Core Values</h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              The principles that guide everything we do at Legacy 83.
+              The principles that guide everything we build at AICenter4U.
             </p>
           </div>
 
@@ -226,53 +290,15 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* The G.R.O.W.S. Framework */}
-      <section className="py-20 md:py-28">
-        <div className="container">
-          <div className="max-w-4xl mx-auto text-center">
-            <Badge variant="outline" className="mb-4 border-amber-500/50 text-amber-600">
-              Our Approach
-            </Badge>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
-              The Legacy Growth System™
-            </h2>
-            <p className="text-lg text-muted-foreground mb-12">
-              Our proprietary G.R.O.W.S. framework is designed to help small business owners 
-              achieve sustainable growth, strengthen leadership, and prepare for succession.
-            </p>
-            
-            <div className="grid grid-cols-5 gap-4 mb-12">
-              {["G", "R", "O", "W", "S"].map((letter, index) => (
-                <div key={letter} className="text-center">
-                  <div className="w-16 h-16 rounded-full bg-amber-500 flex items-center justify-center mx-auto mb-2">
-                    <span className="text-2xl font-bold text-white">{letter}</span>
-                  </div>
-                  <div className="text-sm font-medium text-muted-foreground">
-                    {["Goals", "Roadmap", "Operations", "Workforce", "Succession"][index]}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-slate-900" asChild>
-              <Link href="/services">
-                Explore Our Services
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="py-20 md:py-28 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
         <div className="container text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Ready to Build Your Legacy?
+            Ready to Help Your Child Grow?
           </h2>
           <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-            Take the first step toward building a business that outlasts you. 
-            Schedule a free strategy call with Icy today.
+            Join the families who want kids to really understand - and have fun
+            doing it. The first lesson is waiting.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
             <Button
@@ -280,8 +306,8 @@ export default function AboutPage() {
               className="text-lg px-8 bg-amber-500 hover:bg-amber-600 text-slate-900"
               asChild
             >
-              <Link href="/schedule-a-call">
-                Schedule a Strategy Call
+              <Link href="/academy">
+                Start Learning Today
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -291,8 +317,8 @@ export default function AboutPage() {
               className="text-lg px-8 border-white text-white hover:bg-white hover:text-slate-900"
               asChild
             >
-              <Link href="/quiz-intro">
-                Take the Legacy Growth IQ™ Quiz
+              <Link href="/contact">
+                Questions? Contact Us
               </Link>
             </Button>
           </div>

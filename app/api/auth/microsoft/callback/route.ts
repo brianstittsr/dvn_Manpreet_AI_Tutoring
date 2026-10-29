@@ -6,9 +6,9 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { exchangeMicrosoftCode, MSGraphConfig, TRACTION_MS_SCOPES } from "@/lib/microsoft-graph";
-import { doc, setDoc, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { exchangeMicrosoftCode, MSGraphConfig, MS_SCOPES } from "@/lib/microsoft-graph";
+import { Timestamp } from "firebase-admin/firestore";
+import { adminDb } from "@/lib/firebase-admin";
 import { COLLECTIONS } from "@/lib/schema";
 
 // Get Microsoft config from environment
@@ -27,7 +27,7 @@ function getMicrosoftConfig(): MSGraphConfig | null {
     clientSecret,
     tenantId,
     redirectUri,
-    scopes: TRACTION_MS_SCOPES,
+    scopes: MS_SCOPES,
   };
 }
 
@@ -82,34 +82,38 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Store tokens in Firestore (encrypted in production)
-    if (db) {
-      await setDoc(
-        doc(db, COLLECTIONS.PLATFORM_SETTINGS, `microsoft_tokens_${userId}`),
-        {
-          accessToken: result.data.accessToken,
-          refreshToken: result.data.refreshToken,
-          expiresAt: result.data.expiresAt,
-          connectedAt: Timestamp.now(),
-          provider: "microsoft",
-        },
-        { merge: true }
-      );
+    // Store tokens in the server-only secrets collection
+    if (adminDb) {
+      await adminDb
+        .collection("platformSecrets")
+        .doc(`microsoft_tokens_${userId}`)
+        .set(
+          {
+            accessToken: result.data.accessToken,
+            refreshToken: result.data.refreshToken,
+            expiresAt: result.data.expiresAt,
+            connectedAt: Timestamp.now(),
+            provider: "microsoft",
+          },
+          { merge: true }
+        );
 
       // Update integration status
-      await setDoc(
-        doc(db, COLLECTIONS.PLATFORM_SETTINGS, "default"),
-        {
-          integrations: {
-            microsoft: {
-              connected: true,
-              connectedAt: Timestamp.now(),
-              scopes: TRACTION_MS_SCOPES,
+      await adminDb
+        .collection(COLLECTIONS.PLATFORM_SETTINGS)
+        .doc("default")
+        .set(
+          {
+            integrations: {
+              microsoft: {
+                connected: true,
+                connectedAt: Timestamp.now(),
+                scopes: MS_SCOPES,
+              },
             },
           },
-        },
-        { merge: true }
-      );
+          { merge: true }
+        );
     }
 
     // Redirect back to settings with success

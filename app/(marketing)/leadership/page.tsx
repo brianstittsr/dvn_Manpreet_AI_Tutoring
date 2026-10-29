@@ -9,7 +9,7 @@ import { ArrowRight, Linkedin, Mail } from "lucide-react";
 export const metadata: Metadata = {
   title: "Leadership Team",
   description:
-    "Meet the Legacy 83 leadership team - veteran experts driving business growth and transformation.",
+    "Meet the AICenter4U leadership team - veteran experts driving business growth and transformation.",
 };
 
 const leadershipTeam = [

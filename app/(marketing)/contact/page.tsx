@@ -26,7 +26,7 @@ import {
   Calendar,
   ArrowRight,
   CheckCircle,
-  Linkedin,
+  ShieldCheck,
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -35,36 +35,32 @@ import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { COLLECTIONS } from "@/lib/schema";
 import { logOpportunityCreated } from "@/lib/activity-logger";
 
-const services = [
-  "Supplier Readiness & OEM Qualification",
-  "ISO/QMS Certification",
-  "Lean Manufacturing",
-  "Digital Transformation",
-  "Reshoring Advisory",
-  "Workforce Development",
-  "Other",
+const subjects = [
+  "Math (Coach Maya)",
+  "Reading (Story Explorer)",
+  "Life Skills (Growth & Glow)",
+  "More than one subject",
+  "Not sure yet - help us decide",
 ];
 
-const companySizes = [
-  "1-25 employees",
-  "25-100 employees",
-  "100-250 employees",
-  "250-500 employees",
-  "500+ employees",
+const gradeBands = [
+  "Ages 5-7",
+  "Ages 8-10",
+  "Ages 11-13",
+  "Ages 14+",
+  "Not sure yet",
 ];
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactForm, setContactForm] = useState({
-    firstName: "",
-    lastName: "",
+    parentFirstName: "",
+    parentLastName: "",
+    learnerFirstName: "",
     email: "",
     phone: "",
-    company: "",
-    jobTitle: "",
-    companySize: "",
-    industry: "",
-    service: "",
+    gradeBand: "",
+    subject: "",
     message: "",
     newsletter: false,
   });
@@ -75,8 +71,7 @@ export default function ContactPage() {
     lastName: "",
     email: "",
     phone: "",
-    company: "",
-    jobTitle: "",
+    learnerName: "",
     preferredDate: "",
     preferredTime: "",
     message: "",
@@ -87,46 +82,27 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     try {
-      const payload = {
-        firstName: contactForm.firstName,
-        lastName: contactForm.lastName,
-        email: contactForm.email,
-        phone: contactForm.phone || undefined,
-        company: contactForm.company,
-        jobTitle: contactForm.jobTitle || undefined,
-        companySize: contactForm.companySize,
-        industry: contactForm.industry || undefined,
-        service: contactForm.service,
-        message: contactForm.message || undefined,
-        newsletter: contactForm.newsletter,
-        source: "contact-page",
-        submittedAt: new Date().toISOString(),
-      };
-
-      await fetch("https://services.leadconnectorhq.com/hooks/o1rlj177UVXuz2i8tHHJ/webhook-trigger/TpKQ9HtCcac86vGd6sc7", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
       // Create an Opportunity for this contact form submission
       if (db) {
         try {
+          const parentName = `${contactForm.parentFirstName} ${contactForm.parentLastName}`.trim();
           const opportunityData = {
-            name: `Contact Form Lead - ${contactForm.firstName} ${contactForm.lastName}`.trim(),
-            organizationName: contactForm.company || "Unknown",
+            name: `Parent Inquiry - ${parentName}`.trim(),
+            organizationName: contactForm.learnerFirstName
+              ? `Family of ${contactForm.learnerFirstName}`
+              : "Family",
             stage: "lead",
-            value: 10000,
+            value: 0,
             probability: 20,
             expectedCloseDate: Timestamp.fromDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
-            description: `Lead submitted through the contact form.\n\nService of Interest: ${contactForm.service || "Not specified"}\nCompany Size: ${contactForm.companySize || "Not specified"}\nIndustry: ${contactForm.industry || "Not specified"}`,
-            notes: `Contact Info:\nEmail: ${contactForm.email}\nPhone: ${contactForm.phone || "Not provided"}\nCompany: ${contactForm.company || "Not provided"}\nJob Title: ${contactForm.jobTitle || "Not provided"}\n\nMessage:\n${contactForm.message || "No message provided"}`,
+            description: `Parent/learner inquiry from the contact form.\n\nSubject of Interest: ${contactForm.subject || "Not specified"}\nLearner Age Band: ${contactForm.gradeBand || "Not specified"}`,
+            notes: `Parent/Guardian: ${parentName}\nLearner: ${contactForm.learnerFirstName || "Not provided"}\nEmail: ${contactForm.email}\nPhone: ${contactForm.phone || "Not provided"}\n\nGoals & Questions:\n${contactForm.message || "No message provided"}`,
             source: "contact-form",
             affiliateId: null,
-            affiliateName: `${contactForm.firstName} ${contactForm.lastName}`.trim(),
+            affiliateName: parentName,
             affiliateEmail: contactForm.email,
             affiliatePhone: contactForm.phone || null,
-            affiliateCompany: contactForm.company || null,
+            affiliateCompany: null,
             deliverables: [],
             isSubscription: false,
             monthlyAmount: null,
@@ -137,35 +113,33 @@ export default function ContactPage() {
 
           const oppRef = await addDoc(collection(db, COLLECTIONS.OPPORTUNITIES), opportunityData);
           await logOpportunityCreated(oppRef.id, opportunityData.name);
-          console.log("Opportunity created for contact form submission:", oppRef.id);
+          console.log("Opportunity created for parent inquiry:", oppRef.id);
         } catch (oppError) {
           console.error("Error creating opportunity from contact form:", oppError);
           // Don't block the form submission if opportunity creation fails
         }
       }
 
-      toast.success("Thank you for your inquiry!", {
+      toast.success("Thanks for reaching out!", {
         description: "We'll get back to you within 24 hours.",
       });
 
       setContactForm({
-        firstName: "",
-        lastName: "",
+        parentFirstName: "",
+        parentLastName: "",
+        learnerFirstName: "",
         email: "",
         phone: "",
-        company: "",
-        jobTitle: "",
-        companySize: "",
-        industry: "",
-        service: "",
+        gradeBand: "",
+        subject: "",
         message: "",
         newsletter: false,
       });
       (e.target as HTMLFormElement).reset();
     } catch (error) {
       console.error("Error submitting contact form:", error);
-      toast.error("Failed to submit inquiry", {
-        description: "Please try again or contact us directly.",
+      toast.error("Something went wrong", {
+        description: "Please try again or email us directly.",
       });
     } finally {
       setIsSubmitting(false);
@@ -186,8 +160,8 @@ export default function ContactPage() {
         lastName: bookCallForm.lastName,
         email: bookCallForm.email,
         phone: bookCallForm.phone || null,
-        company: bookCallForm.company || null,
-        jobTitle: bookCallForm.jobTitle || null,
+        company: bookCallForm.learnerName ? `Family of ${bookCallForm.learnerName}` : null,
+        jobTitle: null,
         preferredDate: bookCallForm.preferredDate || null,
         preferredTime: bookCallForm.preferredTime || null,
         message: bookCallForm.message || null,
@@ -199,21 +173,24 @@ export default function ContactPage() {
 
       // Create an Opportunity for this book-a-call request
       try {
+        const parentName = `${bookCallForm.firstName} ${bookCallForm.lastName}`.trim();
         const opportunityData = {
-          name: `Book a Call Request - ${bookCallForm.firstName} ${bookCallForm.lastName}`.trim(),
-          organizationName: bookCallForm.company || "Unknown",
+          name: `Parent Call Request - ${parentName}`.trim(),
+          organizationName: bookCallForm.learnerName
+            ? `Family of ${bookCallForm.learnerName}`
+            : "Family",
           stage: "lead",
-          value: 10000,
+          value: 0,
           probability: 25,
           expectedCloseDate: Timestamp.fromDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
-          description: `Book a call request from the contact page.\n\nPreferred Date: ${bookCallForm.preferredDate || "Not specified"}\nPreferred Time: ${bookCallForm.preferredTime || "Not specified"}`,
-          notes: `Contact Info:\nEmail: ${bookCallForm.email}\nPhone: ${bookCallForm.phone || "Not provided"}\nCompany: ${bookCallForm.company || "Not provided"}\nJob Title: ${bookCallForm.jobTitle || "Not provided"}\n\nMessage:\n${bookCallForm.message || "No message provided"}`,
+          description: `A parent/guardian asked for a call.\n\nPreferred Date: ${bookCallForm.preferredDate || "Not specified"}\nPreferred Time: ${bookCallForm.preferredTime || "Not specified"}\nLearner: ${bookCallForm.learnerName || "Not provided"}`,
+          notes: `Contact Info:\nEmail: ${bookCallForm.email}\nPhone: ${bookCallForm.phone || "Not provided"}\n\nMessage:\n${bookCallForm.message || "No message provided"}`,
           source: "contact-page-book-call",
           affiliateId: null,
-          affiliateName: `${bookCallForm.firstName} ${bookCallForm.lastName}`.trim(),
+          affiliateName: parentName,
           affiliateEmail: bookCallForm.email,
           affiliatePhone: bookCallForm.phone || null,
-          affiliateCompany: bookCallForm.company || null,
+          affiliateCompany: null,
           deliverables: [],
           isSubscription: false,
           monthlyAmount: null,
@@ -224,14 +201,14 @@ export default function ContactPage() {
 
         const oppRef = await addDoc(collection(db, COLLECTIONS.OPPORTUNITIES), opportunityData);
         await logOpportunityCreated(oppRef.id, opportunityData.name);
-        console.log("Opportunity created for book-a-call request:", oppRef.id);
+        console.log("Opportunity created for parent call request:", oppRef.id);
       } catch (oppError) {
-        console.error("Error creating opportunity from book-a-call request:", oppError);
+        console.error("Error creating opportunity from call request:", oppError);
         // Don't block the form submission if opportunity creation fails
       }
 
-      toast.success("Call request submitted!", {
-        description: "We'll contact you shortly to schedule your call.",
+      toast.success("Call request sent!", {
+        description: "We'll contact you soon to set up a time.",
       });
 
       setBookCallForm({
@@ -239,17 +216,16 @@ export default function ContactPage() {
         lastName: "",
         email: "",
         phone: "",
-        company: "",
-        jobTitle: "",
+        learnerName: "",
         preferredDate: "",
         preferredTime: "",
         message: "",
       });
       setBookCallOpen(false);
     } catch (error) {
-      console.error("Error submitting book call request:", error);
-      toast.error("Failed to submit request", {
-        description: "Please try again or contact us directly.",
+      console.error("Error submitting call request:", error);
+      toast.error("Something went wrong", {
+        description: "Please try again or email us directly.",
       });
     } finally {
       setIsBookingCall(false);
@@ -266,12 +242,12 @@ export default function ContactPage() {
               Get in Touch
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              Let's Start Your{" "}
-              <span className="text-primary">Transformation</span>
+              Let&apos;s Help Your Child{" "}
+              <span className="text-primary">Love Learning</span>
             </h1>
             <p className="mt-6 text-lg text-gray-300">
-              Ready to become an OEM-qualified supplier? Schedule a free assessment 
-              or reach out to discuss how we can help your manufacturing business grow.
+              Have a question about AICenter4U? Tell us a little about your learner
+              and we&apos;ll help you find the right fit.
             </p>
           </div>
         </div>
@@ -285,33 +261,66 @@ export default function ContactPage() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-2xl">Request a Free Assessment</CardTitle>
+                  <CardTitle className="text-2xl">Tell Us About Your Learner</CardTitle>
                   <CardDescription>
-                    Fill out the form below and one of our experts will contact you within 24 hours.
+                    Fill out the form below and we&apos;ll get back to you within 24 hours.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="firstName">First Name *</Label>
+                        <Label htmlFor="parentFirstName">Your First Name *</Label>
                         <Input
-                          id="firstName"
+                          id="parentFirstName"
                           required
-                          placeholder="John"
-                          value={contactForm.firstName}
-                          onChange={(e) => setContactForm({ ...contactForm, firstName: e.target.value })}
+                          placeholder="Jane"
+                          value={contactForm.parentFirstName}
+                          onChange={(e) => setContactForm({ ...contactForm, parentFirstName: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="lastName">Last Name *</Label>
+                        <Label htmlFor="parentLastName">Your Last Name *</Label>
                         <Input
-                          id="lastName"
+                          id="parentLastName"
                           required
                           placeholder="Smith"
-                          value={contactForm.lastName}
-                          onChange={(e) => setContactForm({ ...contactForm, lastName: e.target.value })}
+                          value={contactForm.parentLastName}
+                          onChange={(e) => setContactForm({ ...contactForm, parentLastName: e.target.value })}
                         />
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="learnerFirstName">Learner&apos;s First Name</Label>
+                        <Input
+                          id="learnerFirstName"
+                          placeholder="Alex"
+                          value={contactForm.learnerFirstName}
+                          onChange={(e) => setContactForm({ ...contactForm, learnerFirstName: e.target.value })}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          First name only, please - we take kids&apos; privacy seriously.
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="gradeBand">Learner&apos;s Age Range</Label>
+                        <Select
+                          value={contactForm.gradeBand}
+                          onValueChange={(value) => setContactForm({ ...contactForm, gradeBand: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select an age range" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {gradeBands.map((band) => (
+                              <SelectItem key={band} value={band}>
+                                {band}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
 
@@ -322,7 +331,7 @@ export default function ContactPage() {
                           id="email"
                           type="email"
                           required
-                          placeholder="john@company.com"
+                          placeholder="jane@email.com"
                           value={contactForm.email}
                           onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                         />
@@ -332,80 +341,27 @@ export default function ContactPage() {
                         <Input
                           id="phone"
                           type="tel"
-                          placeholder="(513) 335-1978"
+                          placeholder="(555) 123-4567"
                           value={contactForm.phone}
                           onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
                         />
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="company">Company Name *</Label>
-                        <Input
-                          id="company"
-                          required
-                          placeholder="Your Company Inc."
-                          value={contactForm.company}
-                          onChange={(e) => setContactForm({ ...contactForm, company: e.target.value })}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="title">Job Title</Label>
-                        <Input
-                          id="title"
-                          placeholder="VP Operations"
-                          value={contactForm.jobTitle}
-                          onChange={(e) => setContactForm({ ...contactForm, jobTitle: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="size">Company Size *</Label>
-                        <Select
-                          required
-                          value={contactForm.companySize}
-                          onValueChange={(value) => setContactForm({ ...contactForm, companySize: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select company size" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {companySizes.map((size) => (
-                              <SelectItem key={size} value={size}>
-                                {size}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="industry">Industry</Label>
-                        <Input
-                          id="industry"
-                          placeholder="e.g., Automotive, Aerospace"
-                          value={contactForm.industry}
-                          onChange={(e) => setContactForm({ ...contactForm, industry: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="service">Service of Interest *</Label>
+                      <Label htmlFor="subject">What Is Your Child Interested In? *</Label>
                       <Select
                         required
-                        value={contactForm.service}
-                        onValueChange={(value) => setContactForm({ ...contactForm, service: value })}
+                        value={contactForm.subject}
+                        onValueChange={(value) => setContactForm({ ...contactForm, subject: value })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a service" />
+                          <SelectValue placeholder="Select a subject" />
                         </SelectTrigger>
                         <SelectContent>
-                          {services.map((service) => (
-                            <SelectItem key={service} value={service}>
-                              {service}
+                          {subjects.map((subject) => (
+                            <SelectItem key={subject} value={subject}>
+                              {subject}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -413,10 +369,10 @@ export default function ContactPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="message">Tell us about your goals</Label>
+                      <Label htmlFor="message">Goals & Questions</Label>
                       <Textarea
                         id="message"
-                        placeholder="What challenges are you facing? What outcomes are you hoping to achieve?"
+                        placeholder="What would you like your child to learn? Any questions for us?"
                         rows={4}
                         value={contactForm.message}
                         onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
@@ -430,16 +386,16 @@ export default function ContactPage() {
                         onCheckedChange={(checked) => setContactForm({ ...contactForm, newsletter: checked === true })}
                       />
                       <Label htmlFor="newsletter" className="text-sm font-normal">
-                        Subscribe to our newsletter for manufacturing insights and industry updates
+                        Send me learning tips and AICenter4U updates
                       </Label>
                     </div>
 
                     <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
                       {isSubmitting ? (
-                        "Submitting..."
+                        "Sending..."
                       ) : (
                         <>
-                          Request Free Assessment
+                          Send Message
                           <ArrowRight className="ml-2 h-5 w-5" />
                         </>
                       )}
@@ -462,10 +418,10 @@ export default function ContactPage() {
                     <div>
                       <p className="font-medium">Email</p>
                       <Link
-                        href="mailto:info@legacy83business.com"
+                        href="mailto:info@aicenter4u.com"
                         className="text-muted-foreground hover:text-primary"
                       >
-                        info@legacy83business.com
+                        info@aicenter4u.com
                       </Link>
                     </div>
                   </div>
@@ -491,7 +447,7 @@ export default function ContactPage() {
                   <div className="flex items-start gap-3">
                     <Clock className="h-5 w-5 text-primary mt-0.5" />
                     <div>
-                      <p className="font-medium">Business Hours</p>
+                      <p className="font-medium">Hours</p>
                       <p className="text-muted-foreground">Mon-Fri: 8am - 6pm EST</p>
                     </div>
                   </div>
@@ -503,41 +459,42 @@ export default function ContactPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-primary" />
-                    Schedule a Call
+                    Talk to Our Team
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground text-sm mb-4">
-                    Prefer to talk directly? Book a 30-minute discovery call with one of our experts.
+                    Prefer to talk? Request a short call and we&apos;ll help you decide if
+                    AICenter4U is right for your family.
                   </p>
                   <Dialog open={bookCallOpen} onOpenChange={setBookCallOpen}>
                     <DialogTrigger asChild>
                       <Button className="w-full">
-                        Book a Call
+                        Request a Call
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[500px]">
                       <DialogHeader>
-                        <DialogTitle>Book a Discovery Call</DialogTitle>
+                        <DialogTitle>Request a Parent Call</DialogTitle>
                         <DialogDescription>
-                          Fill out the form below and we&apos;ll reach out to schedule a 30-minute call.
+                          Tell us when works best and we&apos;ll reach out to set up a quick chat.
                         </DialogDescription>
                       </DialogHeader>
                       <form onSubmit={handleBookCall} className="space-y-4 mt-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="book-firstName">First Name *</Label>
+                            <Label htmlFor="book-firstName">Your First Name *</Label>
                             <Input
                               id="book-firstName"
                               required
                               value={bookCallForm.firstName}
                               onChange={(e) => setBookCallForm({ ...bookCallForm, firstName: e.target.value })}
-                              placeholder="John"
+                              placeholder="Jane"
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="book-lastName">Last Name *</Label>
+                            <Label htmlFor="book-lastName">Your Last Name *</Label>
                             <Input
                               id="book-lastName"
                               required
@@ -555,7 +512,7 @@ export default function ContactPage() {
                             required
                             value={bookCallForm.email}
                             onChange={(e) => setBookCallForm({ ...bookCallForm, email: e.target.value })}
-                            placeholder="john@company.com"
+                            placeholder="jane@email.com"
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -566,16 +523,16 @@ export default function ContactPage() {
                               type="tel"
                               value={bookCallForm.phone}
                               onChange={(e) => setBookCallForm({ ...bookCallForm, phone: e.target.value })}
-                              placeholder="(513) 335-1978"
+                              placeholder="(555) 123-4567"
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="book-company">Company</Label>
+                            <Label htmlFor="book-learner">Learner&apos;s First Name</Label>
                             <Input
-                              id="book-company"
-                              value={bookCallForm.company}
-                              onChange={(e) => setBookCallForm({ ...bookCallForm, company: e.target.value })}
-                              placeholder="Your Company"
+                              id="book-learner"
+                              value={bookCallForm.learnerName}
+                              onChange={(e) => setBookCallForm({ ...bookCallForm, learnerName: e.target.value })}
+                              placeholder="Alex"
                             />
                           </div>
                         </div>
@@ -607,12 +564,12 @@ export default function ContactPage() {
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="book-message">What would you like to discuss?</Label>
+                          <Label htmlFor="book-message">What would you like to ask?</Label>
                           <Textarea
                             id="book-message"
                             value={bookCallForm.message}
                             onChange={(e) => setBookCallForm({ ...bookCallForm, message: e.target.value })}
-                            placeholder="Tell us about your goals..."
+                            placeholder="Tell us about your learner or what you'd like to know..."
                             rows={3}
                           />
                         </div>
@@ -620,7 +577,7 @@ export default function ContactPage() {
                           {isBookingCall ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Submitting...
+                              Sending...
                             </>
                           ) : (
                             <>
@@ -635,18 +592,27 @@ export default function ContactPage() {
                 </CardContent>
               </Card>
 
-              {/* Connect */}
+              {/* Kid-Safe Promise */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Connect With Us</CardTitle>
+                  <CardTitle>Our Kid-Safe Promise</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex gap-3">
-                    <Button variant="outline" size="icon" asChild>
-                      <Link href="https://linkedin.com">
-                        <Linkedin className="h-5 w-5" />
-                      </Link>
-                    </Button>
+                <CardContent className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <p className="text-sm">Parents approve access before kids start</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <p className="text-sm">Coaches give hints, never just answers</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <p className="text-sm">A real person can step in anytime</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <p className="text-sm">We only keep what learning needs</p>
                   </div>
                 </CardContent>
               </Card>
@@ -659,19 +625,15 @@ export default function ContactPage() {
                 <CardContent className="space-y-3">
                   <div className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <p className="text-sm">Response within 24 hours</p>
+                    <p className="text-sm">A reply within 24 hours</p>
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <p className="text-sm">Free initial assessment</p>
+                    <p className="text-sm">Friendly help picking the right coach</p>
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <p className="text-sm">Customized recommendations</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <p className="text-sm">No obligation to proceed</p>
+                    <p className="text-sm">No pressure - just honest answers</p>
                   </div>
                 </CardContent>
               </Card>

@@ -5,17 +5,17 @@ export function OrganizationJsonLd() {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Legacy 83 Business Inc",
-    alternateName: "Legacy 83",
-    url: "https://legacy83business.com",
-    logo: "https://legacy83business.com/legacy83Logo.webp",
+    name: "AICenter4U",
+    alternateName: "AICenter4U",
+    url: "https://aicenter4u.com",
+    logo: "https://aicenter4u.com/aicenter4u-logo.svg",
     description:
-      "Legacy 83 Business helps entrepreneurs and business owners build sustainable wealth, develop high-performing teams, and create lasting legacies through strategic coaching.",
+      "AICenter4U helps entrepreneurs and business owners build sustainable wealth, develop high-performing teams, and create lasting legacies through strategic coaching.",
     foundingDate: "2020",
     founders: [
       {
         "@type": "Person",
-        name: "Icy Williams",
+        name: "Manpreet Hundal",
         jobTitle: "Founder & CEO",
       },
     ],
@@ -32,14 +32,14 @@ export function OrganizationJsonLd() {
       },
       {
         "@type": "ContactPoint",
-        email: "info@legacy83business.com",
+        email: "info@aicenter4u.com",
         contactType: "customer service",
       },
     ],
     sameAs: [
-      "https://www.linkedin.com/company/legacy83business",
-      "https://twitter.com/legacy83business",
-      "https://www.facebook.com/legacy83business",
+      "https://www.linkedin.com/company/aicenter4ubusiness",
+      "https://twitter.com/aicenter4ubusiness",
+      "https://www.facebook.com/aicenter4ubusiness",
     ],
     areaServed: {
       "@type": "Country",
@@ -71,11 +71,11 @@ export function LocalBusinessJsonLd() {
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
-    name: "Legacy 83 Business Inc",
-    image: "https://legacy83business.com/legacy83Logo.webp",
-    url: "https://legacy83business.com",
+    name: "AICenter4U",
+    image: "https://aicenter4u.com/aicenter4u-logo.svg",
+    url: "https://aicenter4u.com",
     telephone: "+1-513-555-0183",
-    email: "info@legacy83business.com",
+    email: "info@aicenter4u.com",
     priceRange: "$$$$",
     address: {
       "@type": "PostalAddress",
@@ -123,7 +123,7 @@ export function ServiceJsonLd({
   name,
   description,
   url,
-  provider = "Legacy 83 Business Inc",
+  provider = "AICenter4U",
   areaServed = "United States",
 }: ServiceJsonLdProps) {
   const serviceSchema = {
@@ -135,7 +135,7 @@ export function ServiceJsonLd({
     provider: {
       "@type": "Organization",
       name: provider,
-      url: "https://legacy83business.com",
+      url: "https://aicenter4u.com",
     },
     areaServed: {
       "@type": "Country",
@@ -252,10 +252,10 @@ export function ArticleJsonLd({
     },
     publisher: {
       "@type": "Organization",
-      name: "Legacy 83 Business Inc",
+      name: "AICenter4U",
       logo: {
         "@type": "ImageObject",
-        url: "https://legacy83business.com/legacy83Logo.webp",
+        url: "https://aicenter4u.com/aicenter4u-logo.svg",
       },
     },
     mainEntityOfPage: {
@@ -278,14 +278,14 @@ export function WebsiteJsonLd() {
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Legacy 83 Business",
-    alternateName: "Legacy 83 Business Inc",
-    url: "https://legacy83business.com",
+    name: "AICenter4U",
+    alternateName: "AICenter4U",
+    url: "https://aicenter4u.com",
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: "https://legacy83business.com/search?q={search_term_string}",
+        urlTemplate: "https://aicenter4u.com/search?q={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },

@@ -9,18 +9,41 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { collection, query, where, getDocs, updateDoc, doc, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { createHmac, timingSafeEqual } from "crypto";
+import { Timestamp } from "firebase-admin/firestore";
+import { adminDb } from "@/lib/firebase-admin";
 import { COLLECTIONS, DocuSealSubmissionDoc } from "@/lib/schema";
+import { getDocuSealConfig } from "@/lib/openai-config";
+
+function isValidDocuSealSignature(rawBody: string, signature: string | null, secret: string): boolean {
+  if (!signature) return false;
+  const expected = createHmac("sha256", secret).update(rawBody, "utf8").digest("hex");
+  const provided = signature.replace(/^sha256=/, "");
+  if (provided.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(provided, "utf8"), Buffer.from(expected, "utf8"));
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const rawBody = await request.text();
+
+    // Verify HMAC signature when a webhook secret is configured. DocuSeal
+    // sends X-DocuSeal-Signature as the hex HMAC-SHA256 of the raw body.
+    const docuSealConfig = await getDocuSealConfig();
+    if (docuSealConfig?.webhookSecret) {
+      const signature = request.headers.get("x-docuseal-signature");
+      if (!isValidDocuSealSignature(rawBody, signature, docuSealConfig.webhookSecret)) {
+        console.warn("DocuSeal webhook rejected: invalid signature");
+        return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+      }
+    }
+
+    const body = JSON.parse(rawBody);
     const { event_type, timestamp, data } = body;
 
     console.log(`DocuSeal webhook received: ${event_type}`, { timestamp, data });
 
-    if (!db) {
+    if (!adminDb) {
       console.warn("Database not configured, skipping webhook processing");
       return NextResponse.json({ success: true, message: "Webhook received (no db)" });
     }
@@ -31,11 +54,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: "No submission ID in webhook" });
     }
 
-    const submissionQuery = query(
-      collection(db, COLLECTIONS.DOCUSEAL_SUBMISSIONS),
-      where('docusealSubmissionId', '==', submissionId)
-    );
-    const submissionSnap = await getDocs(submissionQuery);
+    const submissionSnap = await adminDb
+      .collection(COLLECTIONS.DOCUSEAL_SUBMISSIONS)
+      .where('docusealSubmissionId', '==', submissionId)
+      .get();
 
     if (submissionSnap.empty) {
       console.warn(`Submission ${submissionId} not found in database`);
@@ -57,7 +79,7 @@ export async function POST(request: NextRequest) {
             }
             return s;
           });
-          await updateDoc(doc(db, COLLECTIONS.DOCUSEAL_SUBMISSIONS, submissionDoc.id), {
+          await submissionDoc.ref.update({
             submitters: updatedSubmitters,
             status: 'viewed',
             updatedAt: now,
@@ -67,7 +89,7 @@ export async function POST(request: NextRequest) {
 
       case 'form.started':
         // Update status to indicate signing has started
-        await updateDoc(doc(db, COLLECTIONS.DOCUSEAL_SUBMISSIONS, submissionDoc.id), {
+        await submissionDoc.ref.update({
           status: 'viewed',
           updatedAt: now,
         });
@@ -91,7 +113,7 @@ export async function POST(request: NextRequest) {
           // Check if all submitters are complete
           const allComplete = updatedSubmitters.every((s) => s.status === 'completed');
 
-          await updateDoc(doc(db, COLLECTIONS.DOCUSEAL_SUBMISSIONS, submissionDoc.id), {
+          await submissionDoc.ref.update({
             submitters: updatedSubmitters,
             status: allComplete ? 'completed' : 'pending',
             completedAt: allComplete ? now : null,
@@ -102,7 +124,7 @@ export async function POST(request: NextRequest) {
 
       case 'submission.completed':
         // All submitters have completed
-        await updateDoc(doc(db, COLLECTIONS.DOCUSEAL_SUBMISSIONS, submissionDoc.id), {
+        await submissionDoc.ref.update({
           status: 'completed',
           completedAt: now,
           combinedDocumentUrl: data.documents?.[0]?.url,
@@ -113,11 +135,10 @@ export async function POST(request: NextRequest) {
         // TODO: Trigger any post-completion workflows
         // - Send notification to team
         // - Update related opportunity/project status
-        // - Trigger GHL workflow if configured
         break;
 
       case 'submission.archived':
-        await updateDoc(doc(db, COLLECTIONS.DOCUSEAL_SUBMISSIONS, submissionDoc.id), {
+        await submissionDoc.ref.update({
           status: 'expired',
           updatedAt: now,
         });

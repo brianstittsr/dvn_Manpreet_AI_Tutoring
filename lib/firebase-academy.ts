@@ -1,6 +1,6 @@
 /**
  * Firebase Academy API Service
- * Client-side Firestore operations for Legacy 83 Academy
+ * Client-side Firestore operations for AICenter4U Academy
  */
 
 import {

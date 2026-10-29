@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { authedJsonHeaders } from "@/lib/api-client";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -352,7 +353,7 @@ export default function ToolPage() {
     try {
       const response = await fetch("/api/ai/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authedJsonHeaders(),
         body: JSON.stringify({
           message: currentInput,
           systemPrompt: "You are a helpful AI assistant. Be concise, friendly, and helpful.",

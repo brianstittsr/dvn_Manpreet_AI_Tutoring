@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "SMS Opt-In | Legacy 83 Business",
-  description: "Opt-in to receive SMS messages from Legacy 83 Business Inc.",
+  title: "SMS Opt-In | AICenter4U",
+  description: "Opt-in to receive SMS messages from AICenter4U",
 };
 
 export default function SmsOptInPage() {
@@ -9,12 +9,12 @@ export default function SmsOptInPage() {
       <div className="max-w-2xl mx-auto border rounded-lg p-8 shadow-sm bg-card">
         <h1 className="text-3xl font-bold text-center mb-2">SMS Messaging Opt-In</h1>
         <p className="text-lg text-center text-muted-foreground mb-6">
-          From Legacy 83 Business Inc
+          From AICenter4U
         </p>
 
         <p className="text-muted-foreground mb-6">
           By submitting this form, you consent to receive SMS text messages from{" "}
-          <strong>Legacy 83 Business Inc</strong> at the phone number you provide.
+          <strong>AICenter4U</strong> at the phone number you provide.
           These messages may include appointment confirmations, reminders, responses
           to service inquiries, and marketing promotions about special offers,
           discounts, and service updates. Message frequency may vary. Message and
@@ -79,7 +79,7 @@ export default function SmsOptInPage() {
               htmlFor="sms-consent-transactional"
               className="text-sm text-muted-foreground leading-relaxed"
             >
-              I consent to receive non-marketing text messages from Legacy 83
+              I consent to receive non-marketing text messages from AICenter4U
               Business Inc at the phone number provided. Message types include
               appointment confirmations, reminders, and responses to service
               inquiries. Message frequency may vary. Message and data rates may
@@ -100,7 +100,7 @@ export default function SmsOptInPage() {
               htmlFor="sms-consent-marketing"
               className="text-sm text-muted-foreground leading-relaxed"
             >
-              I consent to receive marketing text messages from Legacy 83 Business
+              I consent to receive marketing text messages from AICenter4U
               Inc at the phone number provided. Message types include special
               offers, discounts, and service updates. Message frequency may vary.
               Message and data rates may apply. I am at least 18 years of age.
@@ -111,7 +111,7 @@ export default function SmsOptInPage() {
           <p className="text-xs text-muted-foreground">
             Consent is optional and not a condition of purchase or use of our
             services. You may opt out at any time by replying STOP to messages
-            from Legacy 83 Business Inc. For assistance, text HELP. View our{" "}
+            from AICenter4U For assistance, text HELP. View our{" "}
             <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>{" "}
             and{" "}
             <a href="/terms" className="text-primary hover:underline">Terms of Service</a>.
@@ -127,7 +127,7 @@ export default function SmsOptInPage() {
 
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>
-            <strong>Legacy 83 Business Inc</strong> · EIN: 84-3055745
+            <strong>AICenter4U</strong> · EIN: 84-3055745
           </p>
           <p>4724 Vine Street, Cincinnati, OH 45217</p>
           <p>
@@ -135,7 +135,7 @@ export default function SmsOptInPage() {
             <a href="tel:+15133351978" className="text-primary hover:underline">(513) 335-1978</a>
             {" · "}
             Email:{" "}
-            <a href="mailto:info@legacy83business.com" className="text-primary hover:underline">info@legacy83business.com</a>
+            <a href="mailto:info@aicenter4u.com" className="text-primary hover:underline">info@aicenter4u.com</a>
           </p>
         </div>
       </div>

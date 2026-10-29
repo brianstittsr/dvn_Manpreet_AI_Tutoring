@@ -41,10 +41,12 @@ import {
   ArrowLeft,
   Loader2,
   Check,
-  X
+  X,
+  Sparkles
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { QuizPlayer } from "@/components/academy/quiz-player";
+import { GPTLessonPlayer } from "@/components/academy/gpt-lesson-player";
 import { toast } from "sonner";
 
 interface ModuleWithLessons extends CourseModuleDoc {
@@ -192,6 +194,8 @@ export default function LessonViewerPage() {
         return <HelpCircle className="h-4 w-4" />;
       case "download":
         return <Download className="h-4 w-4" />;
+      case "gptLesson":
+        return <Sparkles className="h-4 w-4" />;
       default:
         return <BookOpen className="h-4 w-4" />;
     }
@@ -302,6 +306,16 @@ export default function LessonViewerPage() {
                   />
                 )}
 
+                {lesson.contentType === "gptLesson" && enrollment && (
+                  <GPTLessonPlayer
+                    lessonId={lessonId}
+                    courseId={courseId}
+                    onCompleted={() => {
+                      setProgress(prev => prev ? { ...prev, isCompleted: true } : null);
+                    }}
+                  />
+                )}
+
                 {lesson.contentType === "download" && lesson.downloadUrl && (
                   <div className="text-center py-8">
                     <Download className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -337,7 +351,7 @@ export default function LessonViewerPage() {
             </Card>
 
             {/* Completion Actions */}
-            {lesson.contentType !== "quiz" && (
+            {lesson.contentType !== "quiz" && lesson.contentType !== "gptLesson" && (
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">

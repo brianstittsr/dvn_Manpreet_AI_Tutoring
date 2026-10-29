@@ -22,7 +22,7 @@ interface FirebaseImageProps extends Omit<ImageProps, "src"> {
  * 
  * Usage:
  * <FirebaseImage imageId="abc123" alt="My image" fill />
- * <FirebaseImage imageName="about-icy-williams" alt="Icy Williams" fill />
+ * <FirebaseImage imageName="about-manpreet-hundal" alt="Manpreet Hundal" fill />
  */
 export function FirebaseImage({
   imageId,

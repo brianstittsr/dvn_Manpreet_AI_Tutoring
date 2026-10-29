@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createEventCheckoutSession, type CheckoutLineItem } from "@/lib/stripe";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, addDoc, Timestamp } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 import { COLLECTIONS, type EventDoc, type EventRegistration } from "@/lib/schema";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { scope: "stripe-event-checkout", limit: 15, windowMs: 60_000 });
+  if (limited) return limited;
   try {
     const body = await request.json();
     const {
@@ -31,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!db) {
+    if (!adminDb) {
       return NextResponse.json(
         { error: "Database not configured" },
         { status: 500 }
@@ -39,10 +42,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Get event from Firestore
-    const eventRef = doc(db, COLLECTIONS.EVENTS, eventId);
-    const eventSnap = await getDoc(eventRef);
+    const eventRef = adminDb.collection(COLLECTIONS.EVENTS).doc(eventId);
+    const eventSnap = await eventRef.get();
 
-    if (!eventSnap.exists()) {
+    if (!eventSnap.exists) {
       return NextResponse.json(
         { error: "Event not found" },
         { status: 404 }
@@ -122,7 +125,7 @@ export async function POST(request: NextRequest) {
     // Check if this is a free event
     if (subtotal === 0 || event.isFreeEvent) {
       // Create registration directly without Stripe
-      const registration: Omit<EventRegistration, "id"> = {
+      const registration = {
         eventId,
         firstName: customerInfo.firstName,
         lastName: customerInfo.lastName,
@@ -139,10 +142,9 @@ export async function POST(request: NextRequest) {
         updatedAt: Timestamp.now(),
       };
 
-      const regRef = await addDoc(
-        collection(db, COLLECTIONS.EVENT_REGISTRATIONS),
-        registration
-      );
+      const regRef = await adminDb
+        .collection(COLLECTIONS.EVENT_REGISTRATIONS)
+        .add(registration);
 
       return NextResponse.json({
         success: true,
@@ -153,7 +155,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create pending registration
-    const pendingRegistration: Omit<EventRegistration, "id"> = {
+    const pendingRegistration = {
       eventId,
       firstName: customerInfo.firstName,
       lastName: customerInfo.lastName,
@@ -170,10 +172,9 @@ export async function POST(request: NextRequest) {
       updatedAt: Timestamp.now(),
     };
 
-    const regRef = await addDoc(
-      collection(db, COLLECTIONS.EVENT_REGISTRATIONS),
-      pendingRegistration
-    );
+    const regRef = await adminDb
+      .collection(COLLECTIONS.EVENT_REGISTRATIONS)
+      .add(pendingRegistration);
 
     // Create Stripe checkout session
     const session = await createEventCheckoutSession(
@@ -190,8 +191,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Update registration with Stripe session ID
-    const { updateDoc } = await import("firebase/firestore");
-    await updateDoc(doc(db, COLLECTIONS.EVENT_REGISTRATIONS, regRef.id), {
+    await adminDb.collection(COLLECTIONS.EVENT_REGISTRATIONS).doc(regRef.id).update({
       stripeSessionId: session.id,
     });
 

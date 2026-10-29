@@ -55,7 +55,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; img-src 'self' https: data: blob:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://widgets.leadconnectorhq.com https://services.leadconnectorhq.com https://stcdn.leadconnectorhq.com https://vercel.live; style-src 'self' 'unsafe-inline' https://widgets.leadconnectorhq.com https://stcdn.leadconnectorhq.com https://vercel.live; font-src 'self' data: https://widgets.leadconnectorhq.com https://stcdn.leadconnectorhq.com; connect-src 'self' https://*.googleapis.com https://*.google.com https://*.pexels.com https://*.unsplash.com https://services.leadconnectorhq.com https://widgets.leadconnectorhq.com https://stcdn.leadconnectorhq.com https://services.msgsndr.com wss://services.leadconnectorhq.com https://vercel.live wss://ws-us3.pusher.com; frame-src 'self' https://widgets.leadconnectorhq.com https://services.leadconnectorhq.com https://vercel.live;",
+            value: "default-src 'self'; img-src 'self' https: data: blob:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live; style-src 'self' 'unsafe-inline' https://vercel.live; font-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.google.com https://*.pexels.com https://*.unsplash.com https://vercel.live wss://ws-us3.pusher.com; frame-src 'self' https://vercel.live;",
           },
         ],
       },

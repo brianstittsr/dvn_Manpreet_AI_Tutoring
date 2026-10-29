@@ -521,17 +521,6 @@ export class DocuSealService {
   // ==========================================================================
 
   /**
-   * Verify webhook signature (if using signed webhooks)
-   */
-  verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
-    // DocuSeal uses HMAC-SHA256 for webhook signatures
-    // Implementation depends on your crypto library
-    // This is a placeholder - implement based on your needs
-    console.log('Webhook verification:', { payload, signature, secret });
-    return true;
-  }
-
-  /**
    * Parse webhook event
    */
   parseWebhookEvent(body: unknown): DocuSealWebhookEvent | null {

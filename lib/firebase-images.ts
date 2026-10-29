@@ -394,7 +394,7 @@ export async function compressImage(
  */
 export const SITE_IMAGE_KEYS = {
   // About page
-  ABOUT_ICY_WILLIAMS: "about-icy-williams",
+  ABOUT_ICY_WILLIAMS: "about-manpreet-hundal",
   
   // Hero images
   HERO_MAIN: "hero-main",

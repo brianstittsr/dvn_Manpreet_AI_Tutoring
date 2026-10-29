@@ -7,8 +7,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { collection, getDocs, addDoc, query, where, orderBy, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { Timestamp } from "firebase-admin/firestore";
+import { adminDb } from "@/lib/firebase-admin";
 import { COLLECTIONS, DocuSealSubmissionDoc } from "@/lib/schema";
 import { getDefaultDocuSealService, CreateSubmissionRequest } from "@/lib/docuseal";
 
@@ -65,32 +65,29 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch from local cache
-    if (!db) {
+    if (!adminDb) {
       return NextResponse.json({ success: true, submissions: [], source: 'local' });
     }
 
-    let q = query(
-      collection(db, COLLECTIONS.DOCUSEAL_SUBMISSIONS),
-      orderBy('createdAt', 'desc')
-    );
+    let q: FirebaseFirestore.Query = adminDb
+      .collection(COLLECTIONS.DOCUSEAL_SUBMISSIONS)
+      .orderBy('createdAt', 'desc');
 
     if (status) {
-      q = query(
-        collection(db, COLLECTIONS.DOCUSEAL_SUBMISSIONS),
-        where('status', '==', status),
-        orderBy('createdAt', 'desc')
-      );
+      q = adminDb
+        .collection(COLLECTIONS.DOCUSEAL_SUBMISSIONS)
+        .where('status', '==', status)
+        .orderBy('createdAt', 'desc');
     }
 
     if (organizationId) {
-      q = query(
-        collection(db, COLLECTIONS.DOCUSEAL_SUBMISSIONS),
-        where('organizationId', '==', organizationId),
-        orderBy('createdAt', 'desc')
-      );
+      q = adminDb
+        .collection(COLLECTIONS.DOCUSEAL_SUBMISSIONS)
+        .where('organizationId', '==', organizationId)
+        .orderBy('createdAt', 'desc');
     }
 
-    const snapshot = await getDocs(q);
+    const snapshot = await q.get();
     const submissions = snapshot.docs.map((docSnap) => {
       const data = docSnap.data() as DocuSealSubmissionDoc;
       return serializeSubmission({ ...data, id: docSnap.id });
@@ -116,7 +113,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!db) {
+    if (!adminDb) {
       return NextResponse.json(
         { success: false, error: "Database not configured" },
         { status: 503 }
@@ -176,7 +173,7 @@ export async function POST(request: NextRequest) {
 
     // Store submission in Firestore
     const now = Timestamp.now();
-    const submissionDoc: Omit<DocuSealSubmissionDoc, 'id'> = {
+    const submissionDoc = {
       docusealSubmissionId: submissionId,
       templateId: templateId.toString(),
       templateName: templateName || 'Unknown Template',
@@ -197,7 +194,7 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     };
 
-    const docRef = await addDoc(collection(db, COLLECTIONS.DOCUSEAL_SUBMISSIONS), submissionDoc);
+    const docRef = await adminDb.collection(COLLECTIONS.DOCUSEAL_SUBMISSIONS).add(submissionDoc);
 
     return NextResponse.json({
       success: true,

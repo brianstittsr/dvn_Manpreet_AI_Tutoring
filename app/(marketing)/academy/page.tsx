@@ -37,7 +37,7 @@ import {
 const fallbackCourses = [
   {
     title: "The G.R.O.W.S. Framework Masterclass",
-    description: "Master the complete Legacy 83 methodology for building a business that thrives beyond you.",
+    description: "Master the complete AICenter4U methodology for building a business that thrives beyond you.",
     category: "Goals & Vision",
     duration: "8 hours",
     lessons: 24,
@@ -134,7 +134,7 @@ const subscriptionTiers = [
     period: "month",
     description: "Essential resources for business owners beginning their legacy journey",
     features: [
-      "Access to Legacy Journal articles",
+      "Access to Journal articles",
       "Monthly newsletter",
       "Community forum access",
       "1 free workshop per quarter",
@@ -222,7 +222,7 @@ export default function AcademyPage() {
         <div className="container relative">
           <div className="max-w-4xl mx-auto text-center">
             <Badge className="mb-6 bg-amber-500/20 text-amber-400 border-amber-500/30">
-              Legacy 83 Academy
+              AICenter4U Academy
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-6">
               Build Your Legacy Through{" "}
@@ -451,7 +451,7 @@ export default function AcademyPage() {
           <div className="flex justify-between items-end mb-12">
             <div>
               <h2 className="text-3xl font-bold mb-2">Upcoming Workshops</h2>
-              <p className="text-muted-foreground">Live, interactive sessions with Icy Williams</p>
+              <p className="text-muted-foreground">Live, interactive sessions with Manpreet Hundal</p>
             </div>
             <Button variant="ghost" className="text-amber-600" asChild>
               <Link href="/academy/workshops">
@@ -640,7 +640,7 @@ export default function AcademyPage() {
             <h2 className="text-3xl font-bold mb-4">Ready to Start Building Your Legacy?</h2>
             <p className="text-muted-foreground mb-8">
               Join hundreds of business owners who are transforming their companies through 
-              the Legacy 83 Academy. Start your free trial today.
+              the AICenter4U Academy. Start your free trial today.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-slate-900" asChild>

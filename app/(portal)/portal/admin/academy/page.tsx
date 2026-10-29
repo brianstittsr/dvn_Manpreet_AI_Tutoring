@@ -26,6 +26,8 @@ import {
   MoreHorizontal,
   Layers,
   DollarSign,
+  ClipboardCheck,
+  ShieldCheck,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -52,30 +54,30 @@ import { Timestamp } from "firebase/firestore";
 const MOCK_COURSES: CourseDoc[] = [
   {
     id: "mock-1",
-    title: "G.R.O.W.S. Framework Fundamentals",
-    slug: "grows-framework-fundamentals",
-    description: "Master the G.R.O.W.S. methodology for business growth",
-    shortDescription: "Learn the proven framework for scaling your business",
+    title: "Number Sense Adventures",
+    slug: "number-sense-adventures",
+    description: "Build rock-solid number skills — place value, adding, subtracting, and your first multiplication wins. For grades 3–5.",
+    shortDescription: "Build rock-solid number skills with Coach Maya. For grades 3–5.",
     thumbnailUrl: null,
     thumbnailImageId: null,
     previewVideoUrl: null,
     categoryId: null,
-    instructorName: "Icy Williams",
-    instructorBio: "Business strategist and founder",
+    instructorName: "Coach Maya",
+    instructorBio: "Your friendly AI math coach",
     instructorImageUrl: null,
     difficultyLevel: "beginner",
-    estimatedDurationMinutes: 120,
+    estimatedDurationMinutes: 240,
     minSubscriptionTierId: null,
     isFeatured: true,
     isPublished: true,
     publishedAt: Timestamp.now(),
-    tags: ["business", "growth", "strategy"],
-    learningOutcomes: ["Understand the G.R.O.W.S. framework", "Apply strategies to your business"],
+    tags: ["math", "place value", "grades 3-5"],
+    learningOutcomes: ["Explain place value", "Add and subtract with smart strategies"],
     prerequisites: [],
-    enrollmentCount: 45,
-    priceInCents: 9900,
-    compareAtPriceInCents: 14900,
-    isFree: false,
+    enrollmentCount: 0,
+    priceInCents: 0,
+    compareAtPriceInCents: null,
+    isFree: true,
     stripePriceId: null,
     stripeProductId: null,
     createdAt: Timestamp.now(),
@@ -83,30 +85,30 @@ const MOCK_COURSES: CourseDoc[] = [
   },
   {
     id: "mock-2",
-    title: "Strategic Value Planning",
-    slug: "strategic-value-planning",
-    description: "Create and execute strategic plans for maximum value",
-    shortDescription: "Build strategic plans that deliver results",
+    title: "Story Explorer: Reading Adventures",
+    slug: "story-explorer-reading-adventures",
+    description: "Go inside great stories — find the main idea, understand characters, and read between the lines. For grades 3–5.",
+    shortDescription: "Find main ideas and read between the lines. For grades 3–5.",
     thumbnailUrl: null,
     thumbnailImageId: null,
     previewVideoUrl: null,
     categoryId: null,
-    instructorName: "Icy Williams",
-    instructorBio: "Business strategist and founder",
+    instructorName: "Story Explorer",
+    instructorBio: "Your friendly AI reading coach",
     instructorImageUrl: null,
-    difficultyLevel: "intermediate",
-    estimatedDurationMinutes: 180,
+    difficultyLevel: "beginner",
+    estimatedDurationMinutes: 225,
     minSubscriptionTierId: null,
-    isFeatured: false,
+    isFeatured: true,
     isPublished: true,
     publishedAt: Timestamp.now(),
-    tags: ["strategy", "planning", "value"],
-    learningOutcomes: ["Create strategic plans", "Measure value delivery"],
-    prerequisites: ["Basic business knowledge"],
-    enrollmentCount: 28,
-    priceInCents: 19900,
+    tags: ["reading", "main idea", "grades 3-5"],
+    learningOutcomes: ["Find the main idea", "Make smart inferences"],
+    prerequisites: [],
+    enrollmentCount: 0,
+    priceInCents: 0,
     compareAtPriceInCents: null,
-    isFree: false,
+    isFree: true,
     stripePriceId: null,
     stripeProductId: null,
     createdAt: Timestamp.now(),
@@ -114,26 +116,26 @@ const MOCK_COURSES: CourseDoc[] = [
   },
   {
     id: "mock-3",
-    title: "Leadership Excellence",
-    slug: "leadership-excellence",
-    description: "Develop leadership skills for the modern workplace",
-    shortDescription: "Become an effective leader",
+    title: "Growth & Glow: Confidence & Kindness",
+    slug: "growth-glow-confidence-kindness",
+    description: "Understand your feelings, be a great friend, and solve problems like a pro. For grades 3–6.",
+    shortDescription: "Feelings, friendship, and problem solving. For grades 3–6.",
     thumbnailUrl: null,
     thumbnailImageId: null,
     previewVideoUrl: null,
     categoryId: null,
-    instructorName: "Icy Williams",
-    instructorBio: "Business strategist and founder",
+    instructorName: "Growth & Glow",
+    instructorBio: "Your friendly AI life-skills coach",
     instructorImageUrl: null,
-    difficultyLevel: "advanced",
-    estimatedDurationMinutes: 240,
+    difficultyLevel: "beginner",
+    estimatedDurationMinutes: 180,
     minSubscriptionTierId: null,
     isFeatured: true,
-    isPublished: false,
-    publishedAt: null,
-    tags: ["leadership", "management"],
-    learningOutcomes: ["Lead teams effectively", "Drive organizational change"],
-    prerequisites: ["Management experience"],
+    isPublished: true,
+    publishedAt: Timestamp.now(),
+    tags: ["life skills", "feelings", "grades 3-6"],
+    learningOutcomes: ["Name and describe your feelings", "Solve problems with a 4-step plan"],
+    prerequisites: [],
     enrollmentCount: 0,
     priceInCents: 0,
     compareAtPriceInCents: null,
@@ -146,11 +148,11 @@ const MOCK_COURSES: CourseDoc[] = [
 ];
 
 const MOCK_STATS = {
-  totalCourses: 3,
+  totalCourses: 6,
   totalLessons: 60,
-  totalWorkshops: 2,
-  totalEnrollments: 73,
-  totalCertificates: 20,
+  totalWorkshops: 3,
+  totalEnrollments: 0,
+  totalCertificates: 0,
 };
 
 export default function AcademyAdminPage() {
@@ -260,6 +262,18 @@ export default function AcademyAdminPage() {
               {useMockData ? "Mock Data" : "Live Data"}
             </Label>
           </div>
+          <Button variant="outline" asChild>
+            <Link href="/portal/admin/academy/gpt-reviews">
+              <ClipboardCheck className="mr-2 h-4 w-4" />
+              GPT Reviews
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/portal/admin/academy/guardian-links">
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Guardian Links
+            </Link>
+          </Button>
           <Button variant="outline" asChild>
             <Link href="/portal/admin/academy/purchases">
               <DollarSign className="mr-2 h-4 w-4" />

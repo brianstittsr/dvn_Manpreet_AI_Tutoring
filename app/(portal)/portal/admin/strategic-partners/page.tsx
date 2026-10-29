@@ -94,7 +94,7 @@ const seedPartners: Omit<StrategicPartnerDoc, "id" | "createdAt" | "updatedAt">[
   {
     firstName: "Keith",
     lastName: "Moore",
-    company: "KDM Associates",
+    company: "Hundal",
     website: "https://kdm-assoc.com/",
     expertise: "Access to Federal Contracting and Funding",
     status: "active",

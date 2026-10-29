@@ -1,7 +1,7 @@
 /**
  * Target Companies API Client
  * 
- * API functions for managing target companies in Legacy 83 Business
+ * API functions for managing target companies in AICenter4U
  */
 
 import { createClient } from '@supabase/supabase-js';

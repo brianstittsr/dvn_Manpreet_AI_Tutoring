@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, doc, getDoc, updateDoc, Timestamp, query, where, getDocs, limit } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 import { COLLECTIONS, QuizReportTemplateDoc } from "@/lib/schema";
 import nodemailer from "nodemailer";
+import { rateLimit } from "@/lib/rate-limit";
 
 // Default report template if none configured
 const defaultTemplate: Omit<QuizReportTemplateDoc, 'id' | 'createdAt' | 'updatedAt'> = {
@@ -138,29 +139,48 @@ const defaultTemplate: Omit<QuizReportTemplateDoc, 'id' | 'createdAt' | 'updated
     title: "Ready to Build Your Legacy?",
     description: "Schedule a free 30-minute strategy call to discuss your results and create a personalized action plan for your business.",
     buttonText: "Schedule Your Free Call",
-    buttonUrl: "https://legacy83business.com/schedule-a-call",
+    buttonUrl: "https://aicenter4u.com/schedule-a-call",
   },
   branding: {
-    logoUrl: "/legacy83Logo.webp",
+    logoUrl: "/aicenter4u-logo.svg",
     primaryColor: "#D97706",
     secondaryColor: "#1E293B",
-    companyName: "Legacy 83 Business Inc",
-    contactEmail: "info@legacy83business.com",
+    companyName: "AICenter4U",
+    contactEmail: "info@aicenter4u.com",
     contactPhone: "(513) 335-1978",
-    website: "https://legacy83business.com",
+    website: "https://aicenter4u.com",
   },
   emailSettings: {
     subject: "Your Legacy Growth IQ Assessment Results",
-    fromName: "Legacy 83 Business",
-    replyTo: "info@legacy83business.com",
+    fromName: "AICenter4U",
+    replyTo: "info@aicenter4u.com",
     introText: "Thank you for completing the Legacy Growth IQ Assessment! Attached is your personalized report with insights and recommendations for building a sustainable business legacy.",
-    signatureText: "Best regards,\nThe Legacy 83 Team",
+    signatureText: "Best regards,\nThe AICenter4U Team",
   },
 };
 
+interface QuizSubmissionCategoryScore {
+  category: string;
+  score: number;
+  maxScore: number;
+  percentage: number;
+}
+
+interface QuizSubmissionData {
+  respondentName?: string;
+  respondentEmail?: string;
+  respondentCompany?: string;
+  respondentPhone?: string;
+  totalScore?: number;
+  maxScore?: number;
+  percentage?: number;
+  scoreLevel: string;
+  categoryScores?: QuizSubmissionCategoryScore[];
+}
+
 // Generate HTML for PDF report
 function generateReportHTML(
-  submission: any,
+  submission: QuizSubmissionData,
   template: Omit<QuizReportTemplateDoc, 'id' | 'createdAt' | 'updatedAt'>
 ): string {
   const { branding, executiveSummary, detailedSections, recommendations, callToAction } = template;
@@ -171,7 +191,7 @@ function generateReportHTML(
   
   // Get category scores map
   const categoryScoresMap: Record<string, number> = {};
-  (submission.categoryScores || []).forEach((cat: any) => {
+  (submission.categoryScores || []).forEach((cat: QuizSubmissionCategoryScore) => {
     categoryScoresMap[cat.category] = cat.percentage;
   });
 
@@ -487,7 +507,7 @@ function generateReportHTML(
   `;
 }
 
-function getTopCategory(categoryScores: any[], type: 'high' | 'low'): string {
+function getTopCategory(categoryScores: QuizSubmissionCategoryScore[] | undefined, type: 'high' | 'low'): string {
   if (!categoryScores || categoryScores.length === 0) return 'N/A';
   
   const sorted = [...categoryScores].sort((a, b) => 
@@ -507,6 +527,8 @@ function getTopCategory(categoryScores: any[], type: 'high' | 'low'): string {
 }
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { scope: "quiz-report", limit: 5, windowMs: 60_000 });
+  if (limited) return limited;
   try {
     const body = await request.json();
     const { submissionId, sendEmail = true } = body;
@@ -515,29 +537,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Submission ID required" }, { status: 400 });
     }
 
-    if (!db) {
+    if (!adminDb) {
       return NextResponse.json({ error: "Database not initialized" }, { status: 500 });
     }
 
     // Get submission data
-    const submissionRef = doc(db, COLLECTIONS.QUIZ_SUBMISSIONS, submissionId);
-    const submissionSnap = await getDoc(submissionRef);
+    const submissionRef = adminDb.collection(COLLECTIONS.QUIZ_SUBMISSIONS).doc(submissionId);
+    const submissionSnap = await submissionRef.get();
 
-    if (!submissionSnap.exists()) {
+    if (!submissionSnap.exists) {
       return NextResponse.json({ error: "Submission not found" }, { status: 404 });
     }
 
-    const submission = { id: submissionSnap.id, ...submissionSnap.data() } as Record<string, any>;
+    const submission = { id: submissionSnap.id, ...submissionSnap.data() } as QuizSubmissionData & { id: string };
 
     // Get active report template or use default
     let template = defaultTemplate;
     try {
-      const templatesQuery = query(
-        collection(db, COLLECTIONS.QUIZ_REPORT_TEMPLATES),
-        where("isActive", "==", true),
-        limit(1)
-      );
-      const templatesSnap = await getDocs(templatesQuery);
+      const templatesSnap = await adminDb
+        .collection(COLLECTIONS.QUIZ_REPORT_TEMPLATES)
+        .where("isActive", "==", true)
+        .limit(1)
+        .get();
       if (!templatesSnap.empty) {
         const templateData = templatesSnap.docs[0].data() as QuizReportTemplateDoc;
         template = { ...defaultTemplate, ...templateData };
@@ -569,10 +590,10 @@ export async function POST(request: NextRequest) {
 
           const { emailSettings, branding } = template;
           const subject = emailSettings.subject || "Your Legacy Growth IQ Assessment Results";
-          const fromName = emailSettings.fromName || branding.companyName || "Legacy 83 Business";
-          const replyTo = emailSettings.replyTo || branding.contactEmail || "info@legacy83business.com";
+          const fromName = emailSettings.fromName || branding.companyName || "AICenter4U";
+          const replyTo = emailSettings.replyTo || branding.contactEmail || "info@aicenter4u.com";
           const introText = emailSettings.introText || "Thank you for completing the Legacy Growth IQ Assessment! Attached is your personalized report with insights and recommendations for building a sustainable business legacy.";
-          const signatureText = emailSettings.signatureText || "Best regards,\nThe Legacy 83 Team";
+          const signatureText = emailSettings.signatureText || "Best regards,\nThe AICenter4U Team";
 
           const introHtml = `<p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #333; margin-bottom: 20px;">${introText.replace(/\n/g, "<br/>")}</p>`;
           const signatureHtml = `
@@ -592,7 +613,7 @@ export async function POST(request: NextRequest) {
           );
 
           const toAddresses = [submission.respondentEmail];
-          const internalEmail = "info@legacy83business.com";
+          const internalEmail = "info@aicenter4u.com";
           if (internalEmail !== submission.respondentEmail) {
             toAddresses.push(internalEmail);
           }
@@ -616,7 +637,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update submission with report generation timestamp
-    await updateDoc(submissionRef, {
+    await submissionRef.update({
       reportSentAt: Timestamp.now(),
       reportEmailSent: emailSent,
       updatedAt: Timestamp.now(),

@@ -203,40 +203,6 @@ export async function logTaskCompleted(taskId: string, title: string, userId?: s
   });
 }
 
-export async function logRockCreated(rockId: string, title: string, userId?: string) {
-  return logActivity({
-    type: "create",
-    entityType: "rock",
-    entityId: rockId,
-    entityName: title,
-    description: `Rock created: ${title}`,
-    userId,
-  });
-}
-
-export async function logRockUpdated(rockId: string, title: string, progress: number, userId?: string) {
-  return logActivity({
-    type: "update",
-    entityType: "rock",
-    entityId: rockId,
-    entityName: title,
-    description: `Rock progress updated: ${title} (${progress}%)`,
-    userId,
-    metadata: { progress },
-  });
-}
-
-export async function logRockCompleted(rockId: string, title: string, userId?: string) {
-  return logActivity({
-    type: "update",
-    entityType: "rock",
-    entityId: rockId,
-    entityName: title,
-    description: `Rock completed: ${title}`,
-    userId,
-  });
-}
-
 export async function logProposalCreated(proposalId: string, name: string, userId?: string) {
   return logActivity({
     type: "create",

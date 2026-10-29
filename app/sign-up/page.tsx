@@ -188,8 +188,8 @@ export default function SignUpPage() {
         <div className="flex flex-col items-center mb-8">
           <Link href="/" className="flex flex-col items-center gap-3 group">
             <Image
-              src="/legacy83Logo.webp"
-              alt="Legacy 83 Business Inc"
+              src="/aicenter4u-logo.svg"
+              alt="AICenter4U"
               width={200}
               height={67}
               className="h-16 w-auto"
@@ -215,11 +215,11 @@ export default function SignUpPage() {
         <Card className="shadow-xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-2xl text-center">
-              {step === 1 ? "Register as Legacy83 Business Client" : "Create Your Account"}
+              {step === 1 ? "Register as AICenter4U Business Client" : "Create Your Account"}
             </CardTitle>
             <CardDescription className="text-center">
               {step === 1 
-                ? "Get started with your Legacy83 Business client account" 
+                ? "Get started with your AICenter4U Business client account" 
                 : "Fill in your details to get started"}
             </CardDescription>
           </CardHeader>
@@ -237,10 +237,10 @@ export default function SignUpPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-5 w-5 text-[#C8A951]" />
-                      <span className="text-lg font-semibold">Legacy83 Business client</span>
+                      <span className="text-lg font-semibold">AICenter4U Business client</span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Register as a Legacy83 Business client to access our services and connect with our network of consultants and partners.
+                      Register as a AICenter4U Business client to access our services and connect with our network of consultants and partners.
                     </p>
                     <ul className="text-xs text-muted-foreground mt-2 space-y-1">
                       <li>• Access to consulting services</li>

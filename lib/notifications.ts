@@ -1,16 +1,26 @@
 /**
  * In-Browser Notification System
- * 
- * Mirrors Mattermost notifications to in-browser toasts when the site is open.
- * Works alongside Mattermost webhooks to provide real-time notifications.
+ *
+ * Shows in-browser toasts and browser notifications while the site is open.
  */
 
 import { toast } from "sonner";
-import { WEBHOOK_EVENTS, type WebhookEventType } from "./mattermost";
+
+/** Notification event identifier (free-form string, e.g. "rock_completed"). */
+export type NotificationEventType = string;
+
+const NOTIFICATION_LABELS: Record<string, string> = {
+  meeting_logged: "Meeting Logged",
+  meeting_completed: "Meeting Completed",
+  team_member_added: "Team Member Added",
+  new_lead: "New Lead",
+  affiliate_joined: "Affiliate Joined",
+  referral_submitted: "Referral Submitted",
+};
 
 export interface InAppNotification {
   id: string;
-  type: WebhookEventType;
+  type: NotificationEventType;
   title: string;
   message: string;
   timestamp: Date;
@@ -19,29 +29,15 @@ export interface InAppNotification {
 }
 
 // Notification styling based on event type
-const getNotificationStyle = (eventType: WebhookEventType): {
+const getNotificationStyle = (eventType: NotificationEventType): {
   icon: string;
   variant: "default" | "success" | "warning" | "error" | "info";
 } => {
   switch (eventType) {
     // Success events
-    case "rock_completed":
-    case "issue_solved":
-    case "todo_completed":
     case "meeting_completed":
-    case "scorecard_above_goal":
       return { icon: "✅", variant: "success" };
-    
-    // Warning events
-    case "rock_at_risk":
-    case "todo_overdue":
-    case "scorecard_below_goal":
-      return { icon: "⚠️", variant: "warning" };
-    
-    // Error/Critical events
-    case "rock_off_track":
-      return { icon: "🚨", variant: "error" };
-    
+
     // Info events
     case "new_lead":
     case "affiliate_joined":
@@ -55,65 +51,19 @@ const getNotificationStyle = (eventType: WebhookEventType): {
 };
 
 // Format notification title based on event type
-const getNotificationTitle = (eventType: WebhookEventType): string => {
-  const event = WEBHOOK_EVENTS.find(e => e.type === eventType);
-  return event?.label || "Notification";
+const getNotificationTitle = (eventType: NotificationEventType): string => {
+  return NOTIFICATION_LABELS[eventType] || "Notification";
 };
 
 // Format notification message based on event type and data
 const formatNotificationMessage = (
-  eventType: WebhookEventType,
+  eventType: NotificationEventType,
   data: Record<string, unknown>
 ): string => {
   switch (eventType) {
     case "new_lead":
       return `New lead: ${data.name || data.company || "Unknown"}`;
-    
-    case "deal_status_changed":
-      return `Deal "${data.dealName || "Unknown"}" moved to ${data.newStatus || "new stage"}`;
-    
-    case "rock_created":
-      return `New Rock: "${data.title || data.name || "Untitled"}"`;
-    
-    case "rock_status_changed":
-      return `Rock "${data.title || data.name}" is now ${data.status}`;
-    
-    case "rock_completed":
-      return `🎯 Rock completed: "${data.title || data.name}"`;
-    
-    case "rock_at_risk":
-      return `Rock "${data.title || data.name}" is at risk`;
-    
-    case "rock_off_track":
-      return `Rock "${data.title || data.name}" is off track!`;
-    
-    case "scorecard_updated":
-      return `${data.metricName}: ${data.actual} (Goal: ${data.goal})`;
-    
-    case "scorecard_below_goal":
-      return `⚠️ ${data.metricName} is below goal: ${data.actual} vs ${data.goal}`;
-    
-    case "scorecard_above_goal":
-      return `✨ ${data.metricName} exceeded goal: ${data.actual} vs ${data.goal}`;
-    
-    case "issue_created":
-      return `New issue: "${data.title || data.description || "Untitled"}"`;
-    
-    case "issue_solved":
-      return `Issue resolved: "${data.title || data.description}"`;
-    
-    case "todo_created":
-      return `New to-do: "${data.title || data.description}"`;
-    
-    case "todo_completed":
-      return `To-do completed: "${data.title || data.description}"`;
-    
-    case "todo_overdue":
-      return `⏰ To-do overdue: "${data.title || data.description}"`;
-    
-    case "level10_meeting_logged":
-      return `Level 10 meeting logged for ${data.date || "today"}`;
-    
+
     case "team_member_added":
       return `Welcome ${data.name || "new team member"}!`;
     
@@ -125,10 +75,7 @@ const formatNotificationMessage = (
     
     case "referral_submitted":
       return `New referral from ${data.referrer || "affiliate"}`;
-    
-    case "send_to_brian_stitt":
-      return String(data.message || "Direct message");
-    
+
     default:
       return data.message ? String(data.message) : "New notification";
   }
@@ -136,10 +83,9 @@ const formatNotificationMessage = (
 
 /**
  * Show an in-browser notification toast
- * This mirrors the Mattermost notification
  */
 export function showInAppNotification(
-  eventType: WebhookEventType,
+  eventType: NotificationEventType,
   data: Record<string, unknown>,
   options?: {
     duration?: number;
@@ -185,7 +131,7 @@ export function showInAppNotification(
  * Show a browser notification (requires permission)
  */
 export async function showBrowserNotification(
-  eventType: WebhookEventType,
+  eventType: NotificationEventType,
   data: Record<string, unknown>
 ): Promise<boolean> {
   if (!("Notification" in window)) {
@@ -209,7 +155,7 @@ export async function showBrowserNotification(
   
   new Notification(`${icon} ${title}`, {
     body: message,
-    icon: "/legacy83Logo.webp",
+    icon: "/aicenter4u-logo.svg",
     tag: eventType,
   });
   

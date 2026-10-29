@@ -1,18 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { constructWebhookEvent } from "@/lib/stripe";
-import { db } from "@/lib/firebase";
-import {
-  doc,
-  updateDoc,
-  getDoc,
-  query,
-  where,
-  getDocs,
-  collection,
-  increment,
-  Timestamp,
-  addDoc,
-} from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { COLLECTIONS, type EventDoc, type EventRegistration } from "@/lib/schema";
 import { LMS_COLLECTIONS, type CoursePurchaseDoc } from "@/lib/firebase-lms";
 import Stripe from "stripe";
@@ -41,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!db) {
+    if (!adminDb) {
       return NextResponse.json(
         { error: "Database not configured" },
         { status: 500 }
@@ -94,7 +83,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  if (!db) return;
+  if (!adminDb) return;
 
   const registrationId = session.metadata?.registrationId;
   const eventId = session.metadata?.eventId;
@@ -105,17 +94,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   // Update registration
-  const regRef = doc(db, COLLECTIONS.EVENT_REGISTRATIONS, registrationId);
-  const regSnap = await getDoc(regRef);
+  const regRef = adminDb.collection(COLLECTIONS.EVENT_REGISTRATIONS).doc(registrationId);
+  const regSnap = await regRef.get();
 
-  if (!regSnap.exists()) {
+  if (!regSnap.exists) {
     console.error("Registration not found:", registrationId);
     return;
   }
 
   const registration = regSnap.data() as EventRegistration;
 
-  await updateDoc(regRef, {
+  await regRef.update({
     paymentStatus: "paid",
     status: "confirmed",
     stripePaymentIntentId: session.payment_intent,
@@ -123,10 +112,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   });
 
   // Update ticket quantities sold
-  const eventRef = doc(db, COLLECTIONS.EVENTS, eventId);
-  const eventSnap = await getDoc(eventRef);
+  const eventRef = adminDb.collection(COLLECTIONS.EVENTS).doc(eventId);
+  const eventSnap = await eventRef.get();
 
-  if (eventSnap.exists()) {
+  if (eventSnap.exists) {
     const event = eventSnap.data() as EventDoc;
     const updatedTicketTypes = event.ticketTypes?.map((ticketType) => {
       const purchasedTicket = registration.tickets.find(
@@ -147,9 +136,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       0
     );
 
-    await updateDoc(eventRef, {
+    await eventRef.update({
       ticketTypes: updatedTicketTypes,
-      currentAttendees: increment(totalTicketsSold),
+      currentAttendees: FieldValue.increment(totalTicketsSold),
       updatedAt: Timestamp.now(),
     });
   }
@@ -158,14 +147,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 }
 
 async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
-  if (!db) return;
+  if (!adminDb) return;
 
   const registrationId = session.metadata?.registrationId;
 
   if (!registrationId) return;
 
-  const regRef = doc(db, COLLECTIONS.EVENT_REGISTRATIONS, registrationId);
-  await updateDoc(regRef, {
+  const regRef = adminDb.collection(COLLECTIONS.EVENT_REGISTRATIONS).doc(registrationId);
+  await regRef.update({
     paymentStatus: "failed",
     status: "cancelled",
     updatedAt: Timestamp.now(),
@@ -175,20 +164,18 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
 }
 
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-  if (!db) return;
+  if (!adminDb) return;
 
   // Find registration by payment intent
-  const regsRef = collection(db, COLLECTIONS.EVENT_REGISTRATIONS);
-  const q = query(
-    regsRef,
-    where("stripePaymentIntentId", "==", paymentIntent.id)
-  );
-  const snapshot = await getDocs(q);
+  const snapshot = await adminDb
+    .collection(COLLECTIONS.EVENT_REGISTRATIONS)
+    .where("stripePaymentIntentId", "==", paymentIntent.id)
+    .get();
 
   if (snapshot.empty) return;
 
   const regDoc = snapshot.docs[0];
-  await updateDoc(doc(db, COLLECTIONS.EVENT_REGISTRATIONS, regDoc.id), {
+  await adminDb.collection(COLLECTIONS.EVENT_REGISTRATIONS).doc(regDoc.id).update({
     paymentStatus: "failed",
     updatedAt: Timestamp.now(),
   });
@@ -197,18 +184,16 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
 }
 
 async function handleRefund(charge: Stripe.Charge) {
-  if (!db) return;
+  if (!adminDb) return;
 
   const paymentIntentId = charge.payment_intent;
   if (!paymentIntentId) return;
 
   // Find registration by payment intent
-  const regsRef = collection(db, COLLECTIONS.EVENT_REGISTRATIONS);
-  const q = query(
-    regsRef,
-    where("stripePaymentIntentId", "==", paymentIntentId)
-  );
-  const snapshot = await getDocs(q);
+  const snapshot = await adminDb
+    .collection(COLLECTIONS.EVENT_REGISTRATIONS)
+    .where("stripePaymentIntentId", "==", paymentIntentId)
+    .get();
 
   if (snapshot.empty) return;
 
@@ -218,7 +203,7 @@ async function handleRefund(charge: Stripe.Charge) {
   // Check if fully refunded
   const isFullRefund = charge.amount_refunded >= charge.amount;
 
-  await updateDoc(doc(db, COLLECTIONS.EVENT_REGISTRATIONS, regDoc.id), {
+  await adminDb.collection(COLLECTIONS.EVENT_REGISTRATIONS).doc(regDoc.id).update({
     paymentStatus: "refunded",
     status: isFullRefund ? "cancelled" : registration.status,
     updatedAt: Timestamp.now(),
@@ -226,10 +211,10 @@ async function handleRefund(charge: Stripe.Charge) {
 
   // If fully refunded, update ticket quantities
   if (isFullRefund && registration.eventId) {
-    const eventRef = doc(db, COLLECTIONS.EVENTS, registration.eventId);
-    const eventSnap = await getDoc(eventRef);
+    const eventRef = adminDb.collection(COLLECTIONS.EVENTS).doc(registration.eventId);
+    const eventSnap = await eventRef.get();
 
-    if (eventSnap.exists()) {
+    if (eventSnap.exists) {
       const event = eventSnap.data() as EventDoc;
       const updatedTicketTypes = event.ticketTypes?.map((ticketType) => {
         const refundedTicket = registration.tickets.find(
@@ -252,9 +237,9 @@ async function handleRefund(charge: Stripe.Charge) {
         0
       );
 
-      await updateDoc(eventRef, {
+      await eventRef.update({
         ticketTypes: updatedTicketTypes,
-        currentAttendees: increment(-totalTicketsRefunded),
+        currentAttendees: FieldValue.increment(-totalTicketsRefunded),
         updatedAt: Timestamp.now(),
       });
     }
@@ -268,7 +253,7 @@ async function handleRefund(charge: Stripe.Charge) {
 // ============================================================================
 
 async function handleCourseCheckoutCompleted(session: Stripe.Checkout.Session) {
-  if (!db) return;
+  if (!adminDb) return;
 
   const userId = session.metadata?.userId;
   const courseIds = session.metadata?.courseIds?.split(",") || [];
@@ -281,10 +266,10 @@ async function handleCourseCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // Update all purchase records
   for (const purchaseId of purchaseIds) {
-    const purchaseRef = doc(db, LMS_COLLECTIONS.COURSE_PURCHASES, purchaseId);
-    const purchaseSnap = await getDoc(purchaseRef);
+    const purchaseRef = adminDb.collection(LMS_COLLECTIONS.COURSE_PURCHASES).doc(purchaseId);
+    const purchaseSnap = await purchaseRef.get();
 
-    if (!purchaseSnap.exists()) {
+    if (!purchaseSnap.exists) {
       console.error("Purchase not found:", purchaseId);
       continue;
     }
@@ -292,7 +277,7 @@ async function handleCourseCheckoutCompleted(session: Stripe.Checkout.Session) {
     const purchase = purchaseSnap.data() as CoursePurchaseDoc;
 
     // Update purchase status
-    await updateDoc(purchaseRef, {
+    await purchaseRef.update({
       paymentStatus: "paid",
       stripePaymentIntentId: session.payment_intent,
       purchasedAt: Timestamp.now(),
@@ -312,12 +297,11 @@ async function handleCourseCheckoutCompleted(session: Stripe.Checkout.Session) {
       purchaseId: purchaseId,
     };
 
-    await addDoc(collection(db, LMS_COLLECTIONS.ENROLLMENTS), enrollmentData);
+    await adminDb.collection(LMS_COLLECTIONS.ENROLLMENTS).add(enrollmentData);
 
     // Increment course enrollment count
-    const courseRef = doc(db, LMS_COLLECTIONS.COURSES, purchase.courseId);
-    await updateDoc(courseRef, {
-      enrollmentCount: increment(1),
+    await adminDb.collection(LMS_COLLECTIONS.COURSES).doc(purchase.courseId).update({
+      enrollmentCount: FieldValue.increment(1),
     });
 
     console.log(`Enrollment created for course ${purchase.courseId}, user ${purchase.odUserId}`);

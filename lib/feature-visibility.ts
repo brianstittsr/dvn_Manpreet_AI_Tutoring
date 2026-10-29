@@ -15,28 +15,21 @@ export type UserRole = "superadmin" | "admin" | "team" | "affiliate" | "consulta
 export const SIDEBAR_FEATURES = {
   // Navigation
   commandCenter: { label: "Command Center", section: "navigation", href: "/portal/command-center" },
-  opportunities: { label: "Opportunities", section: "navigation", href: "/portal/opportunities" },
   projects: { label: "Projects", section: "navigation", href: "/portal/projects" },
   affiliates: { label: "Affiliates", section: "navigation", href: "/portal/affiliates" },
   customers: { label: "Customers", section: "navigation", href: "/portal/customers" },
   
   // Work
   apolloSearch: { label: "Apollo Search", section: "work", href: "/portal/apollo-search" },
-  supplierSearch: { label: "Supplier Search", section: "work", href: "/portal/supplier-search" },
   documents: { label: "Documents", section: "work", href: "/portal/documents" },
   calendar: { label: "Calendar", section: "work", href: "/portal/calendar" },
   availability: { label: "Availability", section: "work", href: "/portal/availability" },
   meetings: { label: "Meetings", section: "work", href: "/portal/meetings" },
-  rocks: { label: "Rocks", section: "work", href: "/portal/rocks" },
   networking: { label: "Networking", section: "work", href: "/portal/networking" },
-  deals: { label: "Deals", section: "work", href: "/portal/deals" },
   linkedinContent: { label: "LinkedIn Content", section: "work", href: "/portal/linkedin-content" },
-  eos2: { label: "EOS2 Dashboard", section: "work", href: "/portal/eos2" },
   docuseal: { label: "DocuSeal", section: "work", href: "/portal/docuseal" },
   aiWorkforce: { label: "AI Workforce", section: "work", href: "/portal/ai-workforce" },
   proposals: { label: "Proposal Creator", section: "work", href: "/portal/proposals" },
-  gohighlevel: { label: "GoHighLevel", section: "admin", href: "/portal/gohighlevel" },
-  ghlMigration: { label: "GHL Migration", section: "admin", href: "/portal/admin/ghl-migration" },
   bugTracker: { label: "Bug Tracker", section: "work", href: "/portal/bug-tracker" },
   svpTools: { label: "SVP Tools", section: "work", href: "/portal/svp-tools" },
   systemDocs: { label: "System Documentation", section: "work", href: "/portal/system-docs" },
@@ -57,7 +50,6 @@ export const SIDEBAR_FEATURES = {
   successStories: { label: "Success Stories", section: "admin", href: "/portal/admin/success-stories" },
   academyAdmin: { label: "Academy Admin", section: "admin", href: "/portal/admin/academy" },
   revenueConfig: { label: "Revenue Config", section: "admin", href: "/portal/admin/revenue" },
-  alignable: { label: "Alignable", section: "admin", href: "/portal/admin/alignable" },
   pageDesigner: { label: "Page Designer", section: "admin", href: "/portal/admin/page-designer" },
   navigationManager: { label: "Navigation Manager", section: "admin", href: "/portal/admin/navigation" },
   backups: { label: "Backup & Restore", section: "admin", href: "/portal/admin/backups" },
@@ -69,8 +61,8 @@ export const SIDEBAR_FEATURES = {
 
 export type FeatureKey = keyof typeof SIDEBAR_FEATURES;
 
-// L83 Tools that can be toggled
-export const L83_TOOLS = {
+// Platform Tools that can be toggled
+export const PLATFORM_TOOLS = {
   transcription: { label: "Audio Transcription", description: "Convert audio/video to text" },
   imageGen: { label: "Image Generation", description: "Create images from text" },
   headshot: { label: "AI Headshot Generator", description: "Create professional headshots" },
@@ -80,11 +72,11 @@ export const L83_TOOLS = {
   pdfOcr: { label: "PDF Handwriting OCR", description: "Convert handwritten PDFs" },
 } as const;
 
-export type L83ToolKey = keyof typeof L83_TOOLS;
+export type PlatformToolKey = keyof typeof PLATFORM_TOOLS;
 
 // Sections that can be toggled
 export const SECTIONS = {
-  icyFocused: { label: "Icy Focused" },
+  adminFocused: { label: "Admin Focused" },
   navigation: { label: "Navigation" },
   work: { label: "Work" },
   intelligence: { label: "Intelligence" },
@@ -98,17 +90,17 @@ export type SectionKey = keyof typeof SECTIONS;
 export const DEFAULT_ROLE_VISIBILITY: Record<UserRole, {
   features: Record<FeatureKey, boolean>;
   sections: Record<SectionKey, boolean>;
-  l83Tools: Record<L83ToolKey, boolean>;
+  platformTools: Record<PlatformToolKey, boolean>;
 }> = {
   superadmin: {
     features: Object.keys(SIDEBAR_FEATURES).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<FeatureKey, boolean>),
     sections: Object.keys(SECTIONS).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<SectionKey, boolean>),
-    l83Tools: Object.keys(L83_TOOLS).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<L83ToolKey, boolean>),
+    platformTools: Object.keys(PLATFORM_TOOLS).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<PlatformToolKey, boolean>),
   },
   admin: {
     features: Object.keys(SIDEBAR_FEATURES).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<FeatureKey, boolean>),
     sections: Object.keys(SECTIONS).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<SectionKey, boolean>),
-    l83Tools: Object.keys(L83_TOOLS).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<L83ToolKey, boolean>),
+    platformTools: Object.keys(PLATFORM_TOOLS).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<PlatformToolKey, boolean>),
   },
   team: {
     features: {
@@ -119,31 +111,24 @@ export const DEFAULT_ROLE_VISIBILITY: Record<UserRole, {
       growthIqQuiz: false,
     },
     sections: Object.keys(SECTIONS).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<SectionKey, boolean>),
-    l83Tools: Object.keys(L83_TOOLS).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<L83ToolKey, boolean>),
+    platformTools: Object.keys(PLATFORM_TOOLS).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<PlatformToolKey, boolean>),
   },
   affiliate: {
     features: {
       commandCenter: true,
-      opportunities: true,
       projects: false,
       affiliates: false,
       customers: false,
       apolloSearch: false,
-      supplierSearch: false,
       documents: true,
       calendar: true,
       availability: true,
       meetings: true,
-      rocks: false,
       networking: true,
-      deals: true,
       linkedinContent: false,
-      eos2: false,
       docuseal: true,
       aiWorkforce: false,
       proposals: true,
-      gohighlevel: false,
-      ghlMigration: false,
       bugTracker: false,
       svpTools: false,
       systemDocs: false,
@@ -160,7 +145,6 @@ export const DEFAULT_ROLE_VISIBILITY: Record<UserRole, {
       successStories: false,
       academyAdmin: false,
       revenueConfig: false,
-      alignable: false,
       pageDesigner: false,
       navigationManager: false,
       backups: false,
@@ -168,14 +152,14 @@ export const DEFAULT_ROLE_VISIBILITY: Record<UserRole, {
       tbmncSuppliers: false,
     },
     sections: {
-      icyFocused: false,
+      adminFocused: false,
       navigation: true,
       work: true,
       intelligence: true,
       admin: false,
       initiatives: false,
     },
-    l83Tools: {
+    platformTools: {
       transcription: true,
       imageGen: false,
       headshot: true,
@@ -188,26 +172,19 @@ export const DEFAULT_ROLE_VISIBILITY: Record<UserRole, {
   consultant: {
     features: {
       commandCenter: true,
-      opportunities: true,
       projects: true,
       affiliates: false,
       customers: true,
       apolloSearch: true,
-      supplierSearch: true,
       documents: true,
       calendar: true,
       availability: true,
       meetings: true,
-      rocks: true,
       networking: true,
-      deals: true,
       linkedinContent: true,
-      eos2: true,
       docuseal: true,
       aiWorkforce: true,
       proposals: true,
-      gohighlevel: false,
-      ghlMigration: false,
       bugTracker: false,
       svpTools: true,
       systemDocs: true,
@@ -224,7 +201,6 @@ export const DEFAULT_ROLE_VISIBILITY: Record<UserRole, {
       successStories: false,
       academyAdmin: false,
       revenueConfig: false,
-      alignable: false,
       pageDesigner: false,
       navigationManager: false,
       backups: false,
@@ -232,14 +208,14 @@ export const DEFAULT_ROLE_VISIBILITY: Record<UserRole, {
       tbmncSuppliers: false,
     },
     sections: {
-      icyFocused: false,
+      adminFocused: false,
       navigation: true,
       work: true,
       intelligence: true,
       admin: false,
       initiatives: false,
     },
-    l83Tools: Object.keys(L83_TOOLS).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<L83ToolKey, boolean>),
+    platformTools: Object.keys(PLATFORM_TOOLS).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<PlatformToolKey, boolean>),
   },
 };
 
@@ -247,7 +223,7 @@ export interface FeatureVisibilitySettings {
   roleVisibility: Record<UserRole, {
     features: Record<FeatureKey, boolean>;
     sections: Record<SectionKey, boolean>;
-    l83Tools: Record<L83ToolKey, boolean>;
+    platformTools: Record<PlatformToolKey, boolean>;
   }>;
   updatedAt?: Date;
   updatedBy?: string;
@@ -266,10 +242,26 @@ function mergeRoleVisibility(
     const storedRole = stored[role];
     if (!storedRole) continue;
 
+    // Legacy keys from before the admin/tools rename, if present in stored data.
+    const legacy = storedRole as typeof storedRole & {
+      sections?: Record<string, boolean> & { icyFocused?: boolean };
+      l83Tools?: Record<PlatformToolKey, boolean>;
+    };
+
     merged[role] = {
       features: { ...DEFAULT_ROLE_VISIBILITY[role].features, ...storedRole.features },
-      sections: { ...DEFAULT_ROLE_VISIBILITY[role].sections, ...storedRole.sections },
-      l83Tools: { ...DEFAULT_ROLE_VISIBILITY[role].l83Tools, ...storedRole.l83Tools },
+      sections: {
+        ...DEFAULT_ROLE_VISIBILITY[role].sections,
+        ...legacy.sections,
+        adminFocused:
+          legacy.sections?.adminFocused ??
+          legacy.sections?.icyFocused ??
+          DEFAULT_ROLE_VISIBILITY[role].sections.adminFocused,
+      },
+      platformTools: {
+        ...DEFAULT_ROLE_VISIBILITY[role].platformTools,
+        ...(storedRole.platformTools ?? legacy.l83Tools),
+      },
     };
   }
 
@@ -381,15 +373,15 @@ export function isSectionVisible(
   return roleSettings.sections[sectionKey] ?? true;
 }
 
-// Check if an L83 tool is visible for a role
-export function isL83ToolVisible(
-  toolKey: L83ToolKey,
+// Check if an Platform tool is visible for a role
+export function isPlatformToolVisible(
+  toolKey: PlatformToolKey,
   role: UserRole,
   settings: FeatureVisibilitySettings
 ): boolean {
   const roleSettings = settings.roleVisibility[role];
   if (!roleSettings) return true;
-  return roleSettings.l83Tools[toolKey] ?? true;
+  return roleSettings.platformTools[toolKey] ?? true;
 }
 
 // Get all visible features for a role
@@ -402,12 +394,12 @@ export function getVisibleFeatures(
   );
 }
 
-// Get all visible L83 tools for a role
-export function getVisibleL83Tools(
+// Get all visible Platform tools for a role
+export function getVisiblePlatformTools(
   role: UserRole,
   settings: FeatureVisibilitySettings
-): L83ToolKey[] {
-  return (Object.keys(L83_TOOLS) as L83ToolKey[]).filter(
-    (key) => isL83ToolVisible(key, role, settings)
+): PlatformToolKey[] {
+  return (Object.keys(PLATFORM_TOOLS) as PlatformToolKey[]).filter(
+    (key) => isPlatformToolVisible(key, role, settings)
   );
 }

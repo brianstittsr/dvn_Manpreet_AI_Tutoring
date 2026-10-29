@@ -20,11 +20,6 @@ export const TOOL_DEFINITIONS: Record<ToolType, { name: string; description: str
     description: 'Search and enrich contact data from Apollo.io',
     icon: 'Search'
   },
-  'supplier-search': { 
-    name: 'Supplier Search', 
-    description: 'Search ThomasNet for manufacturing suppliers',
-    icon: 'Factory'
-  },
   'ai-workforce': { 
     name: 'AI Workforce', 
     description: 'AI-powered virtual team members and assistants',
@@ -40,11 +35,6 @@ export const TOOL_DEFINITIONS: Record<ToolType, { name: string; description: str
     description: 'Electronic document signing and management',
     icon: 'PenTool'
   },
-  'gohighlevel': { 
-    name: 'GoHighLevel CRM', 
-    description: 'CRM integration with GoHighLevel',
-    icon: 'Users'
-  },
   'linkedin-content': { 
     name: 'LinkedIn Content', 
     description: 'AI-powered LinkedIn content generation',
@@ -54,11 +44,6 @@ export const TOOL_DEFINITIONS: Record<ToolType, { name: string; description: str
     name: 'Bug Tracker', 
     description: 'Track and manage software bugs and issues',
     icon: 'Bug'
-  },
-  'traction': { 
-    name: 'Traction/EOS', 
-    description: 'EOS Traction tools for business management',
-    icon: 'Target'
   },
   'networking': { 
     name: 'Networking', 

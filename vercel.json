@@ -1,21 +1,3 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "crons": [
-    {
-      "path": "/api/eos2/scheduled-checks?check=todos",
-      "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/eos2/scheduled-checks?check=rocks",
-      "schedule": "0 9 * * 1"
-    },
-    {
-      "path": "/api/eos2/scheduled-checks?check=metrics",
-      "schedule": "0 9 * * 1"
-    },
-    {
-      "path": "/api/eos2/weekly-digest",
-      "schedule": "0 8 * * 1"
-    }
-  ]
+  "$schema": "https://openapi.vercel.sh/vercel.json"
 }

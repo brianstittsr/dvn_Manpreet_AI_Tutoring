@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exchangeMicrosoftCode, TRACTION_MS_SCOPES } from "@/lib/microsoft-graph";
+import { exchangeMicrosoftCode, MS_SCOPES } from "@/lib/microsoft-graph";
 import { saveCalendarIntegration } from "@/lib/calendar-sync-service";
 
 export async function GET(request: NextRequest) {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       clientSecret: process.env.MICROSOFT_CLIENT_SECRET || "",
       tenantId: process.env.MICROSOFT_TENANT_ID || "common",
       redirectUri: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/calendar/microsoft/callback`,
-      scopes: TRACTION_MS_SCOPES,
+      scopes: MS_SCOPES,
     };
 
     const result = await exchangeMicrosoftCode(config, code);

@@ -85,7 +85,7 @@ interface GeneratedContent {
 }
 
 // Default prompt template
-const DEFAULT_ARTICLE_PROMPT = `Please write a friendly, detailed, comprehensive, thoughtful, balanced, engaging, compelling, fact-checked, conversational, long-form SEO-optimized LinkedIn article for business owners and executives about [TOPIC]. Do not use favicons or emoticons. The article should align with Legacy 83 Business Inc's mission: empowering business leaders to build wealth, inspire teams, and leave lasting legacies. Include verifiable examples, data, and statistics where possible. At the end of the article, cite true references with clean links (no tracking). Expand paragraphs. Appropriately promote Legacy 83 Business coaching, strategic planning, leadership development, and operational excellence services. The call to action is to schedule a discovery call or strategic planning session at https://legacy83business.com/schedule-a-call to learn how Legacy 83 helps leaders (1) clarify their vision, (2) build high-performing teams, and (3) create a lasting legacy for their families and communities. At the end, give a glossary of unfamiliar words and acronyms, a list of resources with clean links for further research, and hash-tagged keywords in a row that are directly relevant to the article topic and Legacy 83's legacy planning and business coaching services.`;
+const DEFAULT_ARTICLE_PROMPT = `Please write a friendly, detailed, comprehensive, thoughtful, balanced, engaging, compelling, fact-checked, conversational, long-form SEO-optimized LinkedIn article for business owners and executives about [TOPIC]. Do not use favicons or emoticons. The article should align with AICenter4U's mission: empowering business leaders to build wealth, inspire teams, and leave lasting legacies. Include verifiable examples, data, and statistics where possible. At the end of the article, cite true references with clean links (no tracking). Expand paragraphs. Appropriately promote AICenter4U coaching, strategic planning, leadership development, and operational excellence services. The call to action is to schedule a discovery call or strategic planning session at https://aicenter4u.com/schedule-a-call to learn how AICenter4U helps leaders (1) clarify their vision, (2) build high-performing teams, and (3) create a lasting legacy for their families and communities. At the end, give a glossary of unfamiliar words and acronyms, a list of resources with clean links for further research, and hash-tagged keywords in a row that are directly relevant to the article topic and AICenter4U's legacy planning and business coaching services.`;
 
 export default function LinkedInContentPage() {
   const { linkedTeamMember } = useUserProfile();
@@ -407,9 +407,9 @@ I'd love to hear your thoughts and experiences with ${topic}. What strategies ha
     ];
     
     const generatedReferences: ReferenceLink[] = [
-      { id: "ref-1", title: "Legacy 83 Business - Strategic Planning & Coaching", url: "https://legacy83business.com/services/strategic-planning", status: "valid" },
-      { id: "ref-2", title: "Schedule a Discovery Call", url: "https://legacy83business.com/schedule-a-call", status: "valid" },
-      { id: "ref-3", title: "The Legacy Journal", url: "https://legacy83business.com/legacy-journal", status: "valid" },
+      { id: "ref-1", title: "AICenter4U - Strategic Planning & Coaching", url: "https://aicenter4u.com/services/strategic-planning", status: "valid" },
+      { id: "ref-2", title: "Schedule a Discovery Call", url: "https://aicenter4u.com/schedule-a-call", status: "valid" },
+      { id: "ref-3", title: "The Journal", url: "https://aicenter4u.com/journal", status: "valid" },
     ];
     
     const generated: GeneratedContent = {
@@ -421,7 +421,7 @@ I'd love to hear your thoughts and experiences with ${topic}. What strategies ha
         "BusinessCoaching",
         "StrategicPlanning",
         "LeadershipDevelopment",
-        "Legacy83Business",
+        "AICenter4UBusiness",
         "WealthBuilding",
         "FamilyBusiness",
         "OperationalExcellence",
@@ -1037,7 +1037,7 @@ What's your take on ${articleTopic.toLowerCase()}? I'd love to start a conversat
                         value={editedHashtags}
                         onChange={(e) => setEditedHashtags(e.target.value)}
                         rows={2}
-                        placeholder="#LegacyPlanning #BusinessCoaching #StrategicPlanning #Legacy83Business..."
+                        placeholder="#LegacyPlanning #BusinessCoaching #StrategicPlanning #AICenter4UBusiness..."
                         className="text-sm"
                       />
                     </CardContent>

@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Services | Legacy 83 Business",
+  title: "Services | AICenter4U",
   description:
-    "Explore Legacy 83's business coaching services: Strategic Planning, Leadership Coaching, Operational Excellence, and Legacy Transition. Build a business that outlasts you.",
+    "Explore AICenter4U's business coaching services: Strategic Planning, Leadership Coaching, Operational Excellence, and Legacy Transition. Build a business that outlasts you.",
 };
 
 const services = [
@@ -286,7 +286,7 @@ export default function ServicesPage() {
           </h2>
           <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
             Take our free Legacy Growth IQ™ Quiz to discover what's holding your business back, 
-            or schedule a complimentary strategy call with Icy.
+            or schedule a complimentary strategy call with Manpreet.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
             <Button

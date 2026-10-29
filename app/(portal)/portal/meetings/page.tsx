@@ -84,7 +84,6 @@ interface MeetingData {
   attendees?: string[];
   opportunityId?: string;
   projectId?: string;
-  rockId?: string;
   notes?: string;
   transcript?: string;
   recordingUrl?: string;
@@ -217,7 +216,6 @@ export default function MeetingsPage() {
             attendees: data.attendees || [],
             opportunityId: (data as any).opportunityId,
             projectId: (data as any).projectId,
-            rockId: data.rockId,
             notes: (data as any).notes,
             transcript: (data as any).transcript,
             recordingUrl: (data as any).recordingUrl,

@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * Multi-Schema Deployment Script for Legacy83 Platform
+ * Multi-Schema Deployment Script for AICenter4U Platform
  * 
  * Supports deploying the same schema structure to multiple PostgreSQL schemas
  * for multi-tenant or multi-instance deployments.
  * 
  * Usage:
- *   node scripts/deploy-schema-multi.js legacy83
+ *   node scripts/deploy-schema-multi.js aicenter4u
  *   node scripts/deploy-schema-multi.js svp_platform
  *   node scripts/deploy-schema-multi.js client_alpha
  */
@@ -39,7 +39,7 @@ function logSection(title) {
 }
 
 async function deploySchemaToNamespace(schemaName) {
-  logSection(`🚀 Legacy83 Platform - Multi-Schema Deployment`);
+  logSection(`🚀 AICenter4U Platform - Multi-Schema Deployment`);
   
   log(`Target Schema: ${schemaName}`, 'cyan');
   log(`Database: ${process.env.DATABASE_URL?.split('@')[1]?.split('/')[0] || 'Unknown'}`, 'cyan');
@@ -58,7 +58,7 @@ async function deploySchemaToNamespace(schemaName) {
   if (!schemaName || !/^[a-z0-9_]+$/i.test(schemaName)) {
     log('❌ ERROR: Invalid schema name', 'red');
     log('\nSchema name must contain only letters, numbers, and underscores', 'yellow');
-    log('Examples: legacy83, svp_platform, client_alpha', 'cyan');
+    log('Examples: aicenter4u, svp_platform, client_alpha', 'cyan');
     process.exit(1);
   }
 
@@ -198,7 +198,7 @@ if (!schemaName) {
   log('\nUsage:', 'yellow');
   log('  node scripts/deploy-schema-multi.js <schema_name>', 'cyan');
   log('\nExamples:', 'yellow');
-  log('  node scripts/deploy-schema-multi.js legacy83', 'cyan');
+  log('  node scripts/deploy-schema-multi.js aicenter4u', 'cyan');
   log('  node scripts/deploy-schema-multi.js svp_platform', 'cyan');
   log('  node scripts/deploy-schema-multi.js client_alpha', 'cyan');
   process.exit(1);

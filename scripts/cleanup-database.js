@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Database Cleanup Script for Legacy83 Platform
+ * Database Cleanup Script for AICenter4U Platform
  * 
  * This script helps you clean up existing tables before redeploying.
  * 
@@ -9,8 +9,8 @@
  * 
  * Usage:
  *   node scripts/cleanup-database.js              # Drop all tables in public schema
- *   node scripts/cleanup-database.js legacy83     # Drop entire legacy83 schema
- *   node scripts/cleanup-database.js --schema legacy83  # Drop all tables in legacy83 schema
+ *   node scripts/cleanup-database.js aicenter4u     # Drop entire aicenter4u schema
+ *   node scripts/cleanup-database.js --schema aicenter4u  # Drop all tables in aicenter4u schema
  */
 
 require('dotenv').config({ path: '.env.local' });
@@ -185,8 +185,8 @@ if (args.includes('--help') || args.includes('-h')) {
   log('Database Cleanup Script', 'bright');
   log('\nUsage:', 'cyan');
   log('  node scripts/cleanup-database.js                    # Drop all tables in public schema', 'yellow');
-  log('  node scripts/cleanup-database.js legacy83           # Drop entire legacy83 schema', 'yellow');
-  log('  node scripts/cleanup-database.js --schema legacy83  # Drop tables in legacy83 schema (keep schema)', 'yellow');
+  log('  node scripts/cleanup-database.js aicenter4u           # Drop entire aicenter4u schema', 'yellow');
+  log('  node scripts/cleanup-database.js --schema aicenter4u  # Drop tables in aicenter4u schema (keep schema)', 'yellow');
   log('\nOptions:', 'cyan');
   log('  --schema <name>  Drop tables but keep the schema', 'yellow');
   log('  --help, -h       Show this help message', 'yellow');

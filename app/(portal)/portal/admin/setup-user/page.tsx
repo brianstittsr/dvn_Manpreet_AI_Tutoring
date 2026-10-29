@@ -13,7 +13,7 @@ export default function SetupUserPage() {
   const [result, setResult] = useState<any>(null);
   const { linkedTeamMember, refreshLinkedTeamMember } = useUserProfile();
 
-  const setupIcyWilliams = async () => {
+  const setupManpreetHundal = async () => {
     if (!db) {
       toast.error("Firebase not initialized");
       return;
@@ -21,7 +21,7 @@ export default function SetupUserPage() {
 
     setLoading(true);
     try {
-      const ICY_EMAIL = "info@legacy83business.com";
+      const ICY_EMAIL = "info@aicenter4u.com";
       const now = Timestamp.now();
 
       // Check if there's already a team member with this email
@@ -41,7 +41,7 @@ export default function SetupUserPage() {
         
         // Update existing team member with superadmin role AND name
         await updateDoc(existingTeamMember.ref, {
-          firstName: "Icy",
+          firstName: "Manpreet",
           lastName: "Williams",
           role: "superadmin",
           updatedAt: now,
@@ -56,7 +56,7 @@ export default function SetupUserPage() {
         await setDoc(newTeamMemberRef, {
           id: teamMemberId,
           emailPrimary: ICY_EMAIL,
-          firstName: "Icy",
+          firstName: "Manpreet",
           lastName: "Williams",
           expertise: "",
           role: "superadmin",
@@ -72,9 +72,9 @@ export default function SetupUserPage() {
         await setDoc(userRef, {
           id: firebaseUid,
           email: ICY_EMAIL,
-          firstName: "Icy",
+          firstName: "Manpreet",
           lastName: "Williams",
-          displayName: "Icy Williams",
+          displayName: "Manpreet Hundal",
           role: "superadmin",
           status: "active",
           createdAt: now,
@@ -95,7 +95,7 @@ export default function SetupUserPage() {
         previousData: currentData,
       });
 
-      toast.success("Icy Williams setup complete! Please sign out and sign back in to see changes.");
+      toast.success("Manpreet Hundal setup complete! Please sign out and sign back in to see changes.");
     } catch (error) {
       console.error("Error setting up user:", error);
       toast.error("Failed to setup user: " + String(error));
@@ -111,7 +111,7 @@ export default function SetupUserPage() {
         <CardHeader>
           <CardTitle>Setup Admin User</CardTitle>
           <CardDescription>
-            Create User document for Icy Williams and link to authentication
+            Create User document for Manpreet Hundal and link to authentication
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -131,18 +131,18 @@ export default function SetupUserPage() {
           <div className="p-4 bg-muted rounded-lg">
             <p className="font-medium">Will Update To:</p>
             <ul className="mt-2 space-y-1 text-sm">
-              <li><strong>Name:</strong> Icy Williams</li>
-              <li><strong>Email:</strong> info@legacy83business.com</li>
+              <li><strong>Name:</strong> Manpreet Hundal</li>
+              <li><strong>Email:</strong> info@aicenter4u.com</li>
               <li><strong>Role:</strong> Admin</li>
             </ul>
           </div>
 
           <Button 
-            onClick={setupIcyWilliams} 
+            onClick={setupManpreetHundal} 
             disabled={loading}
             className="w-full"
           >
-            {loading ? "Setting up..." : "Create/Update Icy Williams as Admin"}
+            {loading ? "Setting up..." : "Create/Update Manpreet Hundal as Admin"}
           </Button>
 
           {result && (

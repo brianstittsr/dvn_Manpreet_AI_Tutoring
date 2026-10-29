@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { TRACTION_MS_SCOPES } from "@/lib/microsoft-graph";
+import { MS_SCOPES } from "@/lib/microsoft-graph";
 
 // Get Microsoft config from environment
 function getMicrosoftConfig() {
@@ -22,7 +22,7 @@ function getMicrosoftConfig() {
     clientId,
     tenantId,
     redirectUri,
-    scopes: TRACTION_MS_SCOPES,
+    scopes: MS_SCOPES,
   };
 }
 

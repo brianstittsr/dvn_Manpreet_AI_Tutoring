@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { authedJsonHeaders } from "@/lib/api-client";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -227,10 +228,10 @@ export default function ProjectDetailPage() {
     try {
       const res = await fetch("/api/notifications/sms", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authedJsonHeaders(),
         body: JSON.stringify({
           to: ["+15133351978", "+19196083415"],
-          body: `Legacy 83 milestone reminder: "${milestone.name}" in project "${project?.name || "Unknown"}" is due ${milestone.dueDate.toLocaleDateString("en-US")}. Status: ${getMilestoneStatusLabel(milestone.status)}.`,
+          body: `AICenter4U milestone reminder: "${milestone.name}" in project "${project?.name || "Unknown"}" is due ${milestone.dueDate.toLocaleDateString("en-US")}. Status: ${getMilestoneStatusLabel(milestone.status)}.`,
         }),
       });
       const result = await res.json();
@@ -297,10 +298,10 @@ export default function ProjectDetailPage() {
 
       const res = await fetch("/api/notifications/sms", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authedJsonHeaders(),
         body: JSON.stringify({
           to: ["+15133351978", "+19196083415"],
-          body: `Legacy 83 upcoming milestone reminders for "${project.name}":\n${body}`,
+          body: `AICenter4U upcoming milestone reminders for "${project.name}":\n${body}`,
         }),
       });
       const result = await res.json();

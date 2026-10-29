@@ -30,7 +30,7 @@ const fallbackTeam: LeadershipMember[] = [
     bio: "20+ years in manufacturing consulting and supplier development.",
     avatar: "/team/ceo.jpg",
     linkedIn: "#",
-    email: "ceo@legacy83business.com",
+    email: "ceo@aicenter4u.com",
     leadershipRole: "CEO",
   },
   {
@@ -40,7 +40,7 @@ const fallbackTeam: LeadershipMember[] = [
     bio: "Expert in lean manufacturing and Industry 4.0 transformation.",
     avatar: "/team/ops.jpg",
     linkedIn: "#",
-    email: "ops@legacy83business.com",
+    email: "ops@aicenter4u.com",
     leadershipRole: "COO",
   },
   {
@@ -50,7 +50,7 @@ const fallbackTeam: LeadershipMember[] = [
     bio: "ISO Lead Auditor with extensive QMS implementation experience.",
     avatar: "/team/quality.jpg",
     linkedIn: "#",
-    email: "quality@legacy83business.com",
+    email: "quality@aicenter4u.com",
     leadershipRole: "CRO",
   },
   {
@@ -60,7 +60,7 @@ const fallbackTeam: LeadershipMember[] = [
     bio: "Specializes in digital twin technology and manufacturing automation.",
     avatar: "/team/cto.jpg",
     linkedIn: "#",
-    email: "cto@legacy83business.com",
+    email: "cto@aicenter4u.com",
     leadershipRole: "CTO",
   },
 ];

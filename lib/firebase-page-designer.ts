@@ -257,7 +257,7 @@ export const PUBLIC_PAGES: PublicPage[] = [
     id: "about",
     path: "/about",
     name: "About",
-    description: "Company story, Icy Williams bio, and mission",
+    description: "Company story, Manpreet Hundal bio, and mission",
     sections: [
       { id: "hero", name: "About Hero", type: "hero", order: 1, isEditable: true },
       { id: "founder-story", name: "Founder Story", type: "content", order: 2, isEditable: true },
@@ -376,9 +376,9 @@ export const PUBLIC_PAGES: PublicPage[] = [
     ],
   },
   {
-    id: "legacy-journal",
-    path: "/legacy-journal",
-    name: "Legacy Journal",
+    id: "journal",
+    path: "/journal",
+    name: "Journal",
     description: "Insights, articles, and thought leadership",
     sections: [
       { id: "hero", name: "Journal Hero", type: "hero", order: 1, isEditable: true },

@@ -231,7 +231,7 @@ export default function AccessibilityPage() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button asChild>
-                <Link href="mailto:info@legacy83business.com">
+                <Link href="mailto:info@aicenter4u.com">
                   <Mail className="mr-2 h-4 w-4" />
                   Email Us
                 </Link>

@@ -1,5 +1,5 @@
 /**
- * Legacy 83 Academy LMS Types
+ * AICenter4U Academy LMS Types
  * TypeScript definitions for the Learning Management System
  */
 
@@ -45,7 +45,28 @@ export interface UserSubscription {
 // ============================================================================
 
 export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
-export type ContentType = 'video' | 'text' | 'quiz' | 'assignment' | 'download' | 'live';
+export type ContentType = 'video' | 'text' | 'quiz' | 'assignment' | 'download' | 'live' | 'gptLesson';
+export type GPTLessonStage = 'notice' | 'try' | 'challenge' | 'verify' | 'reflect' | 'transfer';
+export type GPTTutorPersona = 'generic' | 'math' | 'reading' | 'lifeSkills' | 'custom';
+export type GPTLessonAudience = 'adult' | 'minor';
+
+export interface GPTLessonConfig {
+  topicArea: string;
+  learningObjective: string;
+  audience: GPTLessonAudience;
+  gradeBand: string | null;
+  prerequisites: string[];
+  tutorPersona: GPTTutorPersona;
+  customPersonaInstructions: string | null;
+  estimatedDurationMinutes: number | null;
+  maxHints: number;
+  requiresGuardianConsent: boolean;
+  requiresInstructorReview: boolean;
+  quizPassingPercentage: number;
+  rubricPassingScore: number;
+  maxTransferAttempts: number;
+  promptVersion: string;
+}
 
 export interface CourseCategory {
   id: string;
@@ -111,6 +132,7 @@ export interface Lesson {
   videoDurationSeconds: number | null;
   textContent: string | null;
   downloadUrl: string | null;
+  gptConfig?: GPTLessonConfig | null;
   isPreview: boolean;
   sortOrder: number;
   createdAt: string;
@@ -403,6 +425,7 @@ export function getContentTypeIcon(type: ContentType): string {
     assignment: 'ClipboardList',
     download: 'Download',
     live: 'Radio',
+    gptLesson: 'Sparkles',
   };
   return icons[type];
 }

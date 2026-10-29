@@ -27,14 +27,12 @@ import {
   LogOut,
   User,
   Sparkles,
-  Target,
   FolderKanban,
   Calendar,
   FileText,
 } from "lucide-react";
 
 const quickActions = [
-  { title: "New Opportunity", href: "/portal/opportunities/new", icon: Target },
   { title: "New Project", href: "/portal/projects/new", icon: FolderKanban },
   { title: "Upload Document", href: "/portal/documents/new", icon: FileText },
 ];
@@ -60,7 +58,7 @@ const notifications = [
   },
   {
     id: 4,
-    title: "Rock deadline approaching: Q1 Goals",
+    title: "Meeting reminder: Q1 planning session",
     time: "2 hours ago",
     unread: false,
   },

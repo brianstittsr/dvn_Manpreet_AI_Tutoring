@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGoogleAuthUrl, GOOGLE_CALENDAR_SCOPES } from "@/lib/google-calendar";
-import { getMicrosoftAuthUrl, TRACTION_MS_SCOPES } from "@/lib/microsoft-graph";
+import { getMicrosoftAuthUrl, MS_SCOPES } from "@/lib/microsoft-graph";
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         clientSecret: process.env.MICROSOFT_CLIENT_SECRET || "",
         tenantId: process.env.MICROSOFT_TENANT_ID || "common",
         redirectUri: `${baseUrl}/api/calendar/microsoft/callback`,
-        scopes: TRACTION_MS_SCOPES,
+        scopes: MS_SCOPES,
       };
 
       if (!config.clientId) {

@@ -1,21 +1,21 @@
-import { Legacy83HeroCarousel } from "@/components/marketing/legacy83-hero-carousel";
-import { Legacy83ServicesOverview } from "@/components/marketing/legacy83-services-overview";
-import { Legacy83StatsSection } from "@/components/marketing/legacy83-stats-section";
-import { Legacy83HowItWorks } from "@/components/marketing/legacy83-how-it-works";
-import { Legacy83Testimonials } from "@/components/marketing/legacy83-testimonials";
-import { Legacy83FAQSection } from "@/components/marketing/legacy83-faq-section";
-import { Legacy83CTASection } from "@/components/marketing/legacy83-cta-section";
+import { AICenter4UHeroCarousel } from "@/components/marketing/aicenter4u-hero-carousel";
+import { AICenter4UServicesOverview } from "@/components/marketing/aicenter4u-services-overview";
+import { AICenter4UStatsSection } from "@/components/marketing/aicenter4u-stats-section";
+import { AICenter4UHowItWorks } from "@/components/marketing/aicenter4u-how-it-works";
+import { AICenter4UTestimonials } from "@/components/marketing/aicenter4u-testimonials";
+import { AICenter4UFAQSection } from "@/components/marketing/aicenter4u-faq-section";
+import { AICenter4UCTASection } from "@/components/marketing/aicenter4u-cta-section";
 
 export default function HomePage() {
   return (
     <>
-      <Legacy83HeroCarousel />
-      <Legacy83ServicesOverview />
-      <Legacy83HowItWorks />
-      <Legacy83StatsSection />
-      <Legacy83Testimonials />
-      <Legacy83FAQSection />
-      <Legacy83CTASection />
+      <AICenter4UHeroCarousel />
+      <AICenter4UServicesOverview />
+      <AICenter4UHowItWorks />
+      <AICenter4UStatsSection />
+      <AICenter4UTestimonials />
+      <AICenter4UFAQSection />
+      <AICenter4UCTASection />
     </>
   );
 }

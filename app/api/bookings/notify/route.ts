@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { buildGoogleCalendarLink, buildOutlookCalendarLink, encodeICSForDataUri } from "@/lib/calendar-invite";
+import { rateLimit } from "@/lib/rate-limit";
 
-const INTERNAL_NOTIFY_EMAIL = "info@legacy83business.com";
-const FROM_EMAIL = process.env.GMAIL_SMTP_USER || "bookings@legacy83business.com";
+const INTERNAL_NOTIFY_EMAIL = "info@aicenter4u.com";
+const FROM_EMAIL = process.env.GMAIL_SMTP_USER || "bookings@aicenter4u.com";
 
 interface BookingNotificationRequest {
   bookingId: string;
@@ -60,7 +61,7 @@ function buildICS(params: {
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Legacy83 Business//Booking System//EN",
+    "PRODID:-//AICenter4U Business//Booking System//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:REQUEST",
     "BEGIN:VEVENT",
@@ -70,7 +71,7 @@ function buildICS(params: {
     `DTEND:${end}`,
     `SUMMARY:${escapedSummary}`,
     `DESCRIPTION:${escapedDescription}`,
-    `ORGANIZER;CN=Legacy 83 Business:mailto:${organizer}`,
+    `ORGANIZER;CN=AICenter4U:mailto:${organizer}`,
     `ATTENDEE;CN=${attendeeName};RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:${attendeeEmail}`,
     "STATUS:CONFIRMED",
     "SEQUENCE:0",
@@ -118,7 +119,7 @@ function buildClientHTML(params: {
     <html>
     <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #C8A951; margin-bottom: 4px;">Legacy 83 Business</h1>
+        <h1 style="color: #C8A951; margin-bottom: 4px;">AICenter4U</h1>
         <p style="color: #666; margin: 0;">Meeting Confirmation</p>
       </div>
 
@@ -158,7 +159,7 @@ function buildClientHTML(params: {
       </p>
 
       <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px;">
-        <p>Legacy 83 Business Inc. &bull; <a href="mailto:info@legacy83business.com" style="color: #C8A951;">info@legacy83business.com</a></p>
+        <p>AICenter4U &bull; <a href="mailto:info@aicenter4u.com" style="color: #C8A951;">info@aicenter4u.com</a></p>
       </div>
     </body>
     </html>
@@ -197,7 +198,7 @@ function buildInternalHTML(params: {
     <html>
     <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #C8A951; margin-bottom: 4px;">Legacy 83 Business</h1>
+        <h1 style="color: #C8A951; margin-bottom: 4px;">AICenter4U</h1>
         <p style="color: #666; margin: 0;">New Booking Notification</p>
       </div>
 
@@ -252,7 +253,7 @@ function buildInternalHTML(params: {
       </table>
 
       <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px;">
-        <p>Legacy 83 Business Inc. Internal Notification</p>
+        <p>AICenter4U Internal Notification</p>
       </div>
     </body>
     </html>
@@ -260,6 +261,8 @@ function buildInternalHTML(params: {
 }
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { scope: "bookings-notify", limit: 10, windowMs: 60_000 });
+  if (limited) return limited;
   try {
     const body: BookingNotificationRequest = await request.json();
     const {
@@ -300,7 +303,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Build .ics calendar invite content
-    const uid = `booking-${bookingId}@legacy83business.com`;
+    const uid = `booking-${bookingId}@aicenter4u.com`;
     const calendarSummary = `${meetingType} with ${teamMemberName}`;
     const calendarDescription = [
       `Meeting: ${meetingType}`,
@@ -356,7 +359,7 @@ export async function POST(request: NextRequest) {
     // 1. Confirmation email to the requester (client)
     try {
       await transporter.sendMail({
-        from: `"Legacy 83 Business" <${FROM_EMAIL}>`,
+        from: `"AICenter4U" <${FROM_EMAIL}>`,
         to: clientEmail,
         subject: `Meeting Confirmed: ${meetingType} on ${date} at ${time}`,
         html: buildClientHTML({
@@ -376,10 +379,10 @@ export async function POST(request: NextRequest) {
       errors.push("client");
     }
 
-    // 2. Notification email to info@legacy83business.com with calendar invite
+    // 2. Notification email to info@aicenter4u.com with calendar invite
     try {
       await transporter.sendMail({
-        from: `"Legacy 83 Bookings" <${FROM_EMAIL}>`,
+        from: `"AICenter4U Bookings" <${FROM_EMAIL}>`,
         to: INTERNAL_NOTIFY_EMAIL,
         subject: `New Booking: ${meetingType} with ${clientName} — ${date} at ${time}`,
         html: buildInternalHTML({

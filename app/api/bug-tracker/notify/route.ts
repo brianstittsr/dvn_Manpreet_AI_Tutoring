@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { rateLimit } from "@/lib/rate-limit";
 
-const INTERNAL_NOTIFY_EMAIL = "info@legacy83business.com";
+const INTERNAL_NOTIFY_EMAIL = "info@aicenter4u.com";
 const CC_EMAIL = "brianstittsr@gmail.com";
-const FROM_EMAIL = process.env.GMAIL_SMTP_USER || "bookings@legacy83business.com";
+const FROM_EMAIL = process.env.GMAIL_SMTP_USER || "bookings@aicenter4u.com";
 
 interface BugTrackerNotificationRequest {
   id: string;
@@ -34,6 +35,8 @@ interface BugTrackerNotificationRequest {
 }
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { scope: "bug-tracker-notify", limit: 10, windowMs: 60_000 });
+  if (limited) return limited;
   try {
     const body: BugTrackerNotificationRequest = await request.json();
 
@@ -203,7 +206,7 @@ export async function POST(request: NextRequest) {
     const subject = `Bug Tracker: ${typeLabel} Resolved - ${title}`;
 
     await transporter.sendMail({
-      from: `"Legacy 83 Business" <${gmailUser}>`,
+      from: `"AICenter4U" <${gmailUser}>`,
       to: INTERNAL_NOTIFY_EMAIL,
       cc: CC_EMAIL,
       subject,

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
+import { requireAuthenticatedActor, GPTLessonAuthError } from "@/lib/gpt-lesson-server";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -12,7 +14,10 @@ interface ChatRequest {
 }
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { scope: "ai-chat", limit: 30, windowMs: 60_000 });
+  if (limited) return limited;
   try {
+    await requireAuthenticatedActor(request);
     const body: ChatRequest = await request.json();
     const { message, systemPrompt, conversationHistory } = body;
 
@@ -53,6 +58,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ response });
   } catch (error) {
+    if (error instanceof GPTLessonAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("AI Chat error:", error);
     return NextResponse.json(
       { error: "Failed to generate response" },

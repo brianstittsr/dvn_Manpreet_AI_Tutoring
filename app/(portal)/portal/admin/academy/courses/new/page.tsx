@@ -33,7 +33,7 @@ export default function NewCoursePage() {
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [instructorName, setInstructorName] = useState("Icy Williams");
+  const [instructorName, setInstructorName] = useState("Manpreet Hundal");
   const [instructorBio, setInstructorBio] = useState("");
   const [difficultyLevel, setDifficultyLevel] = useState<DifficultyLevel>("beginner");
   const [estimatedDuration, setEstimatedDuration] = useState("");

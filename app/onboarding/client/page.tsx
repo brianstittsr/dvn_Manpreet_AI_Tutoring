@@ -281,14 +281,14 @@ export default function ClientOnboardingPage() {
         <div className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/legacy83Logo.webp"
+              src="/aicenter4u-logo.svg"
               alt="Strategic Value+ Logo"
               width={40}
               height={40}
               className="h-10 w-auto"
             />
             <div className="flex flex-col">
-              <span className="text-lg font-bold leading-none">Legacy 83</span>
+              <span className="text-lg font-bold leading-none">AICenter4U</span>
               <span className="text-xs text-muted-foreground">Client Onboarding</span>
             </div>
           </Link>
@@ -310,7 +310,7 @@ export default function ClientOnboardingPage() {
             </div>
             <h1 className="text-3xl font-bold mb-2">Client Registration</h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Complete your company profile to access Legacy 83 services and connect with our network of expert consultants.
+              Complete your company profile to access AICenter4U services and connect with our network of expert consultants.
             </p>
           </div>
 
@@ -825,7 +825,7 @@ export default function ClientOnboardingPage() {
                       id="primaryGoals"
                       value={formData.primaryGoals}
                       onChange={(e) => updateFormData("primaryGoals", e.target.value)}
-                      placeholder="What are your main objectives for working with Legacy 83?"
+                      placeholder="What are your main objectives for working with AICenter4U?"
                       rows={3}
                     />
                   </div>
@@ -901,7 +901,7 @@ export default function ClientOnboardingPage() {
                         <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
                       </Label>
                       <p className="text-sm text-muted-foreground mt-1">
-                        By submitting this form, you consent to Legacy 83 contacting you about our services.
+                        By submitting this form, you consent to AICenter4U contacting you about our services.
                       </p>
                     </div>
                   </div>

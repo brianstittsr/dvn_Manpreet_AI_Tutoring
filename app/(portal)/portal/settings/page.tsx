@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -19,15 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Eye,
   EyeOff,
   Save,
@@ -35,16 +25,12 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  MessageSquare,
   Zap,
   Video,
   Brain,
   Server,
-  Webhook,
   Key,
   RefreshCw,
-  Send,
-  User,
   Loader2,
   FileSignature,
   Bell,
@@ -60,9 +46,8 @@ import {
   Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { WEBHOOK_EVENTS, testWebhookConnection, sendToBrianStitt, type WebhookEventType } from "@/lib/mattermost";
 import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { COLLECTIONS, type PlatformSettingsDoc } from "@/lib/schema";
 import { logSettingsUpdated } from "@/lib/activity-logger";
 import { 
@@ -80,26 +65,12 @@ interface ApiKeyConfig {
   description: string;
   icon: React.ElementType;
   keyField: string;
-  webhookField?: string;
   additionalFields?: { name: string; label: string; placeholder: string }[];
   status: "connected" | "disconnected" | "error";
   lastTested?: string;
 }
 
 const apiConfigs: ApiKeyConfig[] = [
-  {
-    id: "mattermost",
-    name: "Mattermost",
-    description: "Team communication and collaboration platform",
-    icon: MessageSquare,
-    keyField: "Personal Access Token",
-    webhookField: "Incoming Webhook URL",
-    additionalFields: [
-      { name: "serverUrl", label: "Server URL", placeholder: "https://your-mattermost-server.com" },
-      { name: "teamId", label: "Team ID", placeholder: "team-id" },
-    ],
-    status: "disconnected",
-  },
   {
     id: "apollo",
     name: "Apollo.AI",
@@ -108,18 +79,6 @@ const apiConfigs: ApiKeyConfig[] = [
     keyField: "API Key",
     additionalFields: [
       { name: "accountId", label: "Account ID", placeholder: "your-account-id" },
-    ],
-    status: "disconnected",
-  },
-  {
-    id: "gohighlevel",
-    name: "GoHighLevel",
-    description: "All-in-one marketing and CRM platform",
-    icon: Zap,
-    keyField: "Private API Key",
-    additionalFields: [
-      { name: "locationId", label: "Location ID", placeholder: "location-id" },
-      { name: "agencyId", label: "Agency ID", placeholder: "agency-id" },
     ],
     status: "disconnected",
   },
@@ -160,15 +119,6 @@ const apiConfigs: ApiKeyConfig[] = [
     status: "disconnected",
   },
   {
-    id: "mercury",
-    name: "Mercury Bank",
-    description: "Business banking with API access for accounts and transactions",
-    icon: Server,
-    keyField: "API Token",
-    additionalFields: [],
-    status: "disconnected",
-  },
-  {
     id: "stripe",
     name: "Stripe",
     description: "Payment processing for event tickets and subscriptions",
@@ -200,15 +150,9 @@ function SettingsPageContent() {
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [apiKeys, setApiKeys] = useState<Record<string, Record<string, string>>>({});
   const [testingStatus, setTestingStatus] = useState<Record<string, "testing" | "success" | "error" | null>>({});
-  const [webhookEvents, setWebhookEvents] = useState<Record<WebhookEventType, boolean>>(
-    WEBHOOK_EVENTS.reduce((acc, event) => ({ ...acc, [event.type]: event.enabled }), {} as Record<WebhookEventType, boolean>)
-  );
-  const [brianStittMessage, setBrianStittMessage] = useState("");
-  const [brianStittDialogOpen, setBrianStittDialogOpen] = useState(false);
-  const [sendingMessage, setSendingMessage] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [hasChanges, setHasChanges] = useState(false);
   const [llmConfig, setLlmConfig] = useState({
     provider: "openai",
     model: "gpt-4o",
@@ -218,6 +162,7 @@ function SettingsPageContent() {
     baseUrl: "",
     useOpenAICompatible: false,
   });
+  const [llmHasApiKey, setLlmHasApiKey] = useState(false);
   
   // Social links settings
   const [socialLinks, setSocialLinks] = useState({
@@ -230,7 +175,6 @@ function SettingsPageContent() {
   
   // Notification sync settings
   const [notificationSettings, setNotificationSettings] = useState({
-    syncWithMattermost: true,
     inAppEnabled: true,
     browserEnabled: false,
     soundEnabled: false,
@@ -256,25 +200,10 @@ function SettingsPageContent() {
           if (data.integrations) {
             const loadedApiKeys: Record<string, Record<string, string>> = {};
             
-            if (data.integrations.mattermost) {
-              loadedApiKeys.mattermost = {
-                apiKey: data.integrations.mattermost.apiKey || "",
-                webhook: data.integrations.mattermost.webhookUrl || "",
-                serverUrl: data.integrations.mattermost.serverUrl || "",
-                teamId: data.integrations.mattermost.teamId || "",
-              };
-            }
             if (data.integrations.apollo) {
               loadedApiKeys.apollo = {
                 apiKey: data.integrations.apollo.apiKey || "",
                 accountId: data.integrations.apollo.accountId || "",
-              };
-            }
-            if (data.integrations.gohighlevel) {
-              loadedApiKeys.gohighlevel = {
-                apiKey: data.integrations.gohighlevel.apiKey || "",
-                locationId: data.integrations.gohighlevel.locationId || "",
-                agencyId: data.integrations.gohighlevel.agencyId || "",
               };
             }
             if (data.integrations.zoom) {
@@ -301,22 +230,18 @@ function SettingsPageContent() {
             setApiKeys(loadedApiKeys);
           }
           
-          // Load LLM config
+          // Public settings only carry non-secret LLM metadata.
           if (data.llmConfig) {
-            setLlmConfig({
-              provider: data.llmConfig.provider || "openai",
-              model: data.llmConfig.model || "gpt-4o",
-              apiKey: data.llmConfig.apiKey || "",
-              ollamaUrl: data.llmConfig.ollamaUrl || "http://localhost:11434",
-              useOllama: data.llmConfig.useOllama || false,
-              baseUrl: data.llmConfig.baseUrl || "",
-              useOpenAICompatible: data.llmConfig.useOpenAICompatible || false,
-            });
-          }
-          
-          // Load webhook events
-          if (data.webhookEvents) {
-            setWebhookEvents(prev => ({ ...prev, ...data.webhookEvents }));
+            setLlmConfig(prev => ({
+              ...prev,
+              provider: data.llmConfig?.provider || "openai",
+              model: data.llmConfig?.model || "gpt-4o",
+              apiKey: "",
+              ollamaUrl: data.llmConfig?.ollamaUrl || "http://localhost:11434",
+              useOllama: data.llmConfig?.useOllama || false,
+              baseUrl: data.llmConfig?.baseUrl || "",
+              useOpenAICompatible: data.llmConfig?.useOpenAICompatible || false,
+            }));
           }
           
           // Load notification settings
@@ -327,6 +252,62 @@ function SettingsPageContent() {
           // Load social links
           if (data.socialLinks) {
             setSocialLinks(prev => ({ ...prev, ...data.socialLinks }));
+          }
+        }
+
+        const token = await auth?.currentUser?.getIdToken();
+        if (token) {
+          const [llmResponse, integrationsResponse] = await Promise.all([
+            fetch("/api/settings/llm", { headers: { Authorization: `Bearer ${token}` } }),
+            fetch("/api/settings/integrations", { headers: { Authorization: `Bearer ${token}` } }),
+          ]);
+
+          const payload = await llmResponse.json().catch(() => null) as {
+            data?: {
+              provider?: string;
+              model?: string;
+              hasApiKey?: boolean;
+              ollamaUrl?: string;
+              useOllama?: boolean;
+              baseUrl?: string;
+              useOpenAICompatible?: boolean;
+            };
+          } | null;
+          if (llmResponse.ok && payload?.data) {
+            const llmData = payload.data;
+            setLlmConfig(prev => ({
+              ...prev,
+              provider: llmData.provider || prev.provider,
+              model: llmData.model || prev.model,
+              apiKey: "",
+              ollamaUrl: llmData.ollamaUrl || prev.ollamaUrl,
+              useOllama: llmData.useOllama || false,
+              baseUrl: llmData.baseUrl || "",
+              useOpenAICompatible: llmData.useOpenAICompatible || false,
+            }));
+            setLlmHasApiKey(llmData.hasApiKey === true);
+          }
+
+          const integrationsPayload = await integrationsResponse.json().catch(() => null) as {
+            data?: {
+              integrations?: Record<string, Record<string, unknown>>;
+            };
+          } | null;
+          if (integrationsResponse.ok && integrationsPayload?.data?.integrations) {
+            const serverIntegrations = integrationsPayload.data.integrations;
+            setApiKeys(prev => {
+              const next = { ...prev };
+              for (const config of apiConfigs) {
+                const entry = serverIntegrations[config.id];
+                if (!entry) continue;
+                const merged: Record<string, string> = {};
+                for (const [key, value] of Object.entries(entry)) {
+                  if (typeof value === "string") merged[key] = value;
+                }
+                next[config.id] = merged;
+              }
+              return next;
+            });
           }
         }
       } catch (error) {
@@ -351,63 +332,101 @@ function SettingsPageContent() {
     setSaving(true);
     try {
       const docRef = doc(db, COLLECTIONS.PLATFORM_SETTINGS, SETTINGS_DOC_ID);
-      
+
+      // Integration credentials are sent to the server API, which stores
+      // secrets in the server-only platformSecrets collection and only keeps
+      // non-secret config in platformSettings.
+      const token = await auth?.currentUser?.getIdToken();
+      if (!token) {
+        throw new Error("Please sign in again to save settings securely");
+      }
+      const integrationsResponse = await fetch("/api/settings/integrations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          integrations: {
+            apollo: {
+              apiKey: apiKeys.apollo?.apiKey || "",
+              accountId: apiKeys.apollo?.accountId || "",
+              status: testingStatus.apollo === "success" ? "connected" : "disconnected",
+            },
+            zoom: {
+              apiKey: apiKeys.zoom?.apiKey || "",
+              apiSecret: apiKeys.zoom?.apiSecret || "",
+              accountId: apiKeys.zoom?.accountId || "",
+              status: testingStatus.zoom === "success" ? "connected" : "disconnected",
+            },
+            docuseal: {
+              apiKey: apiKeys.docuseal?.apiKey || "",
+              webhookSecret: apiKeys.docuseal?.webhookSecret || "",
+              status: testingStatus.docuseal === "success" ? "connected" : "disconnected",
+            },
+            linkedin: {
+              apiKey: apiKeys.linkedin?.apiKey || "",
+              clientId: apiKeys.linkedin?.clientId || "",
+              clientSecret: apiKeys.linkedin?.clientSecret || "",
+              organizationId: apiKeys.linkedin?.organizationId || "",
+              status: testingStatus.linkedin === "success" ? "connected" : "disconnected",
+            },
+            stripe: {
+              secretKey: apiKeys.stripe?.apiKey || "",
+              publishableKey: apiKeys.stripe?.publishableKey || "",
+              webhookSecret: apiKeys.stripe?.webhookSecret || "",
+              status: testingStatus.stripe === "success" ? "connected" : "disconnected",
+            },
+          },
+        }),
+      });
+      const integrationsPayload = await integrationsResponse.json().catch(() => null) as { error?: string } | null;
+      if (!integrationsResponse.ok) {
+        throw new Error(integrationsPayload?.error || "Failed to save integration credentials securely");
+      }
+
       // Build settings data, using empty strings instead of undefined
       const settingsData = {
         id: SETTINGS_DOC_ID,
-        integrations: {
-          mattermost: {
-            apiKey: apiKeys.mattermost?.apiKey || "",
-            webhookUrl: apiKeys.mattermost?.webhook || "",
-            serverUrl: apiKeys.mattermost?.serverUrl || "",
-            teamId: apiKeys.mattermost?.teamId || "",
-            status: testingStatus.mattermost === "success" ? "connected" : "disconnected",
-          },
-          apollo: {
-            apiKey: apiKeys.apollo?.apiKey || "",
-            accountId: apiKeys.apollo?.accountId || "",
-            status: testingStatus.apollo === "success" ? "connected" : "disconnected",
-          },
-          gohighlevel: {
-            apiKey: apiKeys.gohighlevel?.apiKey || "",
-            locationId: apiKeys.gohighlevel?.locationId || "",
-            agencyId: apiKeys.gohighlevel?.agencyId || "",
-            status: testingStatus.gohighlevel === "success" ? "connected" : "disconnected",
-          },
-          zoom: {
-            apiKey: apiKeys.zoom?.apiKey || "",
-            apiSecret: apiKeys.zoom?.apiSecret || "",
-            accountId: apiKeys.zoom?.accountId || "",
-            status: testingStatus.zoom === "success" ? "connected" : "disconnected",
-          },
-          docuseal: {
-            apiKey: apiKeys.docuseal?.apiKey || "",
-            webhookSecret: apiKeys.docuseal?.webhookSecret || "",
-            status: testingStatus.docuseal === "success" ? "connected" : "disconnected",
-          },
-          stripe: {
-            secretKey: apiKeys.stripe?.apiKey || "",
-            publishableKey: apiKeys.stripe?.publishableKey || "",
-            webhookSecret: apiKeys.stripe?.webhookSecret || "",
-            status: testingStatus.stripe === "success" ? "connected" : "disconnected",
-          },
-        },
         llmConfig: {
           provider: llmConfig.provider,
           model: llmConfig.model,
-          apiKey: llmConfig.apiKey || "",
+          apiKey: "",
+          apiKeyStoredSeparately: true,
           ollamaUrl: llmConfig.ollamaUrl,
           useOllama: llmConfig.useOllama,
           baseUrl: llmConfig.baseUrl || "",
           useOpenAICompatible: llmConfig.useOpenAICompatible,
         },
-        webhookEvents: webhookEvents as Record<string, boolean>,
         notificationSettings: notificationSettings,
         socialLinks: socialLinks,
         updatedAt: Timestamp.now(),
       };
       
       await setDoc(docRef, settingsData, { merge: true });
+
+      const llmResponse = await fetch("/api/settings/llm", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          provider: llmConfig.provider,
+          model: llmConfig.model,
+          apiKey: llmConfig.apiKey || undefined,
+          ollamaUrl: llmConfig.ollamaUrl,
+          useOllama: llmConfig.useOllama,
+          baseUrl: llmConfig.baseUrl || "",
+          useOpenAICompatible: llmConfig.useOpenAICompatible,
+        }),
+      });
+      const llmPayload = await llmResponse.json().catch(() => null) as { error?: string } | null;
+      if (!llmResponse.ok) {
+        throw new Error(llmPayload?.error || "Failed to save LLM settings securely");
+      }
+      setLlmConfig(prev => ({ ...prev, apiKey: "" }));
+      setLlmHasApiKey(prev => prev || Boolean(llmConfig.apiKey));
       setHasChanges(false);
       // Log activity
       await logSettingsUpdated("Platform Settings");
@@ -435,22 +454,6 @@ function SettingsPageContent() {
   const testConnection = async (configId: string) => {
     setTestingStatus(prev => ({ ...prev, [configId]: "testing" }));
     
-    if (configId === "webhook" || configId === "mattermost") {
-      // Test actual Mattermost webhook
-      const webhookUrl = apiKeys["mattermost"]?.webhook || apiKeys["webhook"]?.url;
-      if (webhookUrl) {
-        const result = await testWebhookConnection(webhookUrl);
-        setTestingStatus(prev => ({ 
-          ...prev, 
-          [configId]: result.success ? "success" : "error" 
-        }));
-        if (!result.success) {
-          toast.error(`Webhook test failed: ${result.error}`);
-        }
-        return;
-      }
-    }
-
     if (configId === "stripe") {
       // Test Stripe connection
       const secretKey = apiKeys["stripe"]?.apiKey;
@@ -491,38 +494,6 @@ function SettingsPageContent() {
     }));
   };
 
-  const handleSendToBrianStitt = async () => {
-    const webhookUrl = apiKeys["mattermost"]?.webhook;
-    if (!webhookUrl) {
-      toast.error("Please configure the Mattermost webhook URL first in the Integrations tab.");
-      return;
-    }
-    if (!brianStittMessage.trim()) {
-      toast.error("Please enter a message.");
-      return;
-    }
-
-    setSendingMessage(true);
-    const result = await sendToBrianStitt(webhookUrl, brianStittMessage, {
-      "Sent By": "SVP Platform User",
-      "Timestamp": new Date().toLocaleString(),
-    });
-    setSendingMessage(false);
-
-    if (result.success) {
-      toast.success("Message sent to Brian Stitt successfully!");
-      setBrianStittMessage("");
-      setBrianStittDialogOpen(false);
-    } else {
-      toast.error(`Failed to send message: ${result.error}`);
-    }
-  };
-
-  const toggleWebhookEvent = (eventType: WebhookEventType) => {
-    setWebhookEvents(prev => ({ ...prev, [eventType]: !prev[eventType] }));
-    setHasChanges(true);
-  };
-
   // Show loading state
   if (loading) {
     return (
@@ -539,7 +510,7 @@ function SettingsPageContent() {
         <div>
           <h1 className="text-3xl font-bold">Settings</h1>
           <p className="text-muted-foreground">
-            Manage API keys, webhooks, and integrations
+            Manage API keys and integrations
           </p>
         </div>
         <Button onClick={saveSettings} disabled={saving}>
@@ -556,7 +527,6 @@ function SettingsPageContent() {
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
           <TabsTrigger value="llm">LLM Configuration</TabsTrigger>
-          <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="social">Social Links</TabsTrigger>
           <TabsTrigger value="visibility">Feature Visibility</TabsTrigger>
@@ -637,18 +607,6 @@ function SettingsPageContent() {
                       </div>
                     </div>
 
-                    {config.webhookField && (
-                      <div className="space-y-2">
-                        <Label htmlFor={`${config.id}-webhook`}>{config.webhookField}</Label>
-                        <Input
-                          id={`${config.id}-webhook`}
-                          placeholder={`Enter your ${config.webhookField.toLowerCase()}`}
-                          value={apiKeys[config.id]?.webhook || ""}
-                          onChange={(e) => updateApiKey(config.id, "webhook", e.target.value)}
-                        />
-                      </div>
-                    )}
-
                     {config.additionalFields?.map((field) => (
                       <div key={field.name} className="space-y-2">
                         <Label htmlFor={`${config.id}-${field.name}`}>{field.label}</Label>
@@ -681,24 +639,6 @@ function SettingsPageContent() {
                     </div>
                   )}
 
-                  {/* GoHighLevel-specific link to integration management */}
-                  {config.id === "gohighlevel" && (
-                    <div className="mt-4 pt-4 border-t">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">Integration Management</p>
-                          <p className="text-xs text-muted-foreground">
-                            Manage connected accounts, workflows, and sync settings
-                          </p>
-                        </div>
-                        <Button variant="outline" size="sm" asChild>
-                          <a href="/portal/gohighlevel">
-                            Manage GoHighLevel
-                          </a>
-                        </Button>
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             ))}
@@ -838,7 +778,7 @@ function SettingsPageContent() {
                     <Input
                       id="llmApiKey"
                       type={showKeys["llm"] ? "text" : "password"}
-                      placeholder={llmConfig.provider === "openai-compatible" ? "Enter API key (optional for some local endpoints)" : "Enter your API key"}
+                      placeholder={llmHasApiKey ? "Existing key stored securely (enter a new key to replace it)" : llmConfig.provider === "openai-compatible" ? "Enter API key (optional for some local endpoints)" : "Enter your API key"}
                       value={llmConfig.apiKey}
                       onChange={(e) => setLlmConfig({ ...llmConfig, apiKey: e.target.value })}
                     />
@@ -883,428 +823,8 @@ function SettingsPageContent() {
           </Card>
         </TabsContent>
 
-        {/* Webhooks Tab */}
-        <TabsContent value="webhooks" className="space-y-6">
-          {/* Send to Brian Stitt - Featured Card */}
-          <Card className="border-primary/50 bg-primary/5">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary">
-                    <User className="h-6 w-6 text-primary-foreground" />
-                  </div>
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      Send to Brian Stitt
-                      <Badge variant="default">Quick Action</Badge>
-                    </CardTitle>
-                    <CardDescription>
-                      Send a direct message to Brian Stitt&apos;s Mattermost channel
-                    </CardDescription>
-                  </div>
-                </div>
-                <Dialog open={brianStittDialogOpen} onOpenChange={setBrianStittDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Send className="mr-2 h-4 w-4" />
-                      Send Message
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>Send Message to Brian Stitt</DialogTitle>
-                      <DialogDescription>
-                        This message will be sent directly to Brian Stitt&apos;s Mattermost channel via webhook.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="brianMessage">Message</Label>
-                        <Textarea
-                          id="brianMessage"
-                          placeholder="Enter your message here..."
-                          value={brianStittMessage}
-                          onChange={(e) => setBrianStittMessage(e.target.value)}
-                          rows={5}
-                        />
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        <p>The message will include:</p>
-                        <ul className="list-disc list-inside mt-1">
-                          <li>Your message content</li>
-                          <li>Timestamp</li>
-                          <li>Sender information</li>
-                        </ul>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setBrianStittDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={handleSendToBrianStitt} disabled={sendingMessage}>
-                        {sendingMessage ? (
-                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Send className="mr-2 h-4 w-4" />
-                        )}
-                        Send Message
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-          </Card>
-
-          {/* Webhook Configuration */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Webhook className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <CardTitle>Webhook Configuration</CardTitle>
-                  <CardDescription>
-                    Configure webhooks for real-time event notifications to Mattermost
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 bg-muted rounded-lg">
-                <h4 className="font-medium mb-2">Setup Instructions</h4>
-                <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                  <li>Go to Mattermost → Main Menu → Integrations → Incoming Webhooks</li>
-                  <li>Click &quot;Add Incoming Webhook&quot;</li>
-                  <li>Select the channel (e.g., &quot;SVP Notifications&quot;)</li>
-                  <li>Copy the webhook URL and paste it below</li>
-                </ol>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="mattermostWebhook">Mattermost Webhook URL</Label>
-                <Input
-                  id="mattermostWebhook"
-                  placeholder="https://your-mattermost.com/hooks/xxx-xxx-xxx"
-                  value={apiKeys["mattermost"]?.webhook || ""}
-                  onChange={(e) => updateApiKey("mattermost", "webhook", e.target.value)}
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => testConnection("webhook")}
-                  disabled={testingStatus["webhook"] === "testing" || !apiKeys["mattermost"]?.webhook}
-                >
-                  {testingStatus["webhook"] === "testing" ? (
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                  ) : testingStatus["webhook"] === "success" ? (
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                  ) : testingStatus["webhook"] === "error" ? (
-                    <XCircle className="mr-2 h-4 w-4 text-red-500" />
-                  ) : (
-                    <TestTube className="mr-2 h-4 w-4" />
-                  )}
-                  Test Webhook
-                </Button>
-                {testingStatus["webhook"] === "success" && (
-                  <Badge variant="default" className="self-center">Connected</Badge>
-                )}
-                {testingStatus["webhook"] === "error" && (
-                  <Badge variant="destructive" className="self-center">Failed</Badge>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Event Configuration */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Webhook Events</CardTitle>
-              <CardDescription>
-                Choose which events trigger webhook notifications
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 md:grid-cols-2">
-                {WEBHOOK_EVENTS.map((event) => (
-                  <div 
-                    key={event.type} 
-                    className={cn(
-                      "flex items-center justify-between p-4 border rounded-lg transition-colors",
-                      event.type === "send_to_brian_stitt" && "border-primary/50 bg-primary/5",
-                      webhookEvents[event.type] && "border-green-500/50 bg-green-500/5"
-                    )}
-                  >
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{event.label}</span>
-                        {event.type === "send_to_brian_stitt" && (
-                          <Badge variant="outline" className="text-xs">Featured</Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">{event.description}</p>
-                    </div>
-                    <Switch 
-                      checked={webhookEvents[event.type]} 
-                      onCheckedChange={() => toggleWebhookEvent(event.type)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Webhook Examples */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Webhook Payload Examples</CardTitle>
-              <CardDescription>
-                Reference examples based on Mattermost incoming webhook documentation
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Basic Text Message */}
-              <div className="space-y-2">
-                <h4 className="font-medium flex items-center gap-2">
-                  <Badge variant="outline">Basic</Badge>
-                  Simple Text Message
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  The simplest webhook payload - just send text content.
-                </p>
-                <pre className="p-4 bg-muted rounded-lg text-xs overflow-x-auto">
-{`{
-  "text": "Hello, this is some text\\nThis is more text. 🎉"
-}`}
-                </pre>
-              </div>
-
-              {/* With Username and Icon */}
-              <div className="space-y-2">
-                <h4 className="font-medium flex items-center gap-2">
-                  <Badge variant="outline">Customized</Badge>
-                  Custom Username & Icon
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Override the bot username and avatar icon.
-                </p>
-                <pre className="p-4 bg-muted rounded-lg text-xs overflow-x-auto">
-{`{
-  "channel": "town-square",
-  "username": "SVP-Bot",
-  "icon_url": "https://your-site.com/logo.png",
-  "icon_emoji": ":rocket:",
-  "text": "#### New notification from SVP Platform"
-}`}
-                </pre>
-              </div>
-
-              {/* Markdown Table */}
-              <div className="space-y-2">
-                <h4 className="font-medium flex items-center gap-2">
-                  <Badge variant="outline">Advanced</Badge>
-                  Markdown with Tables
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Rich formatting with markdown tables and @mentions.
-                </p>
-                <pre className="p-4 bg-muted rounded-lg text-xs overflow-x-auto">
-{`{
-  "channel": "svp-notifications",
-  "username": "test-automation",
-  "icon_url": "https://mattermost.com/wp-content/uploads/2022/02/icon.png",
-  "text": "#### Test results for July 27th, 2024\\n@channel please review.\\n\\n| Component | Tests Run | Tests Failed |\\n|:-----------|:-----------:|:--------------|\\n| Server | 948 | ✅ 0 |\\n| Web Client | 123 | ⚠️ 2 |\\n| iOS Client | 78 | ⚠️ 3 |"
-}`}
-                </pre>
-              </div>
-
-              {/* With Attachments */}
-              <div className="space-y-2">
-                <h4 className="font-medium flex items-center gap-2">
-                  <Badge variant="outline">Rich</Badge>
-                  Message Attachments
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Structured attachments with colors, fields, and formatting.
-                </p>
-                <pre className="p-4 bg-muted rounded-lg text-xs overflow-x-auto">
-{`{
-  "channel": "deals",
-  "username": "SVP Platform",
-  "text": "### 🎯 New Lead Created",
-  "attachments": [{
-    "fallback": "New lead from Precision Parts",
-    "color": "#36a64f",
-    "pretext": "A new lead has been added to the pipeline",
-    "author_name": "Sarah Mitchell",
-    "author_icon": "https://example.com/avatar.png",
-    "title": "Precision Parts Manufacturing",
-    "title_link": "https://svp-platform.com/leads/123",
-    "fields": [
-      { "title": "Contact", "value": "John Harrison", "short": true },
-      { "title": "Value", "value": "$150,000", "short": true },
-      { "title": "Source", "value": "Referral", "short": true },
-      { "title": "Stage", "value": "Discovery", "short": true }
-    ],
-    "footer": "SVP Platform",
-    "footer_icon": "https://svp-platform.com/icon.png"
-  }]
-}`}
-                </pre>
-              </div>
-
-              {/* With Props Card (Side Panel) */}
-              <div className="space-y-2">
-                <h4 className="font-medium flex items-center gap-2">
-                  <Badge variant="outline">Extended</Badge>
-                  Side Panel Card
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Display additional details in the right-hand side panel using the card property.
-                </p>
-                <pre className="p-4 bg-muted rounded-lg text-xs overflow-x-auto">
-{`{
-  "channel": "deals",
-  "username": "Winning-bot",
-  "text": "#### 🎉 We won a new deal!",
-  "props": {
-    "card": "**Deal Information:**\\n\\n[View in CRM](https://crm.example.com/deal/123)\\n\\n- **Salesperson:** Bob McKnight\\n- **Amount:** $300,020.00\\n- **Close Date:** Dec 15, 2024\\n- **Product:** V-Edge Assessment"
-  }
-}`}
-                </pre>
-              </div>
-
-              {/* Direct Message */}
-              <div className="space-y-2">
-                <h4 className="font-medium flex items-center gap-2">
-                  <Badge variant="outline">DM</Badge>
-                  Direct Message to User
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Send a direct message to a specific user using @username.
-                </p>
-                <pre className="p-4 bg-muted rounded-lg text-xs overflow-x-auto">
-{`{
-  "channel": "@brian.stitt",
-  "username": "SVP Platform",
-  "text": "### 📬 Direct Message\\n\\nHey Brian, you have a new referral waiting for review!\\n\\n[View Referral](https://svp-platform.com/referrals/456)"
-}`}
-                </pre>
-              </div>
-
-              {/* SVP Platform Event Example */}
-              <div className="space-y-2">
-                <h4 className="font-medium flex items-center gap-2">
-                  <Badge>SVP</Badge>
-                  One-to-One Meeting Scheduled
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Example of an SVP Platform event notification.
-                </p>
-                <pre className="p-4 bg-muted rounded-lg text-xs overflow-x-auto">
-{`{
-  "username": "SVP Platform",
-  "icon_emoji": ":handshake:",
-  "text": "### 🤝 One-to-One Meeting Scheduled",
-  "attachments": [{
-    "color": "#0066cc",
-    "fields": [
-      { "title": "Initiator", "value": "Sarah Mitchell", "short": true },
-      { "title": "Partner", "value": "Marcus Chen", "short": true },
-      { "title": "Date", "value": "Dec 15, 2024 at 10:00 AM", "short": true },
-      { "title": "Location", "value": "Starbucks, South Blvd", "short": true }
-    ],
-    "footer": "SVP Platform • Affiliate Networking"
-  }]
-}`}
-                </pre>
-              </div>
-
-              {/* Referral Submitted Example */}
-              <div className="space-y-2">
-                <h4 className="font-medium flex items-center gap-2">
-                  <Badge>SVP</Badge>
-                  Referral Submitted
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Notification when an affiliate submits a referral.
-                </p>
-                <pre className="p-4 bg-muted rounded-lg text-xs overflow-x-auto">
-{`{
-  "username": "SVP Platform",
-  "icon_emoji": ":link:",
-  "text": "### 🔗 New Referral Submitted",
-  "attachments": [{
-    "color": "#e74c3c",
-    "fields": [
-      { "title": "From", "value": "Jennifer Rodriguez", "short": true },
-      { "title": "To", "value": "David Thompson", "short": true },
-      { "title": "Prospect", "value": "Maria Gonzalez", "short": true },
-      { "title": "Company", "value": "Lean Machine Shop", "short": true },
-      { "title": "SVP Referral", "value": "Yes ⭐", "short": true },
-      { "title": "Est. Value", "value": "$75,000", "short": true }
-    ],
-    "footer": "SVP Platform • Referral Network"
-  }],
-  "props": {
-    "card": "**Referral Details:**\\n\\n- **Type:** Short-term\\n- **Service Interest:** V-Edge Assessment\\n- **Description:** Completed lean transformation, now ready for automation assessment.\\n\\n[View Full Referral](https://svp-platform.com/referrals/ref-002)"
-  }
-}`}
-                </pre>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         {/* Notifications Tab */}
         <TabsContent value="notifications" className="space-y-6">
-          {/* Sync with Mattermost */}
-          <Card className="border-primary/50 bg-primary/5">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary">
-                  <BellRing className="h-6 w-6 text-primary-foreground" />
-                </div>
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    Sync with Mattermost
-                    <Badge variant="default">Playbooks</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    Mirror Mattermost notifications in the browser when the site is open
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 border rounded-lg bg-background">
-                <div className="flex items-center gap-3">
-                  <MessageSquare className="h-5 w-5 text-primary" />
-                  <div>
-                    <Label>Sync Mattermost Notifications</Label>
-                    <p className="text-sm text-muted-foreground">
-                      When enabled, webhook events sent to Mattermost will also appear as in-browser notifications
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={notificationSettings.syncWithMattermost}
-                  onCheckedChange={(checked) => {
-                    setNotificationSettings(prev => ({ ...prev, syncWithMattermost: checked }));
-                    setHasChanges(true);
-                  }}
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                This allows you to see real-time notifications for Rocks, Issues, To-Dos, Meetings, and other Traction/EOS events 
-                directly in your browser, mirroring what gets sent to your Mattermost channels.
-              </p>
-            </CardContent>
-          </Card>
-
           {/* In-App Notifications */}
           <Card>
             <CardHeader>
@@ -1462,9 +982,9 @@ function SettingsPageContent() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    showInAppNotification("rock_completed", {
-                      title: "Test Rock",
-                      name: "Q4 Revenue Target",
+                    showInAppNotification("meeting_completed", {
+                      title: "Test Meeting",
+                      type: "Weekly Sync",
                     });
                   }}
                   disabled={!notificationSettings.inAppEnabled}
@@ -1475,9 +995,8 @@ function SettingsPageContent() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    showInAppNotification("rock_at_risk", {
-                      title: "Test Warning",
-                      name: "Customer Onboarding Process",
+                    showInAppNotification("team_member_added", {
+                      name: "Test Team Member",
                     });
                   }}
                   disabled={!notificationSettings.inAppEnabled}
@@ -1505,42 +1024,6 @@ function SettingsPageContent() {
             </CardContent>
           </Card>
 
-          {/* Notification Events */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Synced Event Types</CardTitle>
-              <CardDescription>
-                These events will trigger in-browser notifications when synced with Mattermost
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-2 md:grid-cols-2">
-                {WEBHOOK_EVENTS.filter(e => e.type !== "send_to_brian_stitt").map((event) => (
-                  <div 
-                    key={event.type}
-                    className={cn(
-                      "flex items-center gap-2 p-3 border rounded-lg text-sm",
-                      webhookEvents[event.type] ? "border-green-500/30 bg-green-500/5" : "opacity-50"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-2 h-2 rounded-full",
-                      webhookEvents[event.type] ? "bg-green-500" : "bg-muted-foreground"
-                    )} />
-                    <div>
-                      <span className="font-medium">{event.label}</span>
-                      {event.category === "traction" && (
-                        <Badge variant="outline" className="ml-2 text-xs">EOS</Badge>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                Enable or disable specific events in the <strong>Webhooks</strong> tab. Events that are enabled there will also trigger in-browser notifications when sync is active.
-              </p>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Social Links Tab */}

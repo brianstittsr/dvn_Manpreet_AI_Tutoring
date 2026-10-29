@@ -87,7 +87,7 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/legacy83Logo.webp"
+            src="/aicenter4u-logo.svg"
             alt="Strategic Value+ Logo"
             width={48}
             height={48}

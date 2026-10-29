@@ -49,9 +49,6 @@ interface SaveDraftBody {
   scheduledFor?: string;
   createdById: string;
   createdByName: string;
-  ghlFormUrl?: string;
-  ghlFormId?: string;
-  ghlTags?: string[];
 }
 
 /** POST /api/linkedin/drafts - save or update a draft/scheduled/published article */
@@ -82,9 +79,6 @@ export async function POST(request: NextRequest) {
       scheduledFor: body.scheduledFor ? Timestamp.fromDate(new Date(body.scheduledFor)) : null,
       createdById: body.createdById,
       createdByName: body.createdByName,
-      ghlFormUrl: body.ghlFormUrl || null,
-      ghlFormId: body.ghlFormId || null,
-      ghlTags: body.ghlTags || [],
       updatedAt: now,
     };
 

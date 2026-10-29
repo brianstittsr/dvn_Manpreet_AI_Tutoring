@@ -1,5 +1,5 @@
 /**
- * Script to update Icy Williams team member record
+ * Script to update Manpreet Hundal team member record
  * Run with: npx ts-node scripts/update-icy-williams.ts
  */
 
@@ -15,11 +15,11 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-async function updateIcyWilliams() {
+async function updateManpreetHundal() {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   
-  const ICY_EMAIL = "info@legacy83business.com";
+  const ICY_EMAIL = "info@aicenter4u.com";
   const now = Timestamp.now();
 
   console.log("Looking for team member with email:", ICY_EMAIL);
@@ -38,13 +38,13 @@ async function updateIcyWilliams() {
   console.log("Current data:", teamMemberDoc.data());
 
   await updateDoc(teamMemberDoc.ref, {
-    firstName: "Icy",
+    firstName: "Manpreet",
     lastName: "Williams",
     role: "superadmin",
     updatedAt: now,
   });
 
-  console.log("Updated team member with firstName: Icy, lastName: Williams, role: superadmin");
+  console.log("Updated team member with firstName: Manpreet, lastName: Williams, role: superadmin");
 }
 
-updateIcyWilliams().catch(console.error);
+updateManpreetHundal().catch(console.error);

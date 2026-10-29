@@ -6,12 +6,12 @@ import {
   UserRole,
   FeatureKey,
   SectionKey,
-  L83ToolKey,
+  PlatformToolKey,
   DEFAULT_ROLE_VISIBILITY,
   subscribeToFeatureVisibility,
   isFeatureVisible,
   isSectionVisible,
-  isL83ToolVisible,
+  isPlatformToolVisible,
 } from "@/lib/feature-visibility";
 import { useUserProfile } from "@/contexts/user-profile-context";
 import { isSuperAdmin } from "@/lib/permissions";
@@ -28,7 +28,7 @@ interface FeatureVisibilityContextType {
   // Visibility checks
   canSeeFeature: (featureKey: FeatureKey) => boolean;
   canSeeSection: (sectionKey: SectionKey) => boolean;
-  canSeeL83Tool: (toolKey: L83ToolKey) => boolean;
+  canSeePlatformTool: (toolKey: PlatformToolKey) => boolean;
   // Refresh settings
   refreshSettings: () => void;
 }
@@ -89,13 +89,13 @@ export function FeatureVisibilityProvider({ children }: { children: React.ReactN
     [effectiveRole, settings, isSuperAdminUser, isPreviewMode]
   );
 
-  const canSeeL83Tool = useCallback(
-    (toolKey: L83ToolKey): boolean => {
+  const canSeePlatformTool = useCallback(
+    (toolKey: PlatformToolKey): boolean => {
       // SuperAdmin always sees everything when not in preview mode
       if (isSuperAdminUser && !isPreviewMode) {
         return true;
       }
-      return isL83ToolVisible(toolKey, effectiveRole, settings);
+      return isPlatformToolVisible(toolKey, effectiveRole, settings);
     },
     [effectiveRole, settings, isSuperAdminUser, isPreviewMode]
   );
@@ -124,7 +124,7 @@ export function FeatureVisibilityProvider({ children }: { children: React.ReactN
         isPreviewMode,
         canSeeFeature,
         canSeeSection,
-        canSeeL83Tool,
+        canSeePlatformTool,
         refreshSettings,
       }}
     >

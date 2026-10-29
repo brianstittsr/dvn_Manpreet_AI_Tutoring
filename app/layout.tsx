@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope, DM_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
-import Script from "next/script";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -16,37 +15,35 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://legacy83business.com"),
+  metadataBase: new URL("https://aicenter4u.com"),
   title: {
-    default: "Legacy 83 Business | Build Wealth. Inspire Teams. Leave a Legacy.",
-    template: "%s | Legacy 83 Business",
+    default: "AICenter4U | Learn. Believe. Grow.",
+    template: "%s | AICenter4U",
   },
   description:
-    "Legacy 83 Business helps entrepreneurs and business owners build sustainable wealth, develop high-performing teams, and create lasting legacies through strategic coaching and the G.R.O.W.S. framework.",
+    "AICenter4U is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
   keywords: [
-    "business coaching",
-    "executive coaching",
-    "leadership development",
-    "strategic planning",
-    "business succession",
-    "legacy planning",
-    "operational excellence",
-    "team development",
-    "business growth",
-    "entrepreneur coaching",
-    "wealth building",
-    "business transformation",
+    "AI tutoring for kids",
+    "online learning for children",
+    "math help for kids",
+    "reading coach",
+    "life skills for kids",
+    "safe AI for children",
+    "kids learning platform",
+    "guided learning",
+    "parent approved learning",
+    "elementary tutoring",
   ],
-  authors: [{ name: "Legacy 83 Business Inc", url: "https://legacy83business.com" }],
-  creator: "Legacy 83 Business Inc",
-  publisher: "Legacy 83 Business Inc",
+  authors: [{ name: "AICenter4U", url: "https://aicenter4u.com" }],
+  creator: "AICenter4U",
+  publisher: "AICenter4U",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   alternates: {
-    canonical: "https://legacy83business.com",
+    canonical: "https://aicenter4u.com",
   },
   robots: {
     index: true,
@@ -62,34 +59,34 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://legacy83business.com",
-    siteName: "Legacy 83 Business",
-    title: "Legacy 83 Business | Build Wealth. Inspire Teams. Leave a Legacy.",
+    url: "https://aicenter4u.com",
+    siteName: "AICenter4U",
+    title: "AICenter4U | Learn. Believe. Grow.",
     description:
-      "Legacy 83 Business helps entrepreneurs and business owners build sustainable wealth, develop high-performing teams, and create lasting legacies through strategic coaching and the G.R.O.W.S. framework.",
+      "AICenter4U is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
     images: [
       {
-        url: "/legacy83Logo.webp",
+        url: "/aicenter4u-logo.svg",
         width: 1200,
         height: 630,
-        alt: "Legacy 83 Business - Build Wealth. Inspire Teams. Leave a Legacy.",
+        alt: "AICenter4U - Learn. Believe. Grow.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Legacy 83 Business | Build Wealth. Inspire Teams. Leave a Legacy.",
+    title: "AICenter4U | Learn. Believe. Grow.",
     description:
-      "Legacy 83 Business helps entrepreneurs and business owners build sustainable wealth, develop high-performing teams, and create lasting legacies through strategic coaching and the G.R.O.W.S. framework.",
-    images: ["/legacy83Logo.webp"],
-    creator: "@legacy83business",
+      "AICenter4U is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
+    images: ["/aicenter4u-logo.svg"],
+    creator: "@aicenter4u",
   },
   verification: {
     google: "your-google-verification-code",
     // yandex: "your-yandex-verification-code",
     // bing: "your-bing-verification-code",
   },
-  category: "business",
+  category: "education",
 };
 
 export default function RootLayout({
@@ -113,19 +110,6 @@ export default function RootLayout({
         </a>
         {children}
         <Toaster />
-        {/* GoHighLevel Chat Widget */}
-        <div
-          data-chat-widget=""
-          data-widget-id="6a4c60fddbe2962ef69213ba"
-          data-location-id="o1rlj177UVXuz2i8tHHJ"
-        />
-        <Script
-          src="https://widgets.leadconnectorhq.com/loader.js"
-          data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
-          data-widget-id="6a4c60fddbe2962ef69213ba"
-          data-source="WEB_USER"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { authedJsonHeaders } from "@/lib/api-client";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,7 @@ const MARY_CONFIG = {
   avatar: "👩‍💼",
   color: "#8b5cf6",
   description: "Your AI-powered strategic planning facilitator who guides structured brainstorming sessions and generates actionable insights.",
-  systemPrompt: `You are Mary, the Legacy 83 Business Analyst - an expert AI facilitator specializing in strategic business planning. Your role is to:
+  systemPrompt: `You are Mary, the AICenter4U Analyst - an expert AI facilitator specializing in strategic business planning. Your role is to:
 
 1. FACILITATE structured brainstorming sessions by asking probing questions
 2. GATHER comprehensive information through guided discovery
@@ -331,7 +332,7 @@ When you identify that a phase is complete, indicate readiness to move to the ne
 
       const response = await fetch("/api/ai/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authedJsonHeaders(),
         body: JSON.stringify({
           message: userMessage.content,
           systemPrompt,
@@ -437,7 +438,7 @@ Generate a structured report with:
 
       const response = await fetch("/api/ai/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authedJsonHeaders(),
         body: JSON.stringify({
           message: "Generate the planning session report",
           systemPrompt: reportPrompt,

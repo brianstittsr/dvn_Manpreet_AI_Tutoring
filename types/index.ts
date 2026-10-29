@@ -21,9 +21,6 @@ export type Priority = 'low' | 'medium' | 'high' | 'urgent';
 // Task status
 export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'cancelled';
 
-// Rock status
-export type RockStatus = 'on-track' | 'at-risk' | 'off-track' | 'completed';
-
 // Address interface
 export interface Address {
   street?: string;
@@ -206,34 +203,12 @@ export interface Activity {
   createdAt: Date;
 }
 
-// Rock (90-day goal) interface
-export interface Rock {
-  id: string;
-  title: string;
-  description: string;
-  owner: User;
-  quarter: string;
-  status: RockStatus;
-  progress: number;
-  milestones: RockMilestone[];
-  createdAt: Date;
-}
-
-// Rock Milestone interface
-export interface RockMilestone {
-  id: string;
-  title: string;
-  completed: boolean;
-  completedDate?: Date;
-}
-
 // Dashboard Stats interface
 export interface DashboardStats {
   pipelineValue: number;
   pipelineChange: number;
   activeProjects: number;
   projectsAtRisk: number;
-  rockProgress: number;
   daysRemaining: number;
   teamOnline: number;
 }
