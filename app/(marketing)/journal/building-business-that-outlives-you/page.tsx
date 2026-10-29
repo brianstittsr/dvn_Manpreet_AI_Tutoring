@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ArrowRight, Calendar, Clock, User, Target, HelpCircle, Heart, Building2, TreePine } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Building a Business That Outlives You | AICenter4U",
+  title: "Building a Business That Outlives You | CurioQuest",
   description: "Legacy isn't about what you accumulate—it's about what you leave behind. Here's how to build a business that endures for generations.",
   keywords: ["business legacy", "generational business", "long term business", "business endurance", "legacy planning", "business that lasts"],
   openGraph: {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description: "Legacy isn't about what you accumulate—it's about what you leave behind. Here's how to build a business that endures for generations.",
     type: "article",
     publishedTime: "2025-11-01",
-    authors: ["AICenter4U"],
+    authors: ["CurioQuest"],
     images: [{ url: "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", width: 1260, height: 750, alt: "Strong foundation building" }]
   }
 };
@@ -34,7 +34,7 @@ export default function ArticlePage() {
             <div className="flex flex-wrap items-center gap-6 text-gray-300">
               <span className="flex items-center gap-2"><Calendar className="h-4 w-4" />November 1, 2025</span>
               <span className="flex items-center gap-2"><Clock className="h-4 w-4" />7 min read</span>
-              <span className="flex items-center gap-2"><User className="h-4 w-4" />AICenter4U Team</span>
+              <span className="flex items-center gap-2"><User className="h-4 w-4" />CurioQuest Team</span>
             </div>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function ArticlePage() {
                   <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center shrink-0"><TreePine className="h-6 w-6 text-slate-900" /></div>
                   <div>
                     <h3 className="text-xl font-bold mb-2">Ready to Build Something That Lasts?</h3>
-                    <p className="text-gray-300 mb-4">At AICenter4U, we help business owners transform their companies from personal operations into enduring institutions. We guide you through building the systems, culture, and leadership team that will carry your vision forward for generations.</p>
+                    <p className="text-gray-300 mb-4">At CurioQuest, we help business owners transform their companies from personal operations into enduring institutions. We guide you through building the systems, culture, and leadership team that will carry your vision forward for generations.</p>
                     <div className="flex flex-wrap gap-4">
                       <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900" asChild><Link href="/schedule-a-call">Start Building Your Legacy<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
                       <Button variant="outline" className="border-white/30 hover:bg-white/10" asChild><Link href="/quiz">Take the Assessment First</Link></Button>

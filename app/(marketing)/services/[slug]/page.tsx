@@ -116,12 +116,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   if (!service) {
     return {
-      title: "Service Not Found | AICenter4U",
+      title: "Service Not Found | CurioQuest",
     };
   }
 
   return {
-    title: `${service.title} | AICenter4U`,
+    title: `${service.title} | CurioQuest`,
     description: service.description,
   };
 }

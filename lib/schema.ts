@@ -1507,7 +1507,7 @@ export interface SuccessStoryDoc {
   location: string; // Location (e.g., "Cincinnati, OH")
   quote: string; // Main testimonial quote
   challenge: string; // The challenge they faced
-  solution?: string; // How AICenter4U helped (for featured stories)
+  solution?: string; // How CurioQuest helped (for featured stories)
   results: Array<{
     metric: string;
     value: string;

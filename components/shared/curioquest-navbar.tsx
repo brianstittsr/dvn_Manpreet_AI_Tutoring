@@ -64,7 +64,7 @@ const resources = [
   { title: "FAQ", href: "/faq", icon: HelpCircle },
 ];
 
-export function AICenter4UNavbar() {
+export function CurioQuestNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -73,15 +73,15 @@ export function AICenter4UNavbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/aicenter4u-logo.svg"
-            alt="AICenter4U"
+            src="/curioquest-logo.svg"
+            alt="CurioQuest"
             width={180}
             height={60}
             className="h-12 w-auto"
             priority
           />
           <span className="hidden sm:block text-lg font-bold tracking-tight">
-            AICenter<span className="text-amber-500">4U</span>
+            Curio<span className="text-amber-500">Quest</span>
           </span>
         </Link>
 
@@ -205,7 +205,7 @@ export function AICenter4UNavbar() {
                   onClick={() => setMobileOpen(false)}
                 >
                   <Info className="h-5 w-5 text-amber-600" />
-                  <span className="font-medium">About AICenter4U</span>
+                  <span className="font-medium">About CurioQuest</span>
                 </Link>
                 {resources.map((item) => (
                   <Link

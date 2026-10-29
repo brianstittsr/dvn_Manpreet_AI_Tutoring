@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://aicenter4u.com";
+  const baseUrl = "https://curioquest.com";
 
   // Static pages
   const staticPages = [

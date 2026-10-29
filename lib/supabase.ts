@@ -1,8 +1,8 @@
 /**
- * Supabase Client Configuration for AICenter4U Platform
+ * Supabase Client Configuration for CurioQuest Platform
  * 
  * This file provides Supabase client instances for both client-side and server-side usage.
- * All queries will automatically use the aicenter4u schema.
+ * All queries will automatically use the curioquest schema.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -26,7 +26,7 @@ if (!supabaseAnonKey) {
  */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   db: {
-    schema: 'aicenter4u' as any, // Use aicenter4u schema for all queries
+    schema: 'curioquest' as any, // Use curioquest schema for all queries
   },
   auth: {
     persistSession: true,
@@ -46,7 +46,7 @@ export const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey,
   {
     db: {
-      schema: 'aicenter4u' as any, // Use aicenter4u schema for all queries
+      schema: 'curioquest' as any, // Use curioquest schema for all queries
     },
     auth: {
       persistSession: false,
@@ -67,7 +67,7 @@ export function createServerClient() {
     serviceRoleKey || supabaseAnonKey!,
     {
       db: {
-        schema: 'aicenter4u' as any,
+        schema: 'curioquest' as any,
       },
       auth: {
         persistSession: false,

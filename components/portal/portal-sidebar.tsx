@@ -307,7 +307,7 @@ export function PortalSidebar() {
       <SidebarHeader className="border-b border-sidebar-border">
         <Link href="/portal" className="flex items-center gap-2 px-2 py-4">
           <span className="text-xl font-bold tracking-tight">
-            AICenter<span className="text-amber-500">4U</span>
+            Curio<span className="text-amber-500">Quest</span>
           </span>
         </Link>
       </SidebarHeader>

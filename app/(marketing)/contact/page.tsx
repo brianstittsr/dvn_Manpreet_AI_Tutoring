@@ -246,7 +246,7 @@ export default function ContactPage() {
               <span className="text-primary">Love Learning</span>
             </h1>
             <p className="mt-6 text-lg text-gray-300">
-              Have a question about AICenter4U? Tell us a little about your learner
+              Have a question about CurioQuest? Tell us a little about your learner
               and we&apos;ll help you find the right fit.
             </p>
           </div>
@@ -386,7 +386,7 @@ export default function ContactPage() {
                         onCheckedChange={(checked) => setContactForm({ ...contactForm, newsletter: checked === true })}
                       />
                       <Label htmlFor="newsletter" className="text-sm font-normal">
-                        Send me learning tips and AICenter4U updates
+                        Send me learning tips and CurioQuest updates
                       </Label>
                     </div>
 
@@ -418,10 +418,10 @@ export default function ContactPage() {
                     <div>
                       <p className="font-medium">Email</p>
                       <Link
-                        href="mailto:info@aicenter4u.com"
+                        href="mailto:info@curioquest.com"
                         className="text-muted-foreground hover:text-primary"
                       >
-                        info@aicenter4u.com
+                        info@curioquest.com
                       </Link>
                     </div>
                   </div>
@@ -465,7 +465,7 @@ export default function ContactPage() {
                 <CardContent>
                   <p className="text-muted-foreground text-sm mb-4">
                     Prefer to talk? Request a short call and we&apos;ll help you decide if
-                    AICenter4U is right for your family.
+                    CurioQuest is right for your family.
                   </p>
                   <Dialog open={bookCallOpen} onOpenChange={setBookCallOpen}>
                     <DialogTrigger asChild>

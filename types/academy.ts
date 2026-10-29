@@ -1,5 +1,5 @@
 /**
- * AICenter4U Academy LMS Types
+ * CurioQuest Academy LMS Types
  * TypeScript definitions for the Learning Management System
  */
 

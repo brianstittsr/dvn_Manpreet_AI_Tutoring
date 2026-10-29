@@ -250,7 +250,7 @@ Click the eye icon to toggle visibility. Only published slides appear in the car
 
 ### Frontend Components
 - `components/marketing/hero-carousel-enhanced.tsx` - Enhanced carousel
-- `components/marketing/aicenter4u-hero-carousel-enhanced.tsx` - AICenter4U version
+- `components/marketing/curioquest-hero-carousel-enhanced.tsx` - CurioQuest version
 
 ### API Routes
 - `app/api/images/pexels/route.ts` - Pexels image search

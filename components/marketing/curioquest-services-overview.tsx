@@ -71,7 +71,7 @@ const coaches = [
   },
 ];
 
-export function AICenter4UServicesOverview() {
+export function CurioQuestServicesOverview() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   const toggleCard = (title: string) => {

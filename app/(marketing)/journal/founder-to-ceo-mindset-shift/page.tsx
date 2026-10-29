@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ArrowRight, Calendar, Clock, User, Target, HelpCircle, CheckCircle, Lightbulb, TrendingUp } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "From Founder to CEO: Making the Mindset Shift | AICenter4U",
+  title: "From Founder to CEO: Making the Mindset Shift | CurioQuest",
   description: "Building a business requires one set of skills. Leading a business requires another. Here's how to make the transition successfully and scale beyond yourself.",
   keywords: ["founder to CEO", "mindset shift", "business leadership", "scaling business", "entrepreneur transition", "CEO mindset"],
   openGraph: {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description: "Building a business requires one set of skills. Leading a business requires another. Here's how to make the transition successfully.",
     type: "article",
     publishedTime: "2025-11-08",
-    authors: ["AICenter4U"],
+    authors: ["CurioQuest"],
     images: [{ url: "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", width: 1260, height: 750, alt: "Business leader at desk" }]
   }
 };
@@ -34,7 +34,7 @@ export default function ArticlePage() {
             <div className="flex flex-wrap items-center gap-6 text-gray-300">
               <span className="flex items-center gap-2"><Calendar className="h-4 w-4" />November 8, 2025</span>
               <span className="flex items-center gap-2"><Clock className="h-4 w-4" />8 min read</span>
-              <span className="flex items-center gap-2"><User className="h-4 w-4" />AICenter4U Team</span>
+              <span className="flex items-center gap-2"><User className="h-4 w-4" />CurioQuest Team</span>
             </div>
           </div>
         </div>
@@ -118,7 +118,7 @@ export default function ArticlePage() {
                   <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center shrink-0"><TrendingUp className="h-6 w-6 text-slate-900" /></div>
                   <div>
                     <h3 className="text-xl font-bold mb-2">Ready to Make the Founder-to-CEO Shift?</h3>
-                    <p className="text-gray-300 mb-4">At AICenter4U, we've guided hundreds of entrepreneurs through this exact transformation. We help you identify your specific mindset blocks, build the systems and team you need, and step fully into your role as CEO. Schedule a strategy call to start your transition.</p>
+                    <p className="text-gray-300 mb-4">At CurioQuest, we've guided hundreds of entrepreneurs through this exact transformation. We help you identify your specific mindset blocks, build the systems and team you need, and step fully into your role as CEO. Schedule a strategy call to start your transition.</p>
                     <div className="flex flex-wrap gap-4">
                       <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900" asChild><Link href="/schedule-a-call">Schedule Your Strategy Call<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
                       <Button variant="outline" className="border-white/30 hover:bg-white/10" asChild><Link href="/quiz">Take the Assessment First</Link></Button>

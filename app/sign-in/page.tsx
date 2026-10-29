@@ -153,8 +153,8 @@ export default function SignInPage() {
         <div className="flex flex-col items-center mb-8">
           <Link href="/" className="flex flex-col items-center gap-3 group">
             <Image
-              src="/aicenter4u-logo.svg"
-              alt="AICenter4U"
+              src="/curioquest-logo.svg"
+              alt="CurioQuest"
               width={200}
               height={67}
               className="h-16 w-auto"

@@ -312,7 +312,7 @@ export function SuccessStoriesContent() {
           </h2>
           <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
             Join the hundreds of business owners who have transformed their
-            companies with AICenter4U. Your legacy starts today.
+            companies with CurioQuest. Your legacy starts today.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
             <Button

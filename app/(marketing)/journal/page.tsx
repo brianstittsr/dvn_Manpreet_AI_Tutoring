@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "The Journal | AICenter4U",
+  title: "The Journal | CurioQuest",
   description:
     "Insights, strategies, and stories to help business owners build lasting legacies. Expert advice on leadership, succession planning, and business growth.",
 };

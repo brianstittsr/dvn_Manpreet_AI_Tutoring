@@ -251,7 +251,7 @@ export function HeroCarousel({ slides = defaultSlides, autoPlayInterval = 6000 }
                 <span className="text-xs text-gray-400">Powered Tools</span>
               </div>
               <div className="flex flex-col items-center text-center">
-                <span className="text-lg font-bold text-white">AICenter4U</span>
+                <span className="text-lg font-bold text-white">CurioQuest</span>
                 <span className="text-xs text-gray-400">Partner Network</span>
               </div>
             </div>

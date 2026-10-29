@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Exit Strategy: Sell, Transition, or Close? | AICenter4U",
+  title: "Exit Strategy: Sell, Transition, or Close? | CurioQuest",
   description:
     "Every business owner will exit eventually. The question is whether you'll do it on your terms or someone else's. Explore your options and discover the path that maximizes your legacy and wealth.",
   keywords: [
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
       "Every business owner will exit eventually. The question is whether you'll do it on your terms or someone else's. Let's explore your options.",
     type: "article",
     publishedTime: "2025-11-28",
-    authors: ["AICenter4U"],
+    authors: ["CurioQuest"],
     images: [
       {
         url: "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
@@ -82,7 +82,7 @@ export default function ArticlePage() {
               </span>
               <span className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                AICenter4U Team
+                CurioQuest Team
               </span>
             </div>
           </div>
@@ -377,7 +377,7 @@ export default function ArticlePage() {
                       Ready to Plan Your Exit Strategy?
                     </h3>
                     <p className="text-gray-300 mb-4">
-                      At AICenter4U, we've helped hundreds of business owners 
+                      At CurioQuest, we've helped hundreds of business owners 
                       successfully navigate exits of all types. Whether you're 
                       considering a sale, family transition, or other path, we 
                       can help you maximize value and preserve your legacy. 

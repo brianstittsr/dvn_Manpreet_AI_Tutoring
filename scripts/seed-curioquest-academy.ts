@@ -1,8 +1,8 @@
 /**
- * Seed AICenter4U Academy Data Script
+ * Seed CurioQuest Academy Data Script
  *
  * Replaces the business-coaching LMS catalog with K-12 AI tutoring courses
- * built around the AICenter4U three-coach model:
+ * built around the CurioQuest three-coach model:
  *   - Coach Maya      -> Math
  *   - Story Explorer  -> Reading & Language Arts
  *   - Growth & Glow   -> Life Skills & Study Skills
@@ -14,7 +14,7 @@
  * Lesson content spans every ContentType: video, text, quiz, assignment,
  * download, live, and gptLesson (with full GPTLessonConfig).
  *
- * Run with: npx ts-node scripts/seed-aicenter4u-academy.ts
+ * Run with: npx ts-node scripts/seed-curioquest-academy.ts
  */
 
 import { config } from "dotenv";
@@ -298,7 +298,7 @@ const courses: SeedCourse[] = [
 
 In this course, Coach Maya helps you truly understand how numbers work. You'll break big numbers into pieces, add and subtract in your head like a pro, and take your first steps into multiplication and division.
 
-Every lesson follows the AICenter4U way: your coach asks, you think, you try — and you never just get handed the answer.
+Every lesson follows the CurioQuest way: your coach asks, you think, you try — and you never just get handed the answer.
 
 Best for learners in grades 3–5, or anyone who wants to feel more confident with numbers.`,
     categorySlug: "math-adventures",
@@ -1501,14 +1501,14 @@ const workshops = [
     title: "Meet Your AI Coach: Family Orientation",
     slug: "family-orientation",
     shortDescription: "Parents and learners meet the coaches, see how guided lessons work, and set up guardian consent together.",
-    description: `A friendly live session for families new to AICenter4U.
+    description: `A friendly live session for families new to CurioQuest.
 
 We'll introduce Coach Maya, Story Explorer, and Growth & Glow; show you exactly how a guided lesson works (hint: coaches ask, kids think); walk through guardian consent and safety controls; and answer every question parents bring.
 
 Bring your learner — they'll get to try a mini-lesson live.`,
     workshopType: "live",
     categorySlug: "life-skills",
-    instructorName: "AICenter4U Team",
+    instructorName: "CurioQuest Team",
     scheduledStart: new Date("2025-08-02T15:00:00-04:00"),
     scheduledEnd: new Date("2025-08-02T16:00:00-04:00"),
     maxParticipants: 40,
@@ -1520,7 +1520,7 @@ Bring your learner — they'll get to try a mini-lesson live.`,
     shortDescription: "Number bingo, estimation games, and math puzzles the whole family can play — no worksheets allowed.",
     description: `Math is more fun when it's a game.
 
-Join Coach Maya and the AICenter4U team for a live family game night: estimation jars, math bingo, and "closest wins" number challenges. Every game builds real number sense — and nobody will even notice they're learning.
+Join Coach Maya and the CurioQuest team for a live family game night: estimation jars, math bingo, and "closest wins" number challenges. Every game builds real number sense — and nobody will even notice they're learning.
 
 Best for kids in grades 3–6 and their grown-ups.`,
     workshopType: "live",
@@ -1573,7 +1573,7 @@ const subscriptionTiers = [
   {
     name: "Little Explorer",
     slug: "little-explorer",
-    description: "Try AICenter4U free — preview lessons in every course",
+    description: "Try CurioQuest free — preview lessons in every course",
     priceMonthly: 0,
     priceAnnual: 0,
     features: [
@@ -1633,7 +1633,7 @@ async function deleteCollection(name: string): Promise<number> {
 }
 
 async function main() {
-  console.log("🌱 Starting AICenter4U Academy reseed...\n");
+  console.log("🌱 Starting CurioQuest Academy reseed...\n");
 
   // ------------------------------------------------------------------
   // Phase 1: wipe old catalog data
@@ -1926,7 +1926,7 @@ async function main() {
     console.log(`   ✓ ${ev.title}`);
   }
 
-  console.log("\n✅ AICenter4U Academy reseed complete!");
+  console.log("\n✅ CurioQuest Academy reseed complete!");
   console.log(`   ${categories.length} categories`);
   console.log(`   ${courses.length} courses, ${courses.reduce((n, c) => n + c.modules.length, 0)} modules, ${totalLessons} lessons`);
   console.log(`   ${workshops.length} workshops, ${badges.length} badges, ${subscriptionTiers.length} tiers, ${seedEvents.length} events`);

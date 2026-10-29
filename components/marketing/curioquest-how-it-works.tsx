@@ -44,14 +44,14 @@ const steps = [
   },
 ];
 
-export function AICenter4UHowItWorks() {
+export function CurioQuestHowItWorks() {
   return (
     <section className="py-20 md:py-28">
       <div className="container">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <Badge variant="outline" className="mb-4 border-amber-500/50 text-amber-600">
-            The AICenter4U Way
+            The CurioQuest Way
           </Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             How Learning Works Here

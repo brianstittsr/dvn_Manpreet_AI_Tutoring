@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, CheckCircle, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { aicenterHeroSlides, aicenterTrustIndicators } from "@/lib/aicenter-hero-slides";
+import { curioHeroSlides, curioTrustIndicators } from "@/lib/curio-hero-slides";
 import { collection, query, orderBy, onSnapshot, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { COLLECTIONS } from "@/lib/schema";
@@ -51,15 +51,15 @@ export interface HeroSlide {
   };
 }
 
-interface AICenter4UHeroCarouselProps {
+interface CurioQuestHeroCarouselProps {
   slides?: HeroSlide[];
   autoPlayInterval?: number;
 }
 
-export function AICenter4UHeroCarousel({ 
+export function CurioQuestHeroCarousel({ 
   slides, 
   autoPlayInterval = 6000 
-}: AICenter4UHeroCarouselProps) {
+}: CurioQuestHeroCarouselProps) {
   const [firestoreSlides, setFirestoreSlides] = useState<HeroSlide[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -69,7 +69,7 @@ export function AICenter4UHeroCarousel({
   // Fetch slides from Firestore
   useEffect(() => {
     if (!db) {
-      setFirestoreSlides(slides || aicenterHeroSlides);
+      setFirestoreSlides(slides || curioHeroSlides);
       setLoading(false);
       return;
     }
@@ -81,7 +81,7 @@ export function AICenter4UHeroCarousel({
 
     const unsubscribe = onSnapshot(slidesQuery, async (snapshot) => {
       if (snapshot.empty) {
-        setFirestoreSlides(slides || aicenterHeroSlides);
+        setFirestoreSlides(slides || curioHeroSlides);
         setLoading(false);
         return;
       }
@@ -112,7 +112,7 @@ export function AICenter4UHeroCarousel({
 
           // If no background image from Firestore, try to get from default slides
           if (!backgroundImage?.url) {
-            const defaultSlide = aicenterHeroSlides.find(s => s.id === docSnap.id);
+            const defaultSlide = curioHeroSlides.find(s => s.id === docSnap.id);
             if (defaultSlide?.backgroundImage?.url) {
               backgroundImage = defaultSlide.backgroundImage;
             }
@@ -143,7 +143,7 @@ export function AICenter4UHeroCarousel({
       setLoading(false);
     }, (error) => {
       console.error("Error fetching hero slides:", error);
-      setFirestoreSlides(slides || aicenterHeroSlides);
+      setFirestoreSlides(slides || curioHeroSlides);
       setLoading(false);
     });
 
@@ -152,7 +152,7 @@ export function AICenter4UHeroCarousel({
 
   const publishedSlides = firestoreSlides;
 
-  // NOTE: Auto-fetch disabled - using hardcoded Pexels images from aicenterHeroSlides
+  // NOTE: Auto-fetch disabled - using hardcoded Pexels images from curioHeroSlides
   // If you need dynamic image fetching in the future, re-enable this useEffect
   /*
   useEffect(() => {
@@ -364,11 +364,11 @@ export function AICenter4UHeroCarousel({
             </div>
           )}
 
-          {/* Trust Indicators - AICenter4U */}
+          {/* Trust Indicators - CurioQuest */}
           <div className="mt-16 pt-8 border-t border-white/10">
-            <p className="text-sm text-gray-400 mb-6">Why Families Choose AICenter4U</p>
+            <p className="text-sm text-gray-400 mb-6">Why Families Choose CurioQuest</p>
             <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10">
-              {aicenterTrustIndicators.map((indicator) => (
+              {curioTrustIndicators.map((indicator) => (
                 <div key={indicator.title} className="flex flex-col items-center text-center">
                   <span className="text-lg font-bold text-white">{indicator.title}</span>
                   <span className="text-xs text-gray-400">{indicator.subtitle}</span>

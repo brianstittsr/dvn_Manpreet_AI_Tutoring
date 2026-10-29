@@ -19,9 +19,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "About AICenter4U | Learn, Believe, Grow",
+  title: "About CurioQuest | Learn, Believe, Grow",
   description:
-    "AICenter4U is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
+    "CurioQuest is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
 };
 
 const values = [
@@ -83,14 +83,14 @@ export default function AboutPage() {
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
             <Badge variant="outline" className="mb-6 border-amber-500/50 text-amber-400">
-              About AICenter4U
+              About CurioQuest
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               Learn. Believe.{" "}
               <span className="text-amber-400">Grow.</span>
             </h1>
             <p className="mt-6 text-lg text-gray-300 max-w-2xl mx-auto">
-              We built AICenter4U for one simple reason: kids learn best when they
+              We built CurioQuest for one simple reason: kids learn best when they
               figure things out for themselves - with a patient guide by their side.
             </p>
           </div>
@@ -122,7 +122,7 @@ export default function AboutPage() {
 
             <div>
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
-                Why AICenter4U Exists
+                Why CurioQuest Exists
               </h2>
               <div className="space-y-4 text-muted-foreground">
                 <p className="text-lg">
@@ -131,7 +131,7 @@ export default function AboutPage() {
                   really stuck.
                 </p>
                 <p>
-                  AICenter4U works differently. Our AI coaches ask questions and give
+                  CurioQuest works differently. Our AI coaches ask questions and give
                   hints, so kids do the thinking. Then, at the end of every lesson, kids
                   solve a new problem all by themselves - no help allowed. That&apos;s how we
                   know (and how you know) they really learned it.
@@ -270,7 +270,7 @@ export default function AboutPage() {
             </Badge>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Our Core Values</h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              The principles that guide everything we build at AICenter4U.
+              The principles that guide everything we build at CurioQuest.
             </p>
           </div>
 

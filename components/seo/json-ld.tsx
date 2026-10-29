@@ -5,12 +5,12 @@ export function OrganizationJsonLd() {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "AICenter4U",
-    alternateName: "AICenter4U",
-    url: "https://aicenter4u.com",
-    logo: "https://aicenter4u.com/aicenter4u-logo.svg",
+    name: "CurioQuest",
+    alternateName: "CurioQuest",
+    url: "https://curioquest.com",
+    logo: "https://curioquest.com/curioquest-logo.svg",
     description:
-      "AICenter4U helps entrepreneurs and business owners build sustainable wealth, develop high-performing teams, and create lasting legacies through strategic coaching.",
+      "CurioQuest helps entrepreneurs and business owners build sustainable wealth, develop high-performing teams, and create lasting legacies through strategic coaching.",
     foundingDate: "2020",
     founders: [
       {
@@ -32,14 +32,14 @@ export function OrganizationJsonLd() {
       },
       {
         "@type": "ContactPoint",
-        email: "info@aicenter4u.com",
+        email: "info@curioquest.com",
         contactType: "customer service",
       },
     ],
     sameAs: [
-      "https://www.linkedin.com/company/aicenter4ubusiness",
-      "https://twitter.com/aicenter4ubusiness",
-      "https://www.facebook.com/aicenter4ubusiness",
+      "https://www.linkedin.com/company/curioquestbusiness",
+      "https://twitter.com/curioquestbusiness",
+      "https://www.facebook.com/curioquestbusiness",
     ],
     areaServed: {
       "@type": "Country",
@@ -71,11 +71,11 @@ export function LocalBusinessJsonLd() {
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
-    name: "AICenter4U",
-    image: "https://aicenter4u.com/aicenter4u-logo.svg",
-    url: "https://aicenter4u.com",
+    name: "CurioQuest",
+    image: "https://curioquest.com/curioquest-logo.svg",
+    url: "https://curioquest.com",
     telephone: "+1-513-555-0183",
-    email: "info@aicenter4u.com",
+    email: "info@curioquest.com",
     priceRange: "$$$$",
     address: {
       "@type": "PostalAddress",
@@ -123,7 +123,7 @@ export function ServiceJsonLd({
   name,
   description,
   url,
-  provider = "AICenter4U",
+  provider = "CurioQuest",
   areaServed = "United States",
 }: ServiceJsonLdProps) {
   const serviceSchema = {
@@ -135,7 +135,7 @@ export function ServiceJsonLd({
     provider: {
       "@type": "Organization",
       name: provider,
-      url: "https://aicenter4u.com",
+      url: "https://curioquest.com",
     },
     areaServed: {
       "@type": "Country",
@@ -252,10 +252,10 @@ export function ArticleJsonLd({
     },
     publisher: {
       "@type": "Organization",
-      name: "AICenter4U",
+      name: "CurioQuest",
       logo: {
         "@type": "ImageObject",
-        url: "https://aicenter4u.com/aicenter4u-logo.svg",
+        url: "https://curioquest.com/curioquest-logo.svg",
       },
     },
     mainEntityOfPage: {
@@ -278,14 +278,14 @@ export function WebsiteJsonLd() {
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "AICenter4U",
-    alternateName: "AICenter4U",
-    url: "https://aicenter4u.com",
+    name: "CurioQuest",
+    alternateName: "CurioQuest",
+    url: "https://curioquest.com",
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: "https://aicenter4u.com/search?q={search_term_string}",
+        urlTemplate: "https://curioquest.com/search?q={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },

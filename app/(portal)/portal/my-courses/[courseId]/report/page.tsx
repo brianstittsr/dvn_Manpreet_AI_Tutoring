@@ -192,7 +192,7 @@ function ProgressReportInner() {
         {/* Header */}
         <div className="border-b-2 border-teal-600 pb-6 mb-6">
           <p className="text-sm tracking-[0.25em] uppercase text-teal-700 mb-1">
-            AICenter4U Academy
+            CurioQuest Academy
           </p>
           <h1 className="text-3xl font-bold">Learning Progress Report</h1>
           <div className="mt-4 grid sm:grid-cols-2 gap-2 text-sm">
@@ -295,7 +295,7 @@ function ProgressReportInner() {
 
         <div className="text-xs text-muted-foreground border-t pt-4 flex justify-between">
           <span>Generated {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
-          <span>AICenter4U · AI-guided learning for kids</span>
+          <span>CurioQuest · AI-guided learning for kids</span>
         </div>
       </div>
     </div>

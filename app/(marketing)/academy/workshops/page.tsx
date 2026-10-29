@@ -98,7 +98,7 @@ const pastWorkshops = [
   {
     id: "p2",
     title: "Hiring A-Players Workshop",
-    description: "Learn the AICenter4U method for attracting and hiring top talent.",
+    description: "Learn the CurioQuest method for attracting and hiring top talent.",
     date: "December 8, 2024",
     duration: "2 hours",
     type: "recorded",

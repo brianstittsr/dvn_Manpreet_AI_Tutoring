@@ -73,7 +73,7 @@ function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
   );
 }
 
-export function AICenter4UStatsSection() {
+export function CurioQuestStatsSection() {
   return (
     <section className="py-16 md:py-24 bg-slate-900 text-white">
       <div className="container">
@@ -82,7 +82,7 @@ export function AICenter4UStatsSection() {
             Built for Real Learning
           </Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            The AICenter4U Difference
+            The CurioQuest Difference
           </h2>
           <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
             We measure what matters: does your child truly understand - and can they do it on their own?

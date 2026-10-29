@@ -87,7 +87,7 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/aicenter4u-logo.svg"
+            src="/curioquest-logo.svg"
             alt="Strategic Value+ Logo"
             width={48}
             height={48}

@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "How to Build a Leadership Team You Can Trust | AICenter4U",
+  title: "How to Build a Leadership Team You Can Trust | CurioQuest",
   description:
     "The difference between a business that scales and one that stalls often comes down to one thing: the leadership team. Learn how to build yours and break through the ceiling holding you back.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
       "The difference between a business that scales and one that stalls often comes down to one thing: the leadership team. Here's how to build yours.",
     type: "article",
     publishedTime: "2025-12-05",
-    authors: ["AICenter4U"],
+    authors: ["CurioQuest"],
     images: [
       {
         url: "https://images.pexels.com/photos/3182822/pexels-photo-3182822.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
@@ -80,7 +80,7 @@ export default function ArticlePage() {
               </span>
               <span className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                AICenter4U Team
+                CurioQuest Team
               </span>
             </div>
           </div>
@@ -329,7 +329,7 @@ export default function ArticlePage() {
                       Ready to Build Your Leadership Team?
                     </h3>
                     <p className="text-gray-300 mb-4">
-                      At AICenter4U, we specialize in helping business owners 
+                      At CurioQuest, we specialize in helping business owners 
                       transform from overwhelmed operators into confident 
                       leaders of high-performing teams. Our proven methodology 
                       has helped hundreds of owners build leadership teams 

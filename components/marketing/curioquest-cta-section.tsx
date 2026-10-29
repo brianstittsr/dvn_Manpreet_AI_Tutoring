@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Mail, Sparkles } from "lucide-react";
 
-export function AICenter4UCTASection() {
+export function CurioQuestCTASection() {
   return (
     <section className="py-20 md:py-28 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
       {/* Background Pattern */}

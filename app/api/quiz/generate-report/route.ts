@@ -139,23 +139,23 @@ const defaultTemplate: Omit<QuizReportTemplateDoc, 'id' | 'createdAt' | 'updated
     title: "Ready to Build Your Legacy?",
     description: "Schedule a free 30-minute strategy call to discuss your results and create a personalized action plan for your business.",
     buttonText: "Schedule Your Free Call",
-    buttonUrl: "https://aicenter4u.com/schedule-a-call",
+    buttonUrl: "https://curioquest.com/schedule-a-call",
   },
   branding: {
-    logoUrl: "/aicenter4u-logo.svg",
+    logoUrl: "/curioquest-logo.svg",
     primaryColor: "#D97706",
     secondaryColor: "#1E293B",
-    companyName: "AICenter4U",
-    contactEmail: "info@aicenter4u.com",
+    companyName: "CurioQuest",
+    contactEmail: "info@curioquest.com",
     contactPhone: "(513) 335-1978",
-    website: "https://aicenter4u.com",
+    website: "https://curioquest.com",
   },
   emailSettings: {
     subject: "Your Legacy Growth IQ Assessment Results",
-    fromName: "AICenter4U",
-    replyTo: "info@aicenter4u.com",
+    fromName: "CurioQuest",
+    replyTo: "info@curioquest.com",
     introText: "Thank you for completing the Legacy Growth IQ Assessment! Attached is your personalized report with insights and recommendations for building a sustainable business legacy.",
-    signatureText: "Best regards,\nThe AICenter4U Team",
+    signatureText: "Best regards,\nThe CurioQuest Team",
   },
 };
 
@@ -590,10 +590,10 @@ export async function POST(request: NextRequest) {
 
           const { emailSettings, branding } = template;
           const subject = emailSettings.subject || "Your Legacy Growth IQ Assessment Results";
-          const fromName = emailSettings.fromName || branding.companyName || "AICenter4U";
-          const replyTo = emailSettings.replyTo || branding.contactEmail || "info@aicenter4u.com";
+          const fromName = emailSettings.fromName || branding.companyName || "CurioQuest";
+          const replyTo = emailSettings.replyTo || branding.contactEmail || "info@curioquest.com";
           const introText = emailSettings.introText || "Thank you for completing the Legacy Growth IQ Assessment! Attached is your personalized report with insights and recommendations for building a sustainable business legacy.";
-          const signatureText = emailSettings.signatureText || "Best regards,\nThe AICenter4U Team";
+          const signatureText = emailSettings.signatureText || "Best regards,\nThe CurioQuest Team";
 
           const introHtml = `<p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #333; margin-bottom: 20px;">${introText.replace(/\n/g, "<br/>")}</p>`;
           const signatureHtml = `
@@ -613,7 +613,7 @@ export async function POST(request: NextRequest) {
           );
 
           const toAddresses = [submission.respondentEmail];
-          const internalEmail = "info@aicenter4u.com";
+          const internalEmail = "info@curioquest.com";
           if (internalEmail !== submission.respondentEmail) {
             toAddresses.push(internalEmail);
           }

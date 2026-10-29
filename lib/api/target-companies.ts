@@ -1,7 +1,7 @@
 /**
  * Target Companies API Client
  * 
- * API functions for managing target companies in AICenter4U
+ * API functions for managing target companies in CurioQuest
  */
 
 import { createClient } from '@supabase/supabase-js';

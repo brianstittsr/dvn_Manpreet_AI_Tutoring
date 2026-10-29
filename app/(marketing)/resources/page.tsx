@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, Video, FileText, Download, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Resources | AICenter4U",
+  title: "Resources | CurioQuest",
   description:
     "Free resources, guides, and tools to help you build a lasting business legacy. Download our playbooks, read articles, and watch educational content.",
 };

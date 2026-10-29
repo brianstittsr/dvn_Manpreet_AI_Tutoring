@@ -155,7 +155,7 @@ export async function showBrowserNotification(
   
   new Notification(`${icon} ${title}`, {
     body: message,
-    icon: "/aicenter4u-logo.svg",
+    icon: "/curioquest-logo.svg",
     tag: eventType,
   });
   

@@ -32,7 +32,7 @@ const fallbackCourses = [
   {
     id: "1",
     title: "The G.R.O.W.S. Framework Masterclass",
-    description: "Master the complete AICenter4U methodology for building a business that thrives beyond you.",
+    description: "Master the complete CurioQuest methodology for building a business that thrives beyond you.",
     category: "Goals & Vision",
     categorySlug: "goals-vision",
     duration: "8 hours",

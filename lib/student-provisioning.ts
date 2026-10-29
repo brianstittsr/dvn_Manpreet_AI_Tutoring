@@ -11,7 +11,7 @@
  */
 
 import { adminAuth, adminDb } from "./firebase-admin";
-import { sendFromAICenter4U } from "./email-service";
+import { sendFromCurioQuest } from "./email-service";
 import { COLLECTIONS } from "./schema";
 
 export interface ProvisionResult {
@@ -22,7 +22,7 @@ export interface ProvisionResult {
   error?: string;
 }
 
-const APP_NAME = "AICenter4U";
+const APP_NAME = "CurioQuest";
 
 function baseUrl(): string {
   return (
@@ -151,7 +151,7 @@ export async function provisionStudentAccount(params: {
         resetLink,
         context: params.context || "your registration",
       });
-      const sendResult = await sendFromAICenter4U({
+      const sendResult = await sendFromCurioQuest({
         to: email,
         subject,
         text,

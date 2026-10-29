@@ -1,16 +1,16 @@
 import { HeroSlide } from "@/components/marketing/hero-carousel";
 
 /**
- * AICenter4U - Hero Carousel Slides
+ * CurioQuest - Hero Carousel Slides
  *
- * Marketing copy for the AICenter4U AI-guided tutoring platform.
+ * Marketing copy for the CurioQuest AI-guided tutoring platform.
  * Written at a ~6th grade reading level: short sentences, common words.
  * Background photos: kids learning (Unsplash, verified public URLs).
  */
-export const aicenterHeroSlides: HeroSlide[] = [
+export const curioHeroSlides: HeroSlide[] = [
   {
-    id: "aicenter-1",
-    badge: "Welcome to AICenter4U",
+    id: "curio-1",
+    badge: "Welcome to CurioQuest",
     headline: "A Coach That Helps Kids",
     highlightedText: "Really Understand",
     subheadline: "Our AI coaches ask questions, give hints, and cheer kids on. Your child learns to think and solve problems on their own.",
@@ -26,7 +26,7 @@ export const aicenterHeroSlides: HeroSlide[] = [
     }
   },
   {
-    id: "aicenter-2",
+    id: "curio-2",
     badge: "Meet Coach Maya",
     headline: "Math Makes Sense",
     highlightedText: "Step by Step",
@@ -43,7 +43,7 @@ export const aicenterHeroSlides: HeroSlide[] = [
     }
   },
   {
-    id: "aicenter-3",
+    id: "curio-3",
     badge: "Meet Story Explorer",
     headline: "Reading Becomes",
     highlightedText: "an Adventure",
@@ -60,7 +60,7 @@ export const aicenterHeroSlides: HeroSlide[] = [
     }
   },
   {
-    id: "aicenter-4",
+    id: "curio-4",
     badge: "Meet Growth & Glow",
     headline: "Real-Life Skills,",
     highlightedText: "Learned by Doing",
@@ -77,7 +77,7 @@ export const aicenterHeroSlides: HeroSlide[] = [
     }
   },
   {
-    id: "aicenter-5",
+    id: "curio-5",
     badge: "For Parents & Guardians",
     headline: "You See Every",
     highlightedText: "Step They Take",
@@ -96,10 +96,10 @@ export const aicenterHeroSlides: HeroSlide[] = [
 ];
 
 /**
- * AICenter4U Trust Indicators
+ * CurioQuest Trust Indicators
  * Display these in the hero section footer
  */
-export const aicenterTrustIndicators = [
+export const curioTrustIndicators = [
   { title: "3 AI Coaches", subtitle: "Math, Reading, Life Skills" },
   { title: "6 Steps", subtitle: "Guided Learning Cycle" },
   { title: "Hints", subtitle: "Not Just Answers" },
@@ -108,10 +108,10 @@ export const aicenterTrustIndicators = [
 ];
 
 /**
- * AICenter4U Core Values
+ * CurioQuest Core Values
  * For use in about section and other marketing materials
  */
-export const aicenterCoreValues = [
+export const curioCoreValues = [
   {
     name: "Learn",
     description: "We teach kids to understand, not just to finish.",
@@ -131,10 +131,10 @@ export const aicenterCoreValues = [
 ];
 
 /**
- * AICenter4U Coaches
+ * CurioQuest Coaches
  * The three AI learning coaches
  */
-export const aicenterCoaches = [
+export const curioCoaches = [
   {
     id: "math",
     title: "Coach Maya",
@@ -174,11 +174,11 @@ export const aicenterCoaches = [
 ];
 
 /**
- * AICenter4U FAQ Items
+ * CurioQuest FAQ Items
  */
-export const aicenterFAQs = [
+export const curioFAQs = [
   {
-    question: "Is AICenter4U safe for my child?",
+    question: "Is CurioQuest safe for my child?",
     answer: "Yes. Kids learn inside a protected space. Parents approve access, see progress reports, and can ask for human help anytime. We only keep the data needed for learning.",
   },
   {
@@ -191,15 +191,15 @@ export const aicenterFAQs = [
   },
   {
     question: "What ages is it for?",
-    answer: "AICenter4U works best for kids about 8 to 14 years old. Each coach adjusts to your child's level, so it fits beginners and more advanced learners.",
+    answer: "CurioQuest works best for kids about 8 to 14 years old. Each coach adjusts to your child's level, so it fits beginners and more advanced learners.",
   },
 ];
 
 /**
- * AICenter4U Company Info
+ * CurioQuest Company Info
  */
-export const aicenterCompanyInfo = {
-  name: "AICenter4U",
+export const curioCompanyInfo = {
+  name: "CurioQuest",
   tagline: "Learn. Believe. Grow.",
   program: "A Waraba Haven Foundation program",
 };

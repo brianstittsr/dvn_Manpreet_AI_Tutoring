@@ -2,7 +2,7 @@
  * Seed LMS Data Script
  * 
  * Populates the LMS with initial categories, courses, workshops, and badges
- * based on the AICenter4U G.R.O.W.S. framework content.
+ * based on the CurioQuest G.R.O.W.S. framework content.
  * 
  * Run with: npx ts-node scripts/seed-lms-data.ts
  */
@@ -97,8 +97,8 @@ const categories = [
 const courses = [
   {
     title: "The G.R.O.W.S. Framework Masterclass",
-    shortDescription: "Master the complete AICenter4U methodology for building a business that thrives beyond you.",
-    description: `This comprehensive masterclass takes you through the entire G.R.O.W.S. framework - the proven methodology used by AICenter4U to help business owners build companies that thrive beyond them.
+    shortDescription: "Master the complete CurioQuest methodology for building a business that thrives beyond you.",
+    description: `This comprehensive masterclass takes you through the entire G.R.O.W.S. framework - the proven methodology used by CurioQuest to help business owners build companies that thrive beyond them.
 
 You'll learn how to:
 - Set clear, actionable goals aligned with your vision
@@ -127,7 +127,7 @@ This course includes real-world case studies, practical exercises, and templates
         description: "Understanding the framework and its components",
         lessons: [
           { title: "Welcome & Course Overview", contentType: "video", duration: 10 },
-          { title: "The AICenter4U Philosophy", contentType: "video", duration: 15 },
+          { title: "The CurioQuest Philosophy", contentType: "video", duration: 15 },
           { title: "G.R.O.W.S. Framework Overview", contentType: "video", duration: 20 },
           { title: "Self-Assessment: Where Are You Now?", contentType: "quiz", duration: 15 },
         ],
@@ -682,7 +682,7 @@ async function seedData() {
         description: course.description,
         categoryId,
         instructorName: "Manpreet Hundal",
-        instructorBio: "Founder of AICenter4U with 20+ years of experience helping business owners build lasting legacies.",
+        instructorBio: "Founder of CurioQuest with 20+ years of experience helping business owners build lasting legacies.",
         instructorImageUrl: null,
         difficultyLevel: course.difficultyLevel,
         estimatedDurationMinutes: course.estimatedDurationMinutes,

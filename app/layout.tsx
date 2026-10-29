@@ -15,13 +15,13 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://aicenter4u.com"),
+  metadataBase: new URL("https://curioquest.com"),
   title: {
-    default: "AICenter4U | Learn. Believe. Grow.",
-    template: "%s | AICenter4U",
+    default: "CurioQuest | Learn. Believe. Grow.",
+    template: "%s | CurioQuest",
   },
   description:
-    "AICenter4U is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
+    "CurioQuest is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
   keywords: [
     "AI tutoring for kids",
     "online learning for children",
@@ -34,16 +34,16 @@ export const metadata: Metadata = {
     "parent approved learning",
     "elementary tutoring",
   ],
-  authors: [{ name: "AICenter4U", url: "https://aicenter4u.com" }],
-  creator: "AICenter4U",
-  publisher: "AICenter4U",
+  authors: [{ name: "CurioQuest", url: "https://curioquest.com" }],
+  creator: "CurioQuest",
+  publisher: "CurioQuest",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   alternates: {
-    canonical: "https://aicenter4u.com",
+    canonical: "https://curioquest.com",
   },
   robots: {
     index: true,
@@ -59,27 +59,27 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://aicenter4u.com",
-    siteName: "AICenter4U",
-    title: "AICenter4U | Learn. Believe. Grow.",
+    url: "https://curioquest.com",
+    siteName: "CurioQuest",
+    title: "CurioQuest | Learn. Believe. Grow.",
     description:
-      "AICenter4U is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
+      "CurioQuest is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
     images: [
       {
-        url: "/aicenter4u-logo.svg",
+        url: "/curioquest-logo.svg",
         width: 1200,
         height: 630,
-        alt: "AICenter4U - Learn. Believe. Grow.",
+        alt: "CurioQuest - Learn. Believe. Grow.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AICenter4U | Learn. Believe. Grow.",
+    title: "CurioQuest | Learn. Believe. Grow.",
     description:
-      "AICenter4U is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
-    images: ["/aicenter4u-logo.svg"],
-    creator: "@aicenter4u",
+      "CurioQuest is a safe, guided learning platform for kids. Friendly AI coaches help children truly understand math, reading, and life skills - one question at a time.",
+    images: ["/curioquest-logo.svg"],
+    creator: "@curioquest",
   },
   verification: {
     google: "your-google-verification-code",

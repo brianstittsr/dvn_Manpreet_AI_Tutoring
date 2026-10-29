@@ -1,5 +1,5 @@
-import { AICenter4UNavbar } from "@/components/shared/aicenter4u-navbar";
-import { AICenter4UFooter } from "@/components/shared/aicenter4u-footer";
+import { CurioQuestNavbar } from "@/components/shared/curioquest-navbar";
+import { CurioQuestFooter } from "@/components/shared/curioquest-footer";
 import { ContactPopup } from "@/components/marketing/contact-popup";
 import { EventCartProvider } from "@/contexts/event-cart-context";
 import { CourseCartProvider } from "@/contexts/course-cart-context";
@@ -18,12 +18,12 @@ export default function MarketingLayout({
         <EventCartProvider>
           <CourseCartProvider>
             <div className="flex min-h-screen flex-col">
-              <AICenter4UNavbar />
+              <CurioQuestNavbar />
               {/* Main content landmark with skip link target - WCAG 2.4.1 */}
               <main id="main-content" className="flex-1" role="main" tabIndex={-1}>
                 {children}
               </main>
-              <AICenter4UFooter />
+              <CurioQuestFooter />
               <ContactPopup />
               <CourseCartDrawer />
             </div>

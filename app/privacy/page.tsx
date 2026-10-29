@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata = {
-  title: "Privacy Policy | AICenter4U",
-  description: "Privacy Policy for AICenter4U platform and services.",
+  title: "Privacy Policy | CurioQuest",
+  description: "Privacy Policy for CurioQuest platform and services.",
 };
 
 export default function PrivacyPage() {
@@ -28,7 +28,7 @@ export default function PrivacyPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
             <p>
-              AICenter4U (&quot;AICenter4U&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) respects your privacy and is committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you use our platform and services.
+              CurioQuest (&quot;CurioQuest&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) respects your privacy and is committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you use our platform and services.
             </p>
           </section>
 
@@ -110,13 +110,13 @@ export default function PrivacyPage() {
             </p>
             <div className="mt-4 p-4 border rounded-lg bg-muted/30">
               <p>
-                <strong>AICenter4U</strong><br />
+                <strong>CurioQuest</strong><br />
                 EIN: 84-3055745<br />
                 4724 Vine Street<br />
                 Cincinnati, OH 45217<br />
                 Phone: <a href="tel:+15133351978" className="text-primary hover:underline">(513) 335-1978</a><br />
-                Email: <a href="mailto:info@aicenter4u.com" className="text-primary hover:underline">info@aicenter4u.com</a><br />
-                Website: <Link href="https://aicenter4u.com" className="text-primary hover:underline">aicenter4u.com</Link>
+                Email: <a href="mailto:info@curioquest.com" className="text-primary hover:underline">info@curioquest.com</a><br />
+                Website: <Link href="https://curioquest.com" className="text-primary hover:underline">curioquest.com</Link>
               </p>
             </div>
           </section>

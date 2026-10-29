@@ -10,7 +10,7 @@ import {
 
 const faqs = [
   {
-    question: "Is AICenter4U safe for my child?",
+    question: "Is CurioQuest safe for my child?",
     answer: "Yes. Kids learn inside a protected space built just for them. A parent or guardian approves access, gets progress updates, and can ask for a human helper anytime. We only keep the information needed for learning - nothing extra.",
   },
   {
@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     question: "What ages is it for?",
-    answer: "AICenter4U works best for kids about 8 to 14 years old. Every coach adjusts to your child's level, so it fits beginners and more advanced learners.",
+    answer: "CurioQuest works best for kids about 8 to 14 years old. Every coach adjusts to your child's level, so it fits beginners and more advanced learners.",
   },
   {
     question: "How do parents see progress?",
@@ -35,7 +35,7 @@ const faqs = [
   },
   {
     question: "Does my child need special equipment?",
-    answer: "Nope. AICenter4U works on phones, tablets, and computers. It's designed to be easy to use, easy to read, and light on data.",
+    answer: "Nope. CurioQuest works on phones, tablets, and computers. It's designed to be easy to use, easy to read, and light on data.",
   },
   {
     question: "How much does it cost?",
@@ -43,7 +43,7 @@ const faqs = [
   },
 ];
 
-export function AICenter4UFAQSection() {
+export function CurioQuestFAQSection() {
   return (
     <section className="py-20 md:py-28">
       <div className="container">
@@ -56,7 +56,7 @@ export function AICenter4UFAQSection() {
             Questions Parents Ask Us
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Everything families want to know before getting started with AICenter4U.
+            Everything families want to know before getting started with CurioQuest.
           </p>
         </div>
 

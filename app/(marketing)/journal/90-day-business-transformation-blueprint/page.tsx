@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ArrowRight, Calendar, Clock, User, Target, HelpCircle, CheckCircle, Rocket } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "The 90-Day Business Transformation Blueprint | AICenter4U",
+  title: "The 90-Day Business Transformation Blueprint | CurioQuest",
   description: "Real change doesn't take years—it takes focus. Here's our proven framework for achieving measurable results in just 90 days.",
   keywords: ["business transformation", "90 day plan", "business growth", "strategic planning", "business turnaround", "rapid growth strategy"],
   openGraph: {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description: "Real change doesn't take years—it takes focus. Here's our proven framework for achieving measurable results in just 90 days.",
     type: "article",
     publishedTime: "2025-11-20",
-    authors: ["AICenter4U"],
+    authors: ["CurioQuest"],
     images: [{ url: "https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", width: 1260, height: 750, alt: "Business team celebrating success" }]
   }
 };
@@ -34,7 +34,7 @@ export default function ArticlePage() {
             <div className="flex flex-wrap items-center gap-6 text-gray-300">
               <span className="flex items-center gap-2"><Calendar className="h-4 w-4" />November 20, 2025</span>
               <span className="flex items-center gap-2"><Clock className="h-4 w-4" />9 min read</span>
-              <span className="flex items-center gap-2"><User className="h-4 w-4" />AICenter4U Team</span>
+              <span className="flex items-center gap-2"><User className="h-4 w-4" />CurioQuest Team</span>
             </div>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function ArticlePage() {
                   <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center shrink-0"><Rocket className="h-6 w-6 text-slate-900" /></div>
                   <div>
                     <h3 className="text-xl font-bold mb-2">Ready to Transform Your Business in 90 Days?</h3>
-                    <p className="text-gray-300 mb-4">At AICenter4U, we've guided hundreds of business owners through successful 90-day transformations. Our proven methodology helps you achieve in 3 months what might otherwise take 3 years.</p>
+                    <p className="text-gray-300 mb-4">At CurioQuest, we've guided hundreds of business owners through successful 90-day transformations. Our proven methodology helps you achieve in 3 months what might otherwise take 3 years.</p>
                     <div className="flex flex-wrap gap-4">
                       <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900" asChild><Link href="/schedule-a-call">Start Your 90-Day Transformation<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
                       <Button variant="outline" className="border-white/30 hover:bg-white/10" asChild><Link href="/quiz">Take the Assessment First</Link></Button>

@@ -3,9 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { SuccessStoriesContent } from "@/components/marketing/success-stories-content";
 
 export const metadata: Metadata = {
-  title: "Success Stories | AICenter4U",
+  title: "Success Stories | CurioQuest",
   description:
-    "Real results from real business owners. See how AICenter4U has helped entrepreneurs build lasting legacies through strategic coaching.",
+    "Real results from real business owners. See how CurioQuest has helped entrepreneurs build lasting legacies through strategic coaching.",
 };
 
 export default function SuccessStoriesPage() {
@@ -23,7 +23,7 @@ export default function SuccessStoriesPage() {
               <span className="text-amber-400">Real Business Owners</span>
             </h1>
             <p className="mt-6 text-lg text-gray-300 max-w-2xl mx-auto">
-              Don&apos;t just take our word for it. See how AICenter4U has helped entrepreneurs 
+              Don&apos;t just take our word for it. See how CurioQuest has helped entrepreneurs 
               across industries build businesses that thrive today and endure for generations.
             </p>
           </div>

@@ -62,7 +62,7 @@ import { collection, getDocs, doc, setDoc, deleteDoc, Timestamp, writeBatch, onS
 import { db } from "@/lib/firebase";
 import { COLLECTIONS, type HeroSlideDoc } from "@/lib/schema";
 import type { HeroSlide } from "@/components/marketing/hero-carousel";
-import { aicenterHeroSlides } from "@/lib/aicenter-hero-slides";
+import { curioHeroSlides } from "@/lib/curio-hero-slides";
 import { ImageManagerPicker } from "@/components/admin/image-manager-picker";
 
 const wizardSteps = [
@@ -220,7 +220,7 @@ export default function HeroManagementEnhancedPage() {
     try {
       const batch = writeBatch(db);
       
-      aicenterHeroSlides.forEach((slide) => {
+      curioHeroSlides.forEach((slide) => {
         const docRef = doc(db!, COLLECTIONS.HERO_SLIDES, slide.id);
         const slideDoc: HeroSlideDoc = {
           id: slide.id,

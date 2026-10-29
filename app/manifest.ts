@@ -2,8 +2,8 @@ import { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "AICenter4U | AI-Guided Learning for Kids",
-    short_name: "AICenter4U",
+    name: "CurioQuest | AI-Guided Learning for Kids",
+    short_name: "CurioQuest",
     description:
       "Friendly AI coaches that help kids learn math, reading, and life skills — with questions and hints, not just answers.",
     start_url: "/",
@@ -25,7 +25,7 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "any",
       },
       {
-        src: "/aicenter4u-logo.svg",
+        src: "/curioquest-logo.svg",
         sizes: "any",
         type: "image/svg+xml",
       },

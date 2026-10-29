@@ -248,7 +248,7 @@ export function CreateReferralDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="svp">AICenter4U</SelectItem>
+                  <SelectItem value="svp">CurioQuest</SelectItem>
                   <SelectItem value="affiliate">Another Affiliate</SelectItem>
                 </SelectContent>
               </Select>

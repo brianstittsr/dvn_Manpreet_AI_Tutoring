@@ -122,7 +122,7 @@ Navigate to: **`/portal/admin/hero`**
 
 ## 📊 Current Slides
 
-The system comes pre-loaded with 5 AICenter4U slides:
+The system comes pre-loaded with 5 CurioQuest slides:
 
 1. **Legacy Growth System™** - Main value proposition
 2. **Stop Being the Bottleneck** - Pain point focus

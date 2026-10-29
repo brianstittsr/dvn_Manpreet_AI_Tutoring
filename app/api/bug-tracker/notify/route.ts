@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { rateLimit } from "@/lib/rate-limit";
 
-const INTERNAL_NOTIFY_EMAIL = "info@aicenter4u.com";
+const INTERNAL_NOTIFY_EMAIL = "info@curioquest.com";
 const CC_EMAIL = "brianstittsr@gmail.com";
-const FROM_EMAIL = process.env.GMAIL_SMTP_USER || "bookings@aicenter4u.com";
+const FROM_EMAIL = process.env.GMAIL_SMTP_USER || "bookings@curioquest.com";
 
 interface BugTrackerNotificationRequest {
   id: string;
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
     const subject = `Bug Tracker: ${typeLabel} Resolved - ${title}`;
 
     await transporter.sendMail({
-      from: `"AICenter4U" <${gmailUser}>`,
+      from: `"CurioQuest" <${gmailUser}>`,
       to: INTERNAL_NOTIFY_EMAIL,
       cc: CC_EMAIL,
       subject,

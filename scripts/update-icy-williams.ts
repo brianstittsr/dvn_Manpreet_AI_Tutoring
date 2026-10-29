@@ -19,7 +19,7 @@ async function updateManpreetHundal() {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   
-  const ICY_EMAIL = "info@aicenter4u.com";
+  const ICY_EMAIL = "info@curioquest.com";
   const now = Timestamp.now();
 
   console.log("Looking for team member with email:", ICY_EMAIL);

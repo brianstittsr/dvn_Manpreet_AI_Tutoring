@@ -87,7 +87,7 @@ export default function CertificatePage() {
             </div>
 
             <p className="text-sm tracking-[0.3em] uppercase text-teal-700 mb-2">
-              AICenter4U Academy
+              CurioQuest Academy
             </p>
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-2">
               Certificate of Completion
@@ -117,7 +117,7 @@ export default function CertificatePage() {
               <div className="text-center">
                 <div className="w-40 border-b border-slate-400 mb-1" />
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  AICenter4U
+                  CurioQuest
                 </p>
               </div>
               <div className="text-right">
@@ -132,7 +132,7 @@ export default function CertificatePage() {
 
             <div className="mt-10 flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-teal-600" />
-              Verify this certificate at aicenter4u.com/certificate/{certificate.id}
+              Verify this certificate at curioquest.com/certificate/{certificate.id}
             </div>
           </div>
         </div>

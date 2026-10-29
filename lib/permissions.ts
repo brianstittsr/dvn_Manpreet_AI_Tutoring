@@ -1,5 +1,5 @@
 /**
- * Role-based permissions system for AICenter4U Platform
+ * Role-based permissions system for CurioQuest Platform
  * 
  * Roles hierarchy:
  * - superadmin: Full control over everything

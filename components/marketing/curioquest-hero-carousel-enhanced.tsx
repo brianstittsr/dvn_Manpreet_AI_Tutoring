@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, CheckCircle, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { aicenterHeroSlides, aicenterTrustIndicators } from "@/lib/aicenter-hero-slides";
+import { curioHeroSlides, curioTrustIndicators } from "@/lib/curio-hero-slides";
 import type { HeroSlideDoc } from "@/lib/schema";
 import type { HeroSlide } from "@/components/marketing/hero-carousel";
 
-interface AICenter4UHeroCarouselProps {
+interface CurioQuestHeroCarouselProps {
   slides?: HeroSlide[];
   autoPlayInterval?: number;
 }
@@ -32,10 +32,10 @@ const getAnimationClass = (type?: string) => {
   }
 };
 
-export function AICenter4UHeroCarousel({ 
-  slides = aicenterHeroSlides, 
+export function CurioQuestHeroCarousel({ 
+  slides = curioHeroSlides, 
   autoPlayInterval = 6000 
-}: AICenter4UHeroCarouselProps) {
+}: CurioQuestHeroCarouselProps) {
   const publishedSlides = slides.filter(s => s.isPublished).sort((a, b) => a.order - b.order);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -201,9 +201,9 @@ export function AICenter4UHeroCarousel({
           )}
 
           <div className="mt-16 pt-8 border-t border-white/10">
-            <p className="text-sm text-gray-400 mb-6">Why Families Choose AICenter4U</p>
+            <p className="text-sm text-gray-400 mb-6">Why Families Choose CurioQuest</p>
             <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10">
-              {aicenterTrustIndicators.map((indicator) => (
+              {curioTrustIndicators.map((indicator) => (
                 <div key={indicator.title} className="flex flex-col items-center text-center">
                   <span className="text-lg font-bold text-white">{indicator.title}</span>
                   <span className="text-xs text-gray-400">{indicator.subtitle}</span>

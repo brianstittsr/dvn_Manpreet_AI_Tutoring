@@ -357,7 +357,7 @@ export default function BookingPage() {
       ].filter(Boolean).join("\n");
 
       const icsContent = buildICSContent({
-        uid: `booking-${bookingRef.id}@aicenter4u.com`,
+        uid: `booking-${bookingRef.id}@curioquest.com`,
         summary: calendarSummary,
         description: calendarDescription,
         organizerEmail: availability.teamMemberEmail,
@@ -773,7 +773,7 @@ export default function BookingPage() {
                     onCheckedChange={(checked) => setSmsConsentTransactional(checked === true)}
                   />
                   <label htmlFor="sms-transactional" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
-                    I consent to receive non-marketing text messages from AICenter4U about appointment reminders and service inquiries. Message frequency may vary, message &amp; data rates may apply. I am 18 or older. Text HELP for assistance, reply STOP to opt out.
+                    I consent to receive non-marketing text messages from CurioQuest about appointment reminders and service inquiries. Message frequency may vary, message &amp; data rates may apply. I am 18 or older. Text HELP for assistance, reply STOP to opt out.
                   </label>
                 </div>
                 <div className="flex items-start gap-3">
@@ -783,7 +783,7 @@ export default function BookingPage() {
                     onCheckedChange={(checked) => setSmsConsentMarketing(checked === true)}
                   />
                   <label htmlFor="sms-marketing" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
-                    I consent to receive marketing text messages, about special offers, discounts, and service updates, from AICenter4U at the phone number provided. Message frequency may vary. Message &amp; data rates may apply. I am 18 or older. Text HELP for assistance, reply STOP to opt out.
+                    I consent to receive marketing text messages, about special offers, discounts, and service updates, from CurioQuest at the phone number provided. Message frequency may vary. Message &amp; data rates may apply. I am 18 or older. Text HELP for assistance, reply STOP to opt out.
                   </label>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -826,7 +826,7 @@ export default function BookingPage() {
               </div>
               <h2 className="text-2xl font-bold mb-2">Booking Confirmed!</h2>
               <p className="text-muted-foreground mb-6">
-                Your meeting has been scheduled. A confirmation email with a calendar invite has been sent to <strong>{bookingDetails.email}</strong> and our team at <strong>info@aicenter4u.com</strong>.
+                Your meeting has been scheduled. A confirmation email with a calendar invite has been sent to <strong>{bookingDetails.email}</strong> and our team at <strong>info@curioquest.com</strong>.
               </p>
               
               <div className="bg-muted rounded-lg p-4 max-w-sm mx-auto text-left space-y-2">
@@ -892,7 +892,7 @@ export default function BookingPage() {
 
         {/* Footer */}
         <div className="text-center mt-8 text-sm text-muted-foreground">
-          <p>Powered by AICenter4U</p>
+          <p>Powered by CurioQuest</p>
         </div>
       </div>
     </div>

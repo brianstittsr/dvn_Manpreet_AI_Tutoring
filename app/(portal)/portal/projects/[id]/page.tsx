@@ -231,7 +231,7 @@ export default function ProjectDetailPage() {
         headers: await authedJsonHeaders(),
         body: JSON.stringify({
           to: ["+15133351978", "+19196083415"],
-          body: `AICenter4U milestone reminder: "${milestone.name}" in project "${project?.name || "Unknown"}" is due ${milestone.dueDate.toLocaleDateString("en-US")}. Status: ${getMilestoneStatusLabel(milestone.status)}.`,
+          body: `CurioQuest milestone reminder: "${milestone.name}" in project "${project?.name || "Unknown"}" is due ${milestone.dueDate.toLocaleDateString("en-US")}. Status: ${getMilestoneStatusLabel(milestone.status)}.`,
         }),
       });
       const result = await res.json();
@@ -301,7 +301,7 @@ export default function ProjectDetailPage() {
         headers: await authedJsonHeaders(),
         body: JSON.stringify({
           to: ["+15133351978", "+19196083415"],
-          body: `AICenter4U upcoming milestone reminders for "${project.name}":\n${body}`,
+          body: `CurioQuest upcoming milestone reminders for "${project.name}":\n${body}`,
         }),
       });
       const result = await res.json();

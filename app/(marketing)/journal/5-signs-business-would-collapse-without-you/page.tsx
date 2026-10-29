@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "5 Signs Your Business Would Collapse Without You | AICenter4U",
+  title: "5 Signs Your Business Would Collapse Without You | CurioQuest",
   description:
     "If you can't take a vacation without your phone blowing up, you don't have a business—you have a job. Discover the 5 warning signs and how to build a business that thrives without your constant presence.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
       "If you can't take a vacation without your phone blowing up, you don't have a business—you have a job. Here's how to know if you're the bottleneck.",
     type: "article",
     publishedTime: "2025-12-15",
-    authors: ["AICenter4U"],
+    authors: ["CurioQuest"],
     images: [
       {
         url: "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
@@ -80,7 +80,7 @@ export default function ArticlePage() {
               </span>
               <span className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                AICenter4U Team
+                CurioQuest Team
               </span>
             </div>
           </div>
@@ -321,7 +321,7 @@ export default function ArticlePage() {
                       Ready to Build a Business That Thrives Without You?
                     </h3>
                     <p className="text-gray-300 mb-4">
-                      At AICenter4U, we've helped hundreds of business owners 
+                      At CurioQuest, we've helped hundreds of business owners 
                       transform their companies from owner-dependent operations 
                       into scalable, sellable assets. Schedule a free strategy 
                       call to discover your personalized roadmap to freedom.
@@ -399,7 +399,7 @@ export default function ArticlePage() {
                     <User className="h-8 w-8 text-slate-400" />
                   </div>
                   <div>
-                    <p className="font-semibold">AICenter4U</p>
+                    <p className="font-semibold">CurioQuest</p>
                     <p className="text-sm text-muted-foreground">
                       Business Strategy Experts
                     </p>

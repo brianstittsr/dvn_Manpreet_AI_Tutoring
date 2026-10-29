@@ -1,6 +1,6 @@
 /**
  * Firebase Academy API Service
- * Client-side Firestore operations for AICenter4U Academy
+ * Client-side Firestore operations for CurioQuest Academy
  */
 
 import {

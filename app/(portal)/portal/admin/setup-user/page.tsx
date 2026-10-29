@@ -21,7 +21,7 @@ export default function SetupUserPage() {
 
     setLoading(true);
     try {
-      const ICY_EMAIL = "info@aicenter4u.com";
+      const ICY_EMAIL = "info@curioquest.com";
       const now = Timestamp.now();
 
       // Check if there's already a team member with this email
@@ -132,7 +132,7 @@ export default function SetupUserPage() {
             <p className="font-medium">Will Update To:</p>
             <ul className="mt-2 space-y-1 text-sm">
               <li><strong>Name:</strong> Manpreet Hundal</li>
-              <li><strong>Email:</strong> info@aicenter4u.com</li>
+              <li><strong>Email:</strong> info@curioquest.com</li>
               <li><strong>Role:</strong> Admin</li>
             </ul>
           </div>

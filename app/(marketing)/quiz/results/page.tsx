@@ -363,7 +363,7 @@ export default function QuizResultsPage() {
                 </Button>
 
                 <p className="text-xs text-gray-500 text-center">
-                  By submitting, you agree to receive your results and occasional insights from AICenter4U. 
+                  By submitting, you agree to receive your results and occasional insights from CurioQuest. 
                   We respect your privacy and will never spam you.
                 </p>
               </form>

@@ -55,7 +55,7 @@ const testimonials = [
   },
 ];
 
-export function AICenter4UTestimonials() {
+export function CurioQuestTestimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const goToNext = () => {
@@ -80,7 +80,7 @@ export function AICenter4UTestimonials() {
             What Parents Are Saying
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Real moments from families learning with AICenter4U coaches.
+            Real moments from families learning with CurioQuest coaches.
           </p>
         </div>
 

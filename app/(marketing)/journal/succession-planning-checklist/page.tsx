@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "The Succession Planning Checklist Every Owner Needs | AICenter4U",
+  title: "The Succession Planning Checklist Every Owner Needs | CurioQuest",
   description:
     "Whether you're 5 years or 15 years from exit, having a succession plan isn't optional—it's essential. Download our comprehensive checklist to ensure your business legacy is protected.",
   keywords: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
       "Whether you're 5 years or 15 years from exit, having a succession plan isn't optional—it's essential. Here's your complete checklist.",
     type: "article",
     publishedTime: "2025-12-10",
-    authors: ["AICenter4U"],
+    authors: ["CurioQuest"],
     images: [
       {
         url: "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
@@ -79,7 +79,7 @@ export default function ArticlePage() {
               </span>
               <span className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                AICenter4U Team
+                CurioQuest Team
               </span>
             </div>
           </div>

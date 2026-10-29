@@ -5,10 +5,10 @@
  *   - Course "Test Drive: Six-Stage AI Learning" (slug: test-drive-course)
  *     with one module and one lesson of each interactive content type:
  *     text, video, studentInterview, gptLesson, quiz.
- *   - Demo student account: demo.student@aicenter4u.com / DemoLearn2026!
+ *   - Demo student account: demo.student@curioquest.com / DemoLearn2026!
  *   - An active enrollment linking that student to the test course.
  *
- * Unlike seed-aicenter4u-academy.ts, this script does NOT wipe any data.
+ * Unlike seed-curioquest-academy.ts, this script does NOT wipe any data.
  *
  * Run: npx tsx scripts/seed-test-course.ts
  */
@@ -52,7 +52,7 @@ const MODULE_ID = "testdrive-module-1";
 const ENROLLMENT_ID = "testdrive-enrollment";
 
 const DEMO_STUDENT = {
-  email: "demo.student@aicenter4u.com",
+  email: "demo.student@curioquest.com",
   password: "DemoLearn2026!",
   firstName: "Demo",
   lastName: "Student",
@@ -100,7 +100,7 @@ const lessons: SeedLesson[] = [
     contentType: "text",
     textContent: `# Welcome to the Test Course
 
-This course is a **sandbox** — a safe place to try every kind of lesson AICenter4U offers.
+This course is a **sandbox** — a safe place to try every kind of lesson CurioQuest offers.
 
 Here is what you will try:
 
@@ -240,7 +240,7 @@ async function main() {
     publishedAt: Timestamp.now(),
     tags: ["test", "sandbox", "gpt-lesson", "demo"],
     learningOutcomes: [
-      "Experience every lesson content type AICenter4U supports",
+      "Experience every lesson content type CurioQuest supports",
       "Complete a course and receive a certificate",
     ],
     prerequisites: [],

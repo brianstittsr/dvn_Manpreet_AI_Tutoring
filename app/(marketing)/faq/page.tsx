@@ -16,34 +16,34 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "FAQ | AICenter4U",
+  title: "FAQ | CurioQuest",
   description:
-    "Frequently asked questions about AICenter4U coaching services, the G.R.O.W.S. framework, pricing, and how we help business owners build lasting legacies.",
+    "Frequently asked questions about CurioQuest coaching services, the G.R.O.W.S. framework, pricing, and how we help business owners build lasting legacies.",
 };
 
 const faqCategories = [
   {
-    title: "About AICenter4U",
+    title: "About CurioQuest",
     faqs: [
       {
-        question: "What is AICenter4U?",
+        question: "What is CurioQuest?",
         answer:
-          "AICenter4U is a business coaching and consulting firm founded by Manpreet Hundal. We help small business owners and entrepreneurs build sustainable growth strategies through strategic planning, leadership coaching, operational excellence, and succession planning. Our mission is to empower business leaders to build wealth, inspire teams, and leave lasting legacies.",
+          "CurioQuest is a business coaching and consulting firm founded by Manpreet Hundal. We help small business owners and entrepreneurs build sustainable growth strategies through strategic planning, leadership coaching, operational excellence, and succession planning. Our mission is to empower business leaders to build wealth, inspire teams, and leave lasting legacies.",
       },
       {
         question: "Who is Manpreet Hundal?",
         answer:
-          "Manpreet Hundal is the founder and lead coach at AICenter4U. With over 20 years of experience helping business leaders unlock their potential, Manpreet founded AICenter4U after witnessing countless talented entrepreneurs struggle—not from lack of vision, but from lack of strategic execution. She works directly with clients to bridge that gap and help them build businesses that outlast them.",
+          "Manpreet Hundal is the founder and lead coach at CurioQuest. With over 20 years of experience helping business leaders unlock their potential, Manpreet founded CurioQuest after witnessing countless talented entrepreneurs struggle—not from lack of vision, but from lack of strategic execution. She works directly with clients to bridge that gap and help them build businesses that outlast them.",
       },
       {
-        question: "Why is it called 'AICenter4U'?",
+        question: "Why is it called 'CurioQuest'?",
         answer:
-          "The name 'AICenter4U' represents a deeply personal commitment. 83 symbolizes the year that shaped Manpreet's understanding of what it means to build something that lasts—a reminder that legacy isn't about what you accumulate, but what you leave behind. It reflects our core belief that your business should be a vehicle for your legacy, not a prison that holds you captive.",
+          "The name 'CurioQuest' represents a deeply personal commitment. 83 symbolizes the year that shaped Manpreet's understanding of what it means to build something that lasts—a reminder that legacy isn't about what you accumulate, but what you leave behind. It reflects our core belief that your business should be a vehicle for your legacy, not a prison that holds you captive.",
       },
       {
-        question: "Where is AICenter4U located?",
+        question: "Where is CurioQuest located?",
         answer:
-          "AICenter4U is headquartered in Cincinnati, Ohio. We work with clients throughout Ohio, the Midwest, and nationally through virtual coaching. Our address is 4724 Vine Street, Cincinnati, OH 45217.",
+          "CurioQuest is headquartered in Cincinnati, Ohio. We work with clients throughout Ohio, the Midwest, and nationally through virtual coaching. Our address is 4724 Vine Street, Cincinnati, OH 45217.",
       },
     ],
   },
@@ -51,7 +51,7 @@ const faqCategories = [
     title: "Services & Programs",
     faqs: [
       {
-        question: "What services does AICenter4U offer?",
+        question: "What services does CurioQuest offer?",
         answer:
           "We offer four core services: Strategic Planning (vision-aligned roadmaps), Leadership Coaching (executive development and team building), Operational Excellence (systems and process optimization), and Legacy Transition (succession planning and exit strategies). All services are delivered through our proprietary G.R.O.W.S. framework.",
       },
@@ -76,7 +76,7 @@ const faqCategories = [
     title: "Working Together",
     faqs: [
       {
-        question: "How do I get started with AICenter4U?",
+        question: "How do I get started with CurioQuest?",
         answer:
           "The best way to get started is to take our free Legacy Growth IQ™ Quiz or schedule a complimentary strategy call with Manpreet. During the strategy call, we'll discuss your business, challenges, and goals to determine if we're a good fit to work together.",
       },
@@ -136,7 +136,7 @@ const faqCategories = [
           "The Legacy Leaders Community is our private network of business owners who are committed to building lasting legacies. Members get access to monthly mastermind sessions, exclusive webinars, a resource library, and a supportive peer network. It's a great way to connect with like-minded entrepreneurs and get ongoing support.",
       },
       {
-        question: "What events does AICenter4U offer?",
+        question: "What events does CurioQuest offer?",
         answer:
           "We host a variety of events including virtual webinars, in-person workshops, monthly mastermind sessions, and live Q&A sessions with Manpreet. Events cover topics like succession planning, leadership development, strategic planning, and more. Check our Events page for upcoming opportunities.",
       },
@@ -164,7 +164,7 @@ export default function FAQPage() {
               <span className="text-amber-400">We've Got Answers</span>
             </h1>
             <p className="mt-6 text-lg text-gray-300 max-w-2xl mx-auto">
-              Everything you need to know about AICenter4U, our services, and how we help 
+              Everything you need to know about CurioQuest, our services, and how we help 
               business owners build lasting legacies.
             </p>
           </div>
@@ -235,10 +235,10 @@ export default function FAQPage() {
                   We'll respond within 24 hours
                 </p>
                 <a
-                  href="mailto:info@aicenter4u.com"
+                  href="mailto:info@curioquest.com"
                   className="text-amber-600 font-medium hover:underline"
                 >
-                  info@aicenter4u.com
+                  info@curioquest.com
                 </a>
               </div>
             </div>

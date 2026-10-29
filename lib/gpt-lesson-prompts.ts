@@ -2,7 +2,7 @@ import type { GPTLessonConfig, GPTLessonStage, GPTTutorPersona } from "@/types/a
 
 export const GPT_LESSON_PROMPT_VERSION = "gpt-lesson-v1";
 export const GPT_LESSON_RULES_VERSION = "learning-cycle-v1";
-export const GPT_LESSON_RUBRIC_VERSION = "aicenter4u-evidence-v1";
+export const GPT_LESSON_RUBRIC_VERSION = "curioquest-evidence-v1";
 
 const PERSONA_INSTRUCTIONS: Record<Exclude<GPTTutorPersona, "custom">, string> = {
   generic:

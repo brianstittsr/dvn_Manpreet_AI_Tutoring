@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Services | AICenter4U",
+  title: "Services | CurioQuest",
   description:
-    "Explore AICenter4U's business coaching services: Strategic Planning, Leadership Coaching, Operational Excellence, and Legacy Transition. Build a business that outlasts you.",
+    "Explore CurioQuest's business coaching services: Strategic Planning, Leadership Coaching, Operational Excellence, and Legacy Transition. Build a business that outlasts you.",
 };
 
 const services = [

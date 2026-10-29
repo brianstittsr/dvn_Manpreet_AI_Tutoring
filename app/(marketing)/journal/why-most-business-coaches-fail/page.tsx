@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ArrowRight, Calendar, Clock, User, Target, HelpCircle, CheckCircle, XCircle, Award } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Why Most Business Coaches Fail (And How to Find One That Works) | AICenter4U",
+  title: "Why Most Business Coaches Fail (And How to Find One That Works) | CurioQuest",
   description: "The coaching industry is full of promises. Here's how to separate the real deal from the pretenders and find a coach who delivers results.",
   keywords: ["business coach", "coaching industry", "find a business coach", "coaching results", "business mentoring", "executive coaching"],
   openGraph: {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description: "The coaching industry is full of promises. Here's how to separate the real deal from the pretenders and find a coach who delivers results.",
     type: "article",
     publishedTime: "2025-11-15",
-    authors: ["AICenter4U"],
+    authors: ["CurioQuest"],
     images: [{ url: "https://images.pexels.com/photos/3184405/pexels-photo-3184405.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", width: 1260, height: 750, alt: "Business coaching session" }]
   }
 };
@@ -34,7 +34,7 @@ export default function ArticlePage() {
             <div className="flex flex-wrap items-center gap-6 text-gray-300">
               <span className="flex items-center gap-2"><Calendar className="h-4 w-4" />November 15, 2025</span>
               <span className="flex items-center gap-2"><Clock className="h-4 w-4" />6 min read</span>
-              <span className="flex items-center gap-2"><User className="h-4 w-4" />AICenter4U Team</span>
+              <span className="flex items-center gap-2"><User className="h-4 w-4" />CurioQuest Team</span>
             </div>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function ArticlePage() {
                   <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center shrink-0"><Award className="h-6 w-6 text-slate-900" /></div>
                   <div>
                     <h3 className="text-xl font-bold mb-2">A Different Approach to Business Growth</h3>
-                    <p className="text-gray-300 mb-4">At AICenter4U, we don't call ourselves coaches—we're business transformation partners. We've built, scaled, and exited real businesses. We create custom strategies based on deep diagnostic work. And we measure our success by your measurable results.</p>
+                    <p className="text-gray-300 mb-4">At CurioQuest, we don't call ourselves coaches—we're business transformation partners. We've built, scaled, and exited real businesses. We create custom strategies based on deep diagnostic work. And we measure our success by your measurable results.</p>
                     <div className="flex flex-wrap gap-4">
                       <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900" asChild><Link href="/schedule-a-call">See If We're the Right Fit<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
                       <Button variant="outline" className="border-white/30 hover:bg-white/10" asChild><Link href="/quiz">Take the Assessment First</Link></Button>

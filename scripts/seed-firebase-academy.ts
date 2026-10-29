@@ -2,7 +2,7 @@
  * Firebase Academy Seed Script
  * Run with: npx ts-node scripts/seed-firebase-academy.ts
  * 
- * Seeds the Firestore database with initial AICenter4U Academy data
+ * Seeds the Firestore database with initial CurioQuest Academy data
  */
 
 import { initializeApp, cert } from "firebase-admin/app";
@@ -134,11 +134,11 @@ const courses = [
     id: "grows-framework-masterclass",
     title: "The G.R.O.W.S. Framework Masterclass",
     slug: "grows-framework-masterclass",
-    description: "Master the complete AICenter4U methodology for building a business that thrives beyond you. This comprehensive course covers all five pillars of the G.R.O.W.S. framework with practical exercises and real-world case studies.",
-    shortDescription: "Master the complete AICenter4U methodology for building a business that thrives beyond you.",
+    description: "Master the complete CurioQuest methodology for building a business that thrives beyond you. This comprehensive course covers all five pillars of the G.R.O.W.S. framework with practical exercises and real-world case studies.",
+    shortDescription: "Master the complete CurioQuest methodology for building a business that thrives beyond you.",
     categoryId: "goals-vision",
     instructorName: "Manpreet Hundal",
-    instructorBio: "Founder & CEO of AICenter4U with over two decades of experience helping business leaders unlock their potential.",
+    instructorBio: "Founder & CEO of CurioQuest with over two decades of experience helping business leaders unlock their potential.",
     difficultyLevel: "intermediate",
     estimatedDurationMinutes: 480,
     minSubscriptionTierId: "legacy-builder",

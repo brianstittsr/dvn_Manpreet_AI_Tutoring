@@ -1,5 +1,5 @@
 /**
- * Target Company Types for AICenter4U
+ * Target Company Types for CurioQuest
  * 
  * These types define the structure for prospect/target company management
  */

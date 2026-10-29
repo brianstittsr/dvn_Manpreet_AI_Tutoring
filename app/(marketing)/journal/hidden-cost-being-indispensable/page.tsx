@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ArrowRight, Calendar, Clock, User, Target, HelpCircle, AlertTriangle, DollarSign, Clock3 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "The Hidden Cost of Being Indispensable | AICenter4U",
+  title: "The Hidden Cost of Being Indispensable | CurioQuest",
   description: "Being the go-to person for everything feels good—until it doesn't. Here's why being indispensable is actually holding you back and costing you your freedom.",
   keywords: ["indispensable trap", "owner dependency", "delegation", "business owner burnout", "scalable business", "letting go"],
   openGraph: {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description: "Being the go-to person for everything feels good—until it doesn't. Here's why being indispensable is actually holding you back.",
     type: "article",
     publishedTime: "2025-10-25",
-    authors: ["AICenter4U"],
+    authors: ["CurioQuest"],
     images: [{ url: "https://images.pexels.com/photos/3182759/pexels-photo-3182759.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", width: 1260, height: 750, alt: "Overwhelmed business owner" }]
   }
 };
@@ -34,7 +34,7 @@ export default function ArticlePage() {
             <div className="flex flex-wrap items-center gap-6 text-gray-300">
               <span className="flex items-center gap-2"><Calendar className="h-4 w-4" />October 25, 2025</span>
               <span className="flex items-center gap-2"><Clock className="h-4 w-4" />5 min read</span>
-              <span className="flex items-center gap-2"><User className="h-4 w-4" />AICenter4U Team</span>
+              <span className="flex items-center gap-2"><User className="h-4 w-4" />CurioQuest Team</span>
             </div>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function ArticlePage() {
                   <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center shrink-0"><Target className="h-6 w-6 text-slate-900" /></div>
                   <div>
                     <h3 className="text-xl font-bold mb-2">Ready to Break Free?</h3>
-                    <p className="text-gray-300 mb-4">At AICenter4U, we help business owners escape the indispensability trap. We guide you through systematically building systems, teams, and processes that free you from day-to-day operations—without sacrificing business performance.</p>
+                    <p className="text-gray-300 mb-4">At CurioQuest, we help business owners escape the indispensability trap. We guide you through systematically building systems, teams, and processes that free you from day-to-day operations—without sacrificing business performance.</p>
                     <div className="flex flex-wrap gap-4">
                       <Button className="bg-amber-500 hover:bg-amber-600 text-slate-900" asChild><Link href="/schedule-a-call">Reclaim Your Freedom<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
                       <Button variant="outline" className="border-white/30 hover:bg-white/10" asChild><Link href="/quiz">Take the Assessment First</Link></Button>

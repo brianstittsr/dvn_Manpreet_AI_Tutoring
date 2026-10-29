@@ -183,7 +183,7 @@ export async function showBrowserNotification(
 
   const notification = new Notification(title, {
     body: message,
-    icon: options?.icon || "/aicenter4u-logo.svg",
+    icon: options?.icon || "/curioquest-logo.svg",
     tag: options?.tag,
   });
 

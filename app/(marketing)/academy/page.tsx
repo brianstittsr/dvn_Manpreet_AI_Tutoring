@@ -214,7 +214,7 @@ export default function AcademyPage() {
         <div className="container relative">
           <div className="max-w-4xl mx-auto text-center">
             <Badge className="mb-6 bg-teal-500/20 text-teal-300 border-teal-500/30">
-              AICenter4U Academy
+              CurioQuest Academy
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-6">
               Where Kids Learn to Love{" "}

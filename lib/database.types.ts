@@ -1,5 +1,5 @@
 /**
- * Database Type Definitions for AICenter4U Platform
+ * Database Type Definitions for CurioQuest Platform
  * 
  * This file contains TypeScript types for the Supabase database schema.
  * These types provide type safety when querying the database.
@@ -14,7 +14,7 @@ export type Json =
   | Json[]
 
 export interface Database {
-  aicenter4u: {
+  curioquest: {
     Tables: {
       users: {
         Row: {

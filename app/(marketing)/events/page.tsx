@@ -343,7 +343,7 @@ export default function EventsPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             <div>
               <Badge variant="outline" className="mb-4 border-teal-500/50 text-teal-600">
-                The AICenter4U Family
+                The CurioQuest Family
               </Badge>
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
                 Learning Is Better Together
