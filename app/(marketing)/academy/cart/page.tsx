@@ -3,13 +3,12 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCart } from "@/lib/cart-context";
+import { useCourseCart } from "@/contexts/course-cart-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeft,
   ShoppingCart,
@@ -25,60 +24,59 @@ import { formatPrice } from "@/lib/stripe";
 import { CoursePrice } from "@/components/academy/shopping-cart";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useUserProfile } from "@/contexts/user-profile-context";
+import { auth } from "@/lib/firebase";
 
 function CartPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { items, subtotal, removeItem, clearCart } = useCart();
+  const { items, getSubtotal, removeItem, clearCart } = useCourseCart();
+  const subtotal = getSubtotal();
+  const { profile, isAuthenticated, isLoading: profileLoading } = useUserProfile();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [customerInfo, setCustomerInfo] = useState({
-    name: "",
-    email: "",
-  });
 
   const cancelled = searchParams.get("cancelled");
 
   const handleCheckout = async () => {
-    if (!customerInfo.name.trim() || !customerInfo.email.trim()) {
-      toast.error("Please fill in your name and email");
+    if (items.length === 0) {
+      toast.error("Your cart is empty");
       return;
     }
 
-    if (items.length === 0) {
-      toast.error("Your cart is empty");
+    // Course purchase requires a learner account — enrollments are keyed to it.
+    if (!isAuthenticated || !profile.id) {
+      router.push("/sign-in?redirect=/academy/cart");
       return;
     }
 
     setIsProcessing(true);
 
     try {
+      const token = await auth?.currentUser?.getIdToken();
       const response = await fetch("/api/stripe/course-checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           courseIds: items.map((item) => item.courseId),
-          customerInfo: {
-            userId: `guest-${Date.now()}`, // In production, use actual user ID
-            name: customerInfo.name,
-            email: customerInfo.email,
-          },
         }),
       });
 
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data ?? json;
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create checkout session");
+        throw new Error(json.error || "Failed to create checkout session");
       }
 
       if (data.isFree) {
-        // Free courses - enrolled directly
         clearCart();
-        router.push(data.redirectUrl);
+        router.push(data.redirectUrl || "/portal/my-courses?enrolled=true");
         return;
       }
 
-      // Redirect to Stripe checkout
       if (data.sessionUrl) {
         clearCart();
         window.location.href = data.sessionUrl;
@@ -100,7 +98,7 @@ function CartPageContent() {
           <ShoppingCart className="h-20 w-20 text-muted-foreground mb-6" />
           <h1 className="text-2xl font-bold mb-2">Your cart is empty</h1>
           <p className="text-muted-foreground text-center mb-8 max-w-md">
-            Looks like you haven't added any courses yet. Browse our catalog to find courses that interest you.
+            Looks like you haven&apos;t added any courses yet. Browse our catalog to find courses that interest you.
           </p>
           <Button asChild size="lg">
             <Link href="/academy">
@@ -171,9 +169,9 @@ function CartPageContent() {
                         By {item.instructorName}
                       </p>
                       <CoursePrice
-                        priceInCents={item.priceInCents}
-                        compareAtPriceInCents={item.compareAtPriceInCents}
-                        isFree={item.priceInCents === 0}
+                        priceInCents={item.price}
+                        compareAtPriceInCents={item.originalPrice ?? null}
+                        isFree={item.price === 0}
                         className="mt-2"
                       />
                     </div>
@@ -210,7 +208,7 @@ function CartPageContent() {
                   <div key={item.courseId} className="flex justify-between text-sm">
                     <span className="truncate flex-1 mr-2">{item.courseTitle}</span>
                     <span className="font-medium">
-                      {item.priceInCents === 0 ? "Free" : formatPrice(item.priceInCents)}
+                      {item.price === 0 ? "Free" : formatPrice(item.price)}
                     </span>
                   </div>
                 ))}
@@ -228,40 +226,36 @@ function CartPageContent() {
           <Card>
             <CardHeader>
               <CardTitle>Checkout</CardTitle>
-              <CardDescription>Enter your details to complete purchase</CardDescription>
+              <CardDescription>
+                {isAuthenticated
+                  ? `Enrolling as ${[profile.firstName, profile.lastName].filter(Boolean).join(" ") || profile.email}`
+                  : "Sign in to complete your purchase"}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  placeholder="John Doe"
-                  value={customerInfo.name}
-                  onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  value={customerInfo.email}
-                  onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
-                />
-              </div>
+              {!isAuthenticated && !profileLoading && (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    You need a free learner account so we can save your course progress
+                    and certificate.
+                  </AlertDescription>
+                </Alert>
+              )}
 
               <Button
                 className="w-full"
                 size="lg"
                 onClick={handleCheckout}
-                disabled={isProcessing}
+                disabled={isProcessing || profileLoading}
               >
-                {isProcessing ? (
+                {isProcessing || profileLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Processing...
                   </>
+                ) : !isAuthenticated ? (
+                  "Sign In to Checkout"
                 ) : subtotal === 0 ? (
                   "Enroll Now (Free)"
                 ) : (

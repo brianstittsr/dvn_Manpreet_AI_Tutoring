@@ -4,21 +4,16 @@
  * Provides student-facing operations for course progress, quiz attempts, and certificates.
  */
 
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  setDoc, 
-  updateDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
   limit,
   Timestamp,
-  serverTimestamp
 } from "firebase/firestore";
-import { db } from "./firebase";
+import { auth, db } from "./firebase";
 
 const LMS_COLLECTIONS = {
   LESSONS: "lms_lessons",
@@ -69,6 +64,42 @@ export interface QuizAttemptDoc {
   completedAt: Timestamp;
 }
 
+/** Result returned by the server-side progress/quiz APIs. */
+export interface ProgressResult {
+  lessonId?: string;
+  isCompleted?: boolean;
+  progressPercentage: number;
+  courseCompleted?: boolean;
+  certificateId: string | null;
+}
+
+export interface QuizSubmitResult {
+  attemptId: string;
+  score: number;
+  passed: boolean;
+  passingScore: number;
+  correctCount: number;
+  totalQuestions: number;
+  progressPercentage: number;
+  certificateId: string | null;
+  questions: QuizQuestion[];
+}
+
+async function authedJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = await auth?.currentUser?.getIdToken();
+  const res = await fetch(path, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init?.headers as Record<string, string> | undefined),
+    },
+  });
+  const json = (await res.json().catch(() => ({}))) as { data?: T; error?: string };
+  if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
+  return json.data as T;
+}
+
 // ============================================================================
 // LESSON PROGRESS
 // ============================================================================
@@ -109,56 +140,26 @@ export async function getCourseProgress(
   return snapshot.docs.map((doc) => doc.data() as LessonProgressDoc);
 }
 
+/**
+ * Mark a lesson complete via the server API. The server verifies enrollment
+ * ownership, writes progress, recomputes the course percentage, and issues
+ * the completion certificate at 100%.
+ */
 export async function markLessonComplete(data: {
   userId: string;
   lessonId: string;
   courseId: string;
   enrollmentId: string;
-}): Promise<LessonProgressDoc> {
-  if (!db) throw new Error("Firebase not initialized");
-
-  const progressRef = collection(db, LMS_COLLECTIONS.LESSON_PROGRESS);
-  const q = query(
-    progressRef,
-    where("odUserId", "==", data.userId),
-    where("lessonId", "==", data.lessonId),
-    limit(1)
-  );
-  const snapshot = await getDocs(q);
-
-  let progressDoc: LessonProgressDoc;
-
-  if (snapshot.empty) {
-    // Create new progress
-    const newDocRef = doc(progressRef);
-    progressDoc = {
-      id: newDocRef.id,
-      odUserId: data.userId,
+}): Promise<ProgressResult> {
+  return authedJson<ProgressResult>("/api/lms/progress", {
+    method: "POST",
+    body: JSON.stringify({
       lessonId: data.lessonId,
       courseId: data.courseId,
       enrollmentId: data.enrollmentId,
-      startedAt: Timestamp.now(),
-      completedAt: Timestamp.now(),
-      progressSeconds: 0,
-      isCompleted: true,
-      notes: null,
-    };
-    await setDoc(newDocRef, progressDoc);
-  } else {
-    // Update existing progress
-    const existingDoc = snapshot.docs[0];
-    const updates = {
-      isCompleted: true,
-      completedAt: Timestamp.now(),
-    };
-    await updateDoc(existingDoc.ref, updates);
-    progressDoc = { ...existingDoc.data(), ...updates } as LessonProgressDoc;
-  }
-
-  // Update enrollment progress percentage
-  await updateEnrollmentProgress(data.enrollmentId, data.courseId);
-
-  return progressDoc;
+      completed: true,
+    }),
+  });
 }
 
 export async function markLessonIncomplete(data: {
@@ -166,166 +167,52 @@ export async function markLessonIncomplete(data: {
   lessonId: string;
   enrollmentId: string;
   courseId: string;
-}): Promise<void> {
-  if (!db) throw new Error("Firebase not initialized");
-
-  const progressRef = collection(db, LMS_COLLECTIONS.LESSON_PROGRESS);
-  const q = query(
-    progressRef,
-    where("odUserId", "==", data.userId),
-    where("lessonId", "==", data.lessonId),
-    limit(1)
-  );
-  const snapshot = await getDocs(q);
-
-  if (!snapshot.empty) {
-    await updateDoc(snapshot.docs[0].ref, {
-      isCompleted: false,
-      completedAt: null,
-    });
-    await updateEnrollmentProgress(data.enrollmentId, data.courseId);
-  }
-}
-
-export async function updateLessonVideoProgress(data: {
-  userId: string;
-  lessonId: string;
-  courseId: string;
-  enrollmentId: string;
-  progressSeconds: number;
-}): Promise<void> {
-  if (!db) throw new Error("Firebase not initialized");
-
-  const progressRef = collection(db, LMS_COLLECTIONS.LESSON_PROGRESS);
-  const q = query(
-    progressRef,
-    where("odUserId", "==", data.userId),
-    where("lessonId", "==", data.lessonId),
-    limit(1)
-  );
-  const snapshot = await getDocs(q);
-
-  if (snapshot.empty) {
-    // Create new progress
-    const newDocRef = doc(progressRef);
-    await setDoc(newDocRef, {
-      id: newDocRef.id,
-      odUserId: data.userId,
+}): Promise<ProgressResult> {
+  return authedJson<ProgressResult>("/api/lms/progress", {
+    method: "POST",
+    body: JSON.stringify({
       lessonId: data.lessonId,
       courseId: data.courseId,
       enrollmentId: data.enrollmentId,
-      startedAt: Timestamp.now(),
-      completedAt: null,
-      progressSeconds: data.progressSeconds,
-      isCompleted: false,
-      notes: null,
-    });
-  } else {
-    await updateDoc(snapshot.docs[0].ref, {
-      progressSeconds: data.progressSeconds,
-    });
-  }
-}
-
-async function updateEnrollmentProgress(
-  enrollmentId: string,
-  courseId: string
-): Promise<void> {
-  if (!db) throw new Error("Firebase not initialized");
-
-  // Get total lessons in course
-  const lessonsRef = collection(db, LMS_COLLECTIONS.LESSONS);
-  const lessonsQuery = query(lessonsRef, where("courseId", "==", courseId));
-  const lessonsSnapshot = await getDocs(lessonsQuery);
-  const totalLessons = lessonsSnapshot.size;
-
-  if (totalLessons === 0) return;
-
-  // Get completed lessons
-  const progressRef = collection(db, LMS_COLLECTIONS.LESSON_PROGRESS);
-  const q = query(
-    progressRef,
-    where("enrollmentId", "==", enrollmentId),
-    where("isCompleted", "==", true)
-  );
-  const snapshot = await getDocs(q);
-  const completedLessons = snapshot.size;
-
-  const progressPercentage = Math.round((completedLessons / totalLessons) * 100);
-
-  const enrollmentRef = doc(db, LMS_COLLECTIONS.ENROLLMENTS, enrollmentId);
-  const updates: Record<string, unknown> = {
-    progressPercentage,
-    lastAccessedAt: Timestamp.now(),
-  };
-
-  if (progressPercentage === 100) {
-    updates.completedAt = Timestamp.now();
-  }
-
-  await updateDoc(enrollmentRef, updates);
+      completed: false,
+    }),
+  });
 }
 
 // ============================================================================
 // QUIZ ATTEMPTS
 // ============================================================================
 
+/** Fetch quiz questions for display — answers are stripped server-side. */
+export async function getQuizForLesson(lessonId: string): Promise<{
+  title: string;
+  passingScore: number;
+  questions: { id: string; question: string; options: string[] }[];
+}> {
+  return authedJson(`/api/lms/quiz?lessonId=${encodeURIComponent(lessonId)}`);
+}
+
+/**
+ * Submit quiz answers for server-side scoring. The server parses the
+ * authoritative questions from the lesson doc — the client sends only
+ * answer indexes.
+ */
 export async function submitQuizAttempt(data: {
   userId: string;
   lessonId: string;
   courseId: string;
   enrollmentId: string;
-  questions: QuizQuestion[];
   answers: number[];
-  passingScore?: number;
-}): Promise<QuizAttemptDoc> {
-  if (!db) throw new Error("Firebase not initialized");
-
-  const passingScore = data.passingScore || 70;
-  
-  // Calculate score
-  let correctAnswers = 0;
-  for (let i = 0; i < data.questions.length; i++) {
-    if (data.answers[i] === data.questions[i].correctAnswer) {
-      correctAnswers++;
-    }
-  }
-  
-  const score = Math.round((correctAnswers / data.questions.length) * 100);
-  const passed = score >= passingScore;
-
-  const attemptsRef = collection(db, LMS_COLLECTIONS.QUIZ_ATTEMPTS);
-  const newDocRef = doc(attemptsRef);
-
-  const attemptDoc: QuizAttemptDoc = {
-    id: newDocRef.id,
-    odUserId: data.userId,
-    lessonId: data.lessonId,
-    courseId: data.courseId,
-    enrollmentId: data.enrollmentId,
-    questions: data.questions,
-    answers: data.answers,
-    score,
-    totalQuestions: data.questions.length,
-    passed,
-    passingScore,
-    startedAt: Timestamp.now(),
-    completedAt: Timestamp.now(),
-  };
-
-  await setDoc(newDocRef, attemptDoc);
-
-  // If passed, mark lesson as complete
-  if (passed) {
-    await markLessonComplete({
-      userId: data.userId,
+}): Promise<QuizSubmitResult> {
+  return authedJson<QuizSubmitResult>("/api/lms/quiz", {
+    method: "POST",
+    body: JSON.stringify({
       lessonId: data.lessonId,
       courseId: data.courseId,
       enrollmentId: data.enrollmentId,
-    });
-  }
-
-  return attemptDoc;
+      answers: data.answers,
+    }),
+  });
 }
 
 export async function getQuizAttempts(
@@ -366,9 +253,8 @@ export async function getBestQuizAttempt(
 // ============================================================================
 
 /**
- * Idempotently issue a completion certificate for a finished enrollment.
- * Safe to call on every render once a course is complete — it returns the
- * existing certificateId if one was already issued.
+ * Idempotently ensure a completion certificate exists for a finished course.
+ * Delegates to the server, which verifies the enrollment's completedAt.
  */
 export async function ensureCourseCertificate(data: {
   enrollmentId: string;
@@ -377,72 +263,12 @@ export async function ensureCourseCertificate(data: {
   courseTitle: string;
   recipientName: string;
 }): Promise<string | null> {
-  if (!db) throw new Error("Firebase not initialized");
-
-  const enrollmentRef = doc(db, LMS_COLLECTIONS.ENROLLMENTS, data.enrollmentId);
-  const enrollmentSnap = await getDoc(enrollmentRef);
-  if (!enrollmentSnap.exists()) return null;
-
-  const enrollment = enrollmentSnap.data() as {
-    completedAt: Timestamp | null;
-    certificateId: string | null;
-  };
-  if (!enrollment.completedAt || enrollment.certificateId) {
-    return enrollment.certificateId || null;
-  }
-
-  const { issueCertificate } = await import("./firebase-lms");
-  const certificate = await issueCertificate({
-    odUserId: data.userId,
-    certificateType: "course",
-    courseId: data.courseId,
-    title: `${data.courseTitle} — Certificate of Completion`,
-    recipientName: data.recipientName,
-  });
-
-  return certificate.id;
-}
-
-// ============================================================================
-// NOTES
-// ============================================================================
-
-export async function saveLessonNotes(data: {
-  userId: string;
-  lessonId: string;
-  courseId: string;
-  enrollmentId: string;
-  notes: string;
-}): Promise<void> {
-  if (!db) throw new Error("Firebase not initialized");
-
-  const progressRef = collection(db, LMS_COLLECTIONS.LESSON_PROGRESS);
-  const q = query(
-    progressRef,
-    where("odUserId", "==", data.userId),
-    where("lessonId", "==", data.lessonId),
-    limit(1)
+  const result = await authedJson<{ certificateId: string | null }>(
+    "/api/lms/certificate",
+    {
+      method: "POST",
+      body: JSON.stringify({ courseId: data.courseId }),
+    }
   );
-  const snapshot = await getDocs(q);
-
-  if (snapshot.empty) {
-    // Create new progress with notes
-    const newDocRef = doc(progressRef);
-    await setDoc(newDocRef, {
-      id: newDocRef.id,
-      odUserId: data.userId,
-      lessonId: data.lessonId,
-      courseId: data.courseId,
-      enrollmentId: data.enrollmentId,
-      startedAt: Timestamp.now(),
-      completedAt: null,
-      progressSeconds: 0,
-      isCompleted: false,
-      notes: data.notes,
-    });
-  } else {
-    await updateDoc(snapshot.docs[0].ref, {
-      notes: data.notes,
-    });
-  }
+  return result.certificateId;
 }

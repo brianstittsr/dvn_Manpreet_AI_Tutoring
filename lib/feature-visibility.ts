@@ -55,6 +55,7 @@ export const SIDEBAR_FEATURES = {
   navigationManager: { label: "Navigation Manager", section: "admin", href: "/portal/admin/navigation" },
   backups: { label: "Backup & Restore", section: "admin", href: "/portal/admin/backups" },
   reaCloner: { label: "REA Web Cloner", section: "admin", href: "/portal/admin/rea" },
+  grantResearch: { label: "Grant Research", section: "admin", href: "/portal/admin/grants" },
   
   // Initiatives
   initiatives: { label: "Initiatives", section: "initiatives", href: "/portal/admin/initiatives" },
@@ -152,6 +153,7 @@ export const DEFAULT_ROLE_VISIBILITY: Record<UserRole, {
       navigationManager: false,
       backups: false,
       reaCloner: false,
+      grantResearch: false,
       initiatives: false,
       tbmncSuppliers: false,
     },
@@ -210,6 +212,7 @@ export const DEFAULT_ROLE_VISIBILITY: Record<UserRole, {
       navigationManager: false,
       backups: false,
       reaCloner: false,
+      grantResearch: false,
       initiatives: false,
       tbmncSuppliers: false,
     },

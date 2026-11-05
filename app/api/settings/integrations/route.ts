@@ -39,6 +39,7 @@ const PUBLIC_INTEGRATION_FIELDS: Record<string, readonly string[]> = {
   docuseal: [],
   stripe: ["publishableKey"],
   linkedin: ["clientId", "organizationId"],
+  grantedai: [],
 };
 
 const integrationEntrySchema = z.record(z.string(), z.string());

@@ -53,7 +53,11 @@ export async function POST(request: NextRequest) {
 
       case "checkout.session.expired": {
         const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutExpired(session);
+        if (session.metadata?.type === "course_purchase") {
+          await handleCourseCheckoutExpired(session);
+        } else {
+          await handleCheckoutExpired(session);
+        }
         break;
       }
 
@@ -216,6 +220,12 @@ async function handleRefund(charge: Stripe.Charge) {
   const paymentIntentId = charge.payment_intent;
   if (!paymentIntentId) return;
 
+  const isFullRefund = charge.amount_refunded >= charge.amount;
+  await handleCourseRefund(
+    typeof paymentIntentId === "string" ? paymentIntentId : paymentIntentId.id,
+    isFullRefund
+  );
+
   // Find registration by payment intent
   const snapshot = await adminDb
     .collection(COLLECTIONS.EVENT_REGISTRATIONS)
@@ -226,9 +236,6 @@ async function handleRefund(charge: Stripe.Charge) {
 
   const regDoc = snapshot.docs[0];
   const registration = regDoc.data() as EventRegistration;
-
-  // Check if fully refunded
-  const isFullRefund = charge.amount_refunded >= charge.amount;
 
   await adminDb.collection(COLLECTIONS.EVENT_REGISTRATIONS).doc(regDoc.id).update({
     paymentStatus: "refunded",
@@ -291,7 +298,7 @@ async function handleCourseCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // Update all purchase records
+  // Update all purchase records — idempotent against Stripe retries.
   for (const purchaseId of purchaseIds) {
     const purchaseRef = adminDb.collection(LMS_COLLECTIONS.COURSE_PURCHASES).doc(purchaseId);
     const purchaseSnap = await purchaseRef.get();
@@ -302,37 +309,109 @@ async function handleCourseCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
 
     const purchase = purchaseSnap.data() as CoursePurchaseDoc;
+    if (purchase.paymentStatus === "paid") {
+      continue; // already processed (webhook retry)
+    }
 
-    // Update purchase status
     await purchaseRef.update({
       paymentStatus: "paid",
       stripePaymentIntentId: session.payment_intent,
       purchasedAt: Timestamp.now(),
     });
 
-    // Create enrollment for this course
-    const enrollmentData = {
-      id: "",
-      userId: purchase.odUserId,
-      courseId: purchase.courseId,
-      enrolledAt: Timestamp.now(),
-      completedAt: null,
-      progressPercentage: 0,
-      lastAccessedAt: null,
-      certificateIssuedAt: null,
-      certificateId: null,
-      purchaseId: purchaseId,
-    };
+    // Create the enrollment only if one doesn't exist for this user+course.
+    const existing = await adminDb
+      .collection(LMS_COLLECTIONS.ENROLLMENTS)
+      .where("userId", "==", purchase.odUserId)
+      .where("courseId", "==", purchase.courseId)
+      .limit(1)
+      .get();
 
-    await adminDb.collection(LMS_COLLECTIONS.ENROLLMENTS).add(enrollmentData);
+    if (existing.empty) {
+      const enrollmentRef = adminDb.collection(LMS_COLLECTIONS.ENROLLMENTS).doc();
+      await enrollmentRef.set({
+        id: enrollmentRef.id,
+        userId: purchase.odUserId,
+        courseId: purchase.courseId,
+        enrolledAt: Timestamp.now(),
+        completedAt: null,
+        progressPercentage: 0,
+        lastAccessedAt: null,
+        certificateIssuedAt: null,
+        certificateId: null,
+        purchaseId: purchaseId,
+      });
 
-    // Increment course enrollment count
-    await adminDb.collection(LMS_COLLECTIONS.COURSES).doc(purchase.courseId).update({
-      enrollmentCount: FieldValue.increment(1),
-    });
-
-    console.log(`Enrollment created for course ${purchase.courseId}, user ${purchase.odUserId}`);
+      await adminDb.collection(LMS_COLLECTIONS.COURSES).doc(purchase.courseId).update({
+        enrollmentCount: FieldValue.increment(1),
+      });
+      console.log(`Enrollment created for course ${purchase.courseId}, user ${purchase.odUserId}`);
+    } else {
+      await existing.docs[0].ref.update({ purchaseId });
+    }
   }
 
   console.log(`Course purchase completed for user ${userId}, courses: ${courseIds.join(", ")}`);
+}
+
+async function handleCourseCheckoutExpired(session: Stripe.Checkout.Session) {
+  if (!adminDb) return;
+  const purchaseIds = session.metadata?.purchaseIds?.split(",") || [];
+  for (const purchaseId of purchaseIds) {
+    await adminDb
+      .collection(LMS_COLLECTIONS.COURSE_PURCHASES)
+      .doc(purchaseId)
+      .update({ paymentStatus: "failed", updatedAt: Timestamp.now() })
+      .catch((e) => console.error("[webhook] failed purchase update:", e));
+  }
+  console.log(`Course checkout expired for purchases: ${purchaseIds.join(", ")}`);
+}
+
+/** Full refunds revoke the enrollment created from the refunded purchase. */
+async function handleCourseRefund(paymentIntentId: string, fullRefund: boolean) {
+  if (!adminDb) return;
+
+  const snapshot = await adminDb
+    .collection(LMS_COLLECTIONS.COURSE_PURCHASES)
+    .where("stripePaymentIntentId", "==", paymentIntentId)
+    .get();
+  if (snapshot.empty) return;
+
+  for (const purchaseDoc of snapshot.docs) {
+    const purchase = purchaseDoc.data() as CoursePurchaseDoc;
+    await purchaseDoc.ref.update({
+      paymentStatus: "refunded",
+      refundedAt: Timestamp.now(),
+      refundReason: fullRefund ? "full_refund" : "partial_refund",
+    });
+
+    if (!fullRefund) continue;
+
+    // Remove the enrollment and roll back the course's enrollment count.
+    const enrollSnap = await adminDb
+      .collection(LMS_COLLECTIONS.ENROLLMENTS)
+      .where("purchaseId", "==", purchaseDoc.id)
+      .limit(1)
+      .get();
+    const enrollmentDoc = enrollSnap.empty
+      ? (
+          await adminDb
+            .collection(LMS_COLLECTIONS.ENROLLMENTS)
+            .where("userId", "==", purchase.odUserId)
+            .where("courseId", "==", purchase.courseId)
+            .limit(1)
+            .get()
+        ).docs[0]
+      : enrollSnap.docs[0];
+
+    if (enrollmentDoc) {
+      await enrollmentDoc.ref.delete();
+      await adminDb
+        .collection(LMS_COLLECTIONS.COURSES)
+        .doc(purchase.courseId)
+        .update({ enrollmentCount: FieldValue.increment(-1) })
+        .catch((e) => console.error("[webhook] enrollmentCount decrement failed:", e));
+      console.log(`Enrollment revoked for course ${purchase.courseId}, user ${purchase.odUserId}`);
+    }
+  }
 }

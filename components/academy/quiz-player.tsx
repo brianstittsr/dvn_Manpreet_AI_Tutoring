@@ -16,7 +16,13 @@ import {
   Loader2,
   HelpCircle
 } from "lucide-react";
-import { submitQuizAttempt, getBestQuizAttempt, QuizQuestion, QuizAttemptDoc } from "@/lib/firebase-lms-student";
+import {
+  submitQuizAttempt,
+  getQuizForLesson,
+  getBestQuizAttempt,
+  QuizQuestion,
+
+} from "@/lib/firebase-lms-student";
 import { toast } from "sonner";
 
 interface QuizPlayerProps {
@@ -24,119 +30,68 @@ interface QuizPlayerProps {
   courseId: string;
   enrollmentId: string;
   userId: string;
-  quizContent: string;
   onComplete?: () => void;
 }
 
-interface ParsedQuiz {
+interface DisplayQuestion {
+  id: string;
+  question: string;
+  options: string[];
+}
+
+interface DisplayQuiz {
   title: string;
   passingScore: number;
+  questions: DisplayQuestion[];
+}
+
+interface ReviewResult {
+  passed: boolean;
+  score: number;
+  answers: number[];
   questions: QuizQuestion[];
 }
 
-function parseQuizContent(content: string): ParsedQuiz {
-  const lines = content.split("\n");
-  const questions: QuizQuestion[] = [];
-  let title = "Quiz";
-  let passingScore = 70;
-  
-  let currentQuestion: Partial<QuizQuestion> | null = null;
-  let questionId = 0;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    
-    // Parse title
-    if (trimmed.startsWith("# ")) {
-      title = trimmed.substring(2);
-      continue;
-    }
-
-    // Parse passing score
-    const scoreMatch = trimmed.match(/Passing Score:\s*(\d+)%/i);
-    if (scoreMatch) {
-      passingScore = parseInt(scoreMatch[1]);
-      continue;
-    }
-
-    // Parse question
-    const questionMatch = trimmed.match(/^###?\s*(?:Question\s*\d+|Q\d+)[.:]?\s*(.*)/i);
-    if (questionMatch || trimmed.match(/^###?\s+\w/)) {
-      if (currentQuestion && currentQuestion.question && currentQuestion.options && currentQuestion.options.length > 0) {
-        questions.push(currentQuestion as QuizQuestion);
-      }
-      currentQuestion = {
-        id: `q${++questionId}`,
-        question: questionMatch ? questionMatch[1] : trimmed.replace(/^###?\s*/, ""),
-        options: [],
-        correctAnswer: 0,
-      };
-      continue;
-    }
-
-    // Parse options (A), B), C), D) or A. B. C. D.)
-    const optionMatch = trimmed.match(/^([A-D])[).]\s*(.*)/i);
-    if (optionMatch && currentQuestion) {
-      const optionText = optionMatch[2];
-      const isCorrect = optionText.includes("✓") || optionText.includes("✔");
-      const cleanText = optionText.replace(/[✓✔]/g, "").trim();
-      
-      if (isCorrect) {
-        currentQuestion.correctAnswer = currentQuestion.options?.length || 0;
-      }
-      currentQuestion.options = [...(currentQuestion.options || []), cleanText];
-      continue;
-    }
-
-    // Parse explanation
-    if (trimmed.startsWith("*") && currentQuestion) {
-      currentQuestion.explanation = trimmed.replace(/^\*+|\*+$/g, "").trim();
-    }
-  }
-
-  // Add last question
-  if (currentQuestion && currentQuestion.question && currentQuestion.options && currentQuestion.options.length > 0) {
-    questions.push(currentQuestion as QuizQuestion);
-  }
-
-  return { title, passingScore, questions };
-}
-
-export function QuizPlayer({ 
-  lessonId, 
-  courseId, 
-  enrollmentId, 
-  userId, 
-  quizContent,
-  onComplete 
+export function QuizPlayer({
+  lessonId,
+  courseId,
+  enrollmentId,
+  userId,
+  onComplete
 }: QuizPlayerProps) {
-  const [quiz, setQuiz] = useState<ParsedQuiz | null>(null);
+  const [quiz, setQuiz] = useState<DisplayQuiz | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [result, setResult] = useState<QuizAttemptDoc | null>(null);
-  const [bestAttempt, setBestAttempt] = useState<QuizAttemptDoc | null>(null);
+  const [result, setResult] = useState<ReviewResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const parsed = parseQuizContent(quizContent);
-    setQuiz(parsed);
-    setAnswers(new Array(parsed.questions.length).fill(null));
-    loadBestAttempt();
-  }, [quizContent]);
+    loadQuiz();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonId]);
 
-  const loadBestAttempt = async () => {
+  const loadQuiz = async () => {
     setLoading(true);
     try {
+      const data = await getQuizForLesson(lessonId);
+      setQuiz(data);
+      setAnswers(new Array(data.questions.length).fill(null));
+
       const best = await getBestQuizAttempt(userId, lessonId);
-      setBestAttempt(best);
       if (best?.passed) {
         setShowResults(true);
-        setResult(best);
+        setResult({
+          passed: best.passed,
+          score: best.score,
+          answers: best.answers,
+          questions: best.questions,
+        });
       }
     } catch (error) {
-      console.error("Error loading best attempt:", error);
+      console.error("Error loading quiz:", error);
+      setQuiz(null);
     } finally {
       setLoading(false);
     }
@@ -178,12 +133,15 @@ export function QuizPlayer({
         lessonId,
         courseId,
         enrollmentId,
-        questions: quiz.questions,
-        answers: answers as number[],
-        passingScore: quiz.passingScore,
+        answers: answers.map((a) => a as number),
       });
 
-      setResult(attempt);
+      setResult({
+        passed: attempt.passed,
+        score: attempt.score,
+        answers: answers.map((a) => a as number),
+        questions: attempt.questions,
+      });
       setShowResults(true);
 
       if (attempt.passed) {
@@ -257,7 +215,7 @@ export function QuizPlayer({
             <CardTitle>Review Your Answers</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {quiz.questions.map((question, index) => {
+            {result.questions.map((question, index) => {
               const userAnswer = result.answers[index];
               const isCorrect = userAnswer === question.correctAnswer;
 

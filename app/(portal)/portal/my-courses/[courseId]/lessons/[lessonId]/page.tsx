@@ -24,13 +24,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+
 import { 
   BookOpen, 
-  Clock, 
-  PlayCircle, 
   CheckCircle2, 
   ChevronLeft,
   ChevronRight,
@@ -43,7 +40,8 @@ import {
   Check,
   X,
   Sparkles,
-  MessagesSquare
+  MessagesSquare,
+  Lock
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { QuizPlayer } from "@/components/academy/quiz-player";
@@ -58,7 +56,7 @@ interface ModuleWithLessons extends CourseModuleDoc {
 export default function LessonViewerPage() {
   const params = useParams();
   const router = useRouter();
-  const { profile, isAuthenticated } = useUserProfile();
+  const { profile, isAuthenticated, isLoading: profileLoading } = useUserProfile();
   const courseId = params.courseId as string;
   const lessonId = params.lessonId as string;
 
@@ -71,11 +69,15 @@ export default function LessonViewerPage() {
   const [completing, setCompleting] = useState(false);
 
   useEffect(() => {
+    if (!profileLoading && !isAuthenticated) {
+      router.push(`/sign-in?redirect=/portal/my-courses/${courseId}/lessons/${lessonId}`);
+      return;
+    }
     if (isAuthenticated && profile.id && courseId && lessonId) {
       loadLessonData();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, profile.id, courseId, lessonId]);
+  }, [isAuthenticated, profileLoading, profile.id, courseId, lessonId]);
 
   const loadLessonData = async () => {
     if (!profile.id) return;
@@ -122,13 +124,28 @@ export default function LessonViewerPage() {
 
     setCompleting(true);
     try {
-      const newProgress = await markLessonComplete({
+      await markLessonComplete({
         userId: profile.id,
         lessonId,
         courseId,
         enrollmentId: enrollment.id,
       });
-      setProgress(newProgress);
+      setProgress(prev =>
+        prev
+          ? { ...prev, isCompleted: true }
+          : ({
+              id: "",
+              odUserId: profile.id,
+              lessonId,
+              courseId,
+              enrollmentId: enrollment.id,
+              startedAt: null,
+              completedAt: null,
+              progressSeconds: 0,
+              isCompleted: true,
+              notes: null,
+            } as unknown as LessonProgressDoc)
+      );
       toast.success("Lesson marked as complete!");
       
       // Navigate to next lesson
@@ -224,6 +241,30 @@ export default function LessonViewerPage() {
     );
   }
 
+  // Non-enrolled learners can only view preview lessons.
+  if (!enrollment && !lesson.isPreview) {
+    return (
+      <div className="container mx-auto py-16 px-4 text-center max-w-lg">
+        <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Enrollment Required</h1>
+        <p className="text-muted-foreground mb-6">
+          Enroll in <span className="font-medium">{course.title}</span> to access this
+          lesson and track your progress.
+        </p>
+        <div className="flex justify-center gap-3">
+          <Button variant="outline" asChild>
+            <Link href="/portal/my-courses">My Courses</Link>
+          </Button>
+          <Button asChild>
+            <Link href={`/academy/courses/${course.slug || courseId}`}>
+              View Course
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const previousLesson = getPreviousLesson();
   const nextLesson = getNextLesson();
   const isCompleted = progress?.isCompleted || false;
@@ -303,7 +344,6 @@ export default function LessonViewerPage() {
                     courseId={courseId}
                     enrollmentId={enrollment.id}
                     userId={profile.id}
-                    quizContent={lesson.textContent || ""}
                     onComplete={() => {
                       setProgress(prev => prev ? { ...prev, isCompleted: true } : null);
                     }}
@@ -365,7 +405,7 @@ export default function LessonViewerPage() {
             </Card>
 
             {/* Completion Actions */}
-            {lesson.contentType !== "quiz" && lesson.contentType !== "gptLesson" && lesson.contentType !== "studentInterview" && (
+            {enrollment && lesson.contentType !== "quiz" && lesson.contentType !== "gptLesson" && lesson.contentType !== "studentInterview" && (
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">

@@ -82,6 +82,7 @@ import {
   BookOpen,
   Database,
   Globe,
+  Landmark,
   Ticket,
   UsersRound,
   Briefcase,
@@ -108,6 +109,7 @@ const adminPlatformManagementItems: { title: string; href: string; icon: React.E
   { title: "Documentation", href: "/portal/system-docs", icon: BookOpen, featureKey: "systemDocs" },
   { title: "Hero Carousel", href: "/portal/admin/hero", icon: Presentation, featureKey: "heroManagement" },
   { title: "REA Web Cloner", href: "/portal/admin/rea", icon: Globe, badge: "Local", featureKey: "reaCloner" },
+  { title: "Grant Research", href: "/portal/admin/grants", icon: Landmark, featureKey: "grantResearch" },
 ];
 
 // Admin Focused — Deal Management

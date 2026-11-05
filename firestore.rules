@@ -15,9 +15,23 @@ service cloud.firestore {
     function getUserRole() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
     }
-    
+
     function isAdmin() {
-      return isAuthenticated() && getUserRole() == 'admin';
+      return isAuthenticated() && getUserRole() in ['admin', 'superadmin'];
+    }
+
+    function userTeamMemberId() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamMemberId
+        : '';
+    }
+
+    function isLmsOwner(field) {
+      return isAuthenticated() && (
+        resource.data[field] == userTeamMemberId() ||
+        resource.data[field] == request.auth.uid ||
+        isAdmin()
+      );
     }
     
     function isTeamMember() {
@@ -680,43 +694,88 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Public LMS catalog metadata. Learner progress and operational records still
-    // require authentication through the authenticated fallback below.
+    // Public LMS catalog metadata — readable by everyone for marketing,
+    // writable only by admins (users/{uid}.role bridge; writes also go
+    // through admin API routes). Learner records below are owner/admin-read
+    // and writable only via server APIs.
     match /lms_categories/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
     match /lms_courses/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
     match /lms_course_modules/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
     match /lms_lessons/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
     match /lms_workshops/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
     match /lms_badges/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
     match /lms_subscription_tiers/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
     match /lms_learning_paths/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
     }
     match /lms_settings/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // GrantedAI saved grants — staff reads via admin API; client writes denied.
+    match /grantedaiSavedGrants/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Learner records — owner (or admin) may read; all writes go through
+    // authenticated API routes using the Admin SDK.
+    match /lms_enrollments/{docId} {
+      allow read: if isLmsOwner('userId');
+      allow write: if false;
+    }
+    match /lms_lesson_progress/{docId} {
+      allow read: if isLmsOwner('odUserId');
+      allow write: if false;
+    }
+    match /lms_quiz_attempts/{docId} {
+      allow read: if isLmsOwner('odUserId');
+      allow write: if false;
+    }
+    match /lms_certificates/{docId} {
+      allow read: if isLmsOwner('odUserId');
+      allow write: if false;
+    }
+    match /lms_course_purchases/{docId} {
+      allow read: if isLmsOwner('odUserId');
+      allow write: if false;
+    }
+    match /lms_user_points/{docId} {
+      allow read: if isAdmin() || (isAuthenticated() && docId == userTeamMemberId());
+      allow write: if false;
+    }
+    match /lms_workshop_registrations/{docId} {
+      allow read: if isLmsOwner('odUserId');
+      allow write: if false;
+    }
+
+    // users/{uid} role bridge — server-written only (sync-profile API).
+    match /users/{docId} {
+      allow read: if isAdmin() || (isAuthenticated() && docId == request.auth.uid);
+      allow write: if false;
     }
 
     // =========================================================================
@@ -733,7 +792,16 @@ service cloud.firestore {
         'lms_gpt_safety_incidents',
         'lms_interview_sessions',
         'lms_learner_profiles',
-        'platformSecrets'
+        'platformSecrets',
+        'users',
+        'grantedaiSavedGrants',
+        'lms_enrollments',
+        'lms_lesson_progress',
+        'lms_quiz_attempts',
+        'lms_certificates',
+        'lms_course_purchases',
+        'lms_user_points',
+        'lms_workshop_registrations'
       ]);
       allow write: if isAuthenticated() && !(collection in [
         'lms_gpt_lesson_sessions',
@@ -743,7 +811,25 @@ service cloud.firestore {
         'lms_gpt_safety_incidents',
         'lms_interview_sessions',
         'lms_learner_profiles',
-        'platformSecrets'
+        'platformSecrets',
+        'users',
+        'grantedaiSavedGrants',
+        'lms_enrollments',
+        'lms_lesson_progress',
+        'lms_quiz_attempts',
+        'lms_certificates',
+        'lms_course_purchases',
+        'lms_user_points',
+        'lms_workshop_registrations',
+        'lms_categories',
+        'lms_courses',
+        'lms_course_modules',
+        'lms_lessons',
+        'lms_workshops',
+        'lms_badges',
+        'lms_subscription_tiers',
+        'lms_learning_paths',
+        'lms_settings'
       ]);
     }
   }

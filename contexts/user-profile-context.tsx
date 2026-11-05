@@ -235,7 +235,7 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
           if (teamMember) {
             console.log("Linked Team Member found:", teamMember.id, teamMember.firstName, teamMember.lastName);
             setLinkedTeamMember(teamMember);
-            
+
             // Map Team Member data to profile
             const mappedProfile = mapTeamMemberToProfile(teamMember);
             setProfile((prev) => ({
@@ -257,6 +257,14 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
               updatedAt: new Date().toISOString(),
             }));
           }
+          // Sync the server-side users/{uid} role doc used by security rules
+          // (runs for both linked and unlinked accounts).
+          firebaseUser.getIdToken().then((token) =>
+            fetch("/api/auth/sync-profile", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+            }).catch((e) => console.error("Role sync failed:", e))
+          );
         } catch (error) {
           console.error("Error fetching Team Member:", error);
         }

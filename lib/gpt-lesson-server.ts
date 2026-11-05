@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { Timestamp } from "firebase-admin/firestore";
 import { adminAuth, adminDb } from "./firebase-admin";
 import { COLLECTIONS, type TeamMemberDoc } from "./schema";
 import {
@@ -371,28 +371,24 @@ export async function markLessonCompleteAdmin(input: {
     });
   }
 
-  const lessonsSnapshot = await db
-    .collection(LMS_COLLECTIONS.LESSONS)
-    .where("courseId", "==", input.courseId)
+  // Recompute enrollment % and issue the completion certificate server-side.
+  const memberSnap = await db
+    .collection(COLLECTIONS.TEAM_MEMBERS)
+    .doc(input.learnerId)
     .get();
-  const totalLessons = lessonsSnapshot.size;
-  if (totalLessons === 0) return;
+  const member = memberSnap.exists ? (memberSnap.data() as TeamMemberDoc) : null;
+  const recipientName =
+    [member?.firstName, member?.lastName].filter(Boolean).join(" ").trim() ||
+    member?.emailPrimary ||
+    "Learner";
 
-  const completedSnapshot = await db
-    .collection(LMS_COLLECTIONS.LESSON_PROGRESS)
-    .where("enrollmentId", "==", input.enrollmentId)
-    .where("isCompleted", "==", true)
-    .get();
-
-  const progressPercentage = Math.round((completedSnapshot.size / totalLessons) * 100);
-  const updates: Record<string, unknown> = {
-    progressPercentage,
-    lastAccessedAt: FieldValue.serverTimestamp(),
-  };
-  if (progressPercentage === 100) {
-    updates.completedAt = Timestamp.now();
-  }
-  await db.collection(LMS_COLLECTIONS.ENROLLMENTS).doc(input.enrollmentId).update(updates);
+  const { recalcEnrollmentProgress } = await import("@/lib/lms-server");
+  await recalcEnrollmentProgress({
+    enrollmentId: input.enrollmentId,
+    courseId: input.courseId,
+    learnerId: input.learnerId,
+    recipientName,
+  });
 }
 
 export function nextStage(stage: GPTLessonStage): GPTLessonStage | null {

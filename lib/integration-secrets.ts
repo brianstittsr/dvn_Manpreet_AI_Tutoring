@@ -22,6 +22,7 @@ export const SECRET_INTEGRATION_FIELDS: Record<string, readonly string[]> = {
   docuseal: ["apiKey", "webhookSecret"],
   stripe: ["secretKey", "webhookSecret"],
   linkedin: ["apiKey", "clientSecret"],
+  grantedai: ["apiKey"],
 };
 
 export type IntegrationSecrets = Record<string, Record<string, string>>;

@@ -5,20 +5,19 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useUserProfile } from "@/contexts/user-profile-context";
 import { useCourseCart } from "@/contexts/course-cart-context";
-import { 
-  getCourse, 
-  getModules, 
+import {
+  getCourse,
+  getModules,
   getLessons,
   getEnrollment,
-  enrollInCourse,
-  CourseDoc, 
-  CourseModuleDoc, 
-  LessonDoc 
+  CourseDoc,
+  CourseModuleDoc,
+  LessonDoc
 } from "@/lib/firebase-lms";
+import { auth } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { 
   BookOpen, 
   Clock, 
@@ -67,8 +66,8 @@ export default function CourseDetailPage() {
     setLoading(true);
     try {
       const courseData = await getCourse(courseId);
-      
-      if (!courseData) {
+
+      if (!courseData || !courseData.isPublished) {
         router.push("/academy/courses");
         return;
       }
@@ -112,13 +111,25 @@ export default function CourseDetailPage() {
 
     setEnrolling(true);
     try {
-      await enrollInCourse(profile.id, courseId);
+      const token = await auth?.currentUser?.getIdToken();
+      const res = await fetch("/api/lms/enroll", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ courseId }),
+      });
+      const json = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        throw new Error(json.error || "Enrollment failed");
+      }
       setIsEnrolled(true);
       toast.success("Successfully enrolled in course!");
       router.push(`/portal/my-courses/${courseId}`);
     } catch (error) {
       console.error("Error enrolling:", error);
-      toast.error("Failed to enroll in course");
+      toast.error(error instanceof Error ? error.message : "Failed to enroll in course");
     } finally {
       setEnrolling(false);
     }
@@ -356,7 +367,7 @@ export default function CourseDetailPage() {
             {course.learningOutcomes && course.learningOutcomes.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>What You'll Learn</CardTitle>
+                  <CardTitle>What You&apos;ll Learn</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-3">

@@ -126,12 +126,14 @@ export async function provisionStudentAccount(params: {
       .where("emailPrimary", "==", email)
       .limit(1)
       .get();
+    let teamMemberId: string | null = null;
     if (existingMember.empty) {
       const now = new Date();
-      await teamMembers.add({
+      const memberRef = await teamMembers.add({
         firstName: params.firstName,
         lastName: params.lastName,
         emailPrimary: email,
+        firebaseUid: result.userId,
         role: "client",
         status: "active",
         expertise: "",
@@ -140,7 +142,28 @@ export async function provisionStudentAccount(params: {
         createdAt: now,
         updatedAt: now,
       });
+      teamMemberId = memberRef.id;
       result.teamMemberCreated = true;
+    } else {
+      teamMemberId = existingMember.docs[0].id;
+      // Backfill the UID link if the member record predates provisioning.
+      if (!existingMember.docs[0].data().firebaseUid) {
+        await existingMember.docs[0].ref.update({ firebaseUid: result.userId });
+      }
+    }
+
+    // users/{uid} role doc — the bridge Firestore rules use for role checks.
+    if (result.userId) {
+      await adminDb.collection("users").doc(result.userId).set(
+        {
+          uid: result.userId,
+          teamMemberId,
+          role: "client",
+          email,
+          updatedAt: new Date(),
+        },
+        { merge: true }
+      );
     }
 
     // 3. Welcome email with a set-password link.

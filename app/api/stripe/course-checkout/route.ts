@@ -1,93 +1,102 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe, STRIPE_CONFIG } from "@/lib/stripe";
-import { adminDb } from "@/lib/firebase-admin";
+
 import { Timestamp } from "firebase-admin/firestore";
 import { LMS_COLLECTIONS, type CourseDoc } from "@/lib/firebase-lms";
+import {
+  GPTLessonAuthError,
+  requireAdminDb,
+} from "@/lib/gpt-lesson-server";
+import { ensureEnrollment, getEnrollmentFor, requireLearner } from "@/lib/lms-server";
 import Stripe from "stripe";
+import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
+const checkoutSchema = z.object({
+  courseIds: z.array(z.string().min(1).max(120)).min(1).max(20),
+});
+
+function handleError(error: unknown): NextResponse {
+  if (error instanceof GPTLessonAuthError) {
+    return NextResponse.json({ error: error.message }, { status: error.status });
+  }
+  console.error("Error creating course checkout session:", error);
+  return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
+}
+
+/**
+ * POST /api/stripe/course-checkout
+ *
+ * Authenticated only — the buyer's identity is resolved server-side from the
+ * Firebase ID token (never trusted from the request body). Free courses are
+ * enrolled immediately (idempotent); paid courses create pending purchases +
+ * a Stripe session, and the webhook enrolls on payment.
+ */
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { scope: "stripe-course-checkout", limit: 15, windowMs: 60_000 });
   if (limited) return limited;
+
   try {
-    const body = await request.json();
-    const {
-      courseIds,
-      customerInfo,
-    }: {
-      courseIds: string[];
-      customerInfo: {
-        userId: string;
-        name: string;
-        email: string;
-      };
-    } = body;
-
-    // Validate required fields
-    if (!courseIds || courseIds.length === 0 || !customerInfo) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+    const learner = await requireLearner(request);
+    const parsed = checkoutSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
-
-    if (!adminDb) {
-      return NextResponse.json(
-        { error: "Database not configured" },
-        { status: 500 }
-      );
-    }
-
-    if (!stripe) {
-      return NextResponse.json(
-        { error: "Stripe is not configured" },
-        { status: 500 }
-      );
-    }
+    const { courseIds } = parsed.data;
+    const db = requireAdminDb();
 
     // Fetch all courses and validate
     const courses: CourseDoc[] = [];
-    let subtotal = 0;
 
     for (const courseId of courseIds) {
-      const courseRef = adminDb.collection(LMS_COLLECTIONS.COURSES).doc(courseId);
-      const courseSnap = await courseRef.get();
-
+      const courseSnap = await db.collection(LMS_COLLECTIONS.COURSES).doc(courseId).get();
       if (!courseSnap.exists) {
-        return NextResponse.json(
-          { error: `Course ${courseId} not found` },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: `Course ${courseId} not found` }, { status: 404 });
       }
-
       const course = { id: courseSnap.id, ...courseSnap.data() } as CourseDoc;
-
       if (!course.isPublished) {
         return NextResponse.json(
           { error: `Course "${course.title}" is not available for purchase` },
           { status: 400 }
         );
       }
-
-      // Check if already purchased (would need to query purchases)
-      // For now, we'll let the enrollment check handle this
-
       courses.push(course);
-      subtotal += course.isFree ? 0 : course.priceInCents;
     }
 
-    // If all courses are free, create enrollments directly
-    if (subtotal === 0) {
+    // Drop courses the learner already owns — never double-enroll/double-charge
+    const unowned: CourseDoc[] = [];
+    const alreadyOwned: CourseDoc[] = [];
+    for (const course of courses) {
+      const existing = await getEnrollmentFor(learner.learnerId, course.id);
+      (existing ? alreadyOwned : unowned).push(course);
+    }
+
+    if (unowned.length === 0) {
+      return NextResponse.json({
+        data: {
+          isFree: true,
+          enrollmentIds: [],
+          alreadyOwned: alreadyOwned.map((c) => c.id),
+          redirectUrl: "/portal/my-courses",
+        },
+      });
+    }
+
+    const payableSubtotal = unowned.reduce(
+      (sum, c) => sum + (c.isFree ? 0 : c.priceInCents),
+      0
+    );
+
+    // All remaining courses free (or all paid ones owned) → enroll directly
+    if (payableSubtotal === 0) {
       const enrollmentIds: string[] = [];
-      
-      for (const course of courses) {
-        // Create purchase record
-        const purchaseData = {
-          odUserId: customerInfo.userId,
-          userEmail: customerInfo.email,
-          userName: customerInfo.name,
+      for (const course of unowned) {
+        const purchaseRef = await db.collection(LMS_COLLECTIONS.COURSE_PURCHASES).add({
+          odUserId: learner.learnerId,
+          userEmail: learner.email,
+          userName: learner.displayName,
           courseId: course.id,
           courseTitle: course.title,
           priceInCents: 0,
@@ -101,69 +110,57 @@ export async function POST(request: NextRequest) {
           refundedAt: null,
           refundReason: null,
           createdAt: Timestamp.now(),
-        };
+        });
 
-        const purchaseRef = await adminDb
-          .collection(LMS_COLLECTIONS.COURSE_PURCHASES)
-          .add(purchaseData);
-
-        // Create enrollment
-        const enrollmentData = {
-          userId: customerInfo.userId,
-          courseId: course.id,
-          enrolledAt: Timestamp.now(),
-          completedAt: null,
-          progressPercentage: 0,
-          lastAccessedAt: null,
-          certificateIssuedAt: null,
-          certificateId: null,
-          purchaseId: purchaseRef.id,
-        };
-
-        const enrollmentRef = await adminDb
-          .collection(LMS_COLLECTIONS.ENROLLMENTS)
-          .add({ id: "", ...enrollmentData });
-
-        enrollmentIds.push(enrollmentRef.id);
+        const { enrollmentId } = await ensureEnrollment(
+          learner.learnerId,
+          course.id,
+          purchaseRef.id
+        );
+        enrollmentIds.push(enrollmentId);
       }
 
       return NextResponse.json({
-        success: true,
-        isFree: true,
-        enrollmentIds,
-        redirectUrl: `/academy/my-courses?enrolled=true`,
+        data: {
+          success: true,
+          isFree: true,
+          enrollmentIds,
+          alreadyOwned: alreadyOwned.map((c) => c.id),
+          redirectUrl: "/portal/my-courses?enrolled=true",
+        },
       });
     }
 
-    // Build Stripe line items
-    const stripeLineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = courses
-      .filter((course) => !course.isFree && course.priceInCents > 0)
-      .map((course) => ({
+    if (!stripe) {
+      return NextResponse.json({ error: "Stripe is not configured" }, { status: 500 });
+    }
+
+    // Build Stripe line items for the unowned paid courses; free courses in
+    // the cart are enrolled immediately alongside the paid purchase.
+    const paidCourses = unowned.filter((c) => !c.isFree && c.priceInCents > 0);
+    const stripeLineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = paidCourses.map(
+      (course) => ({
         price_data: {
           currency: STRIPE_CONFIG.currency,
           product_data: {
             name: course.title,
             description: course.shortDescription || undefined,
             images: course.thumbnailUrl ? [course.thumbnailUrl] : undefined,
-            metadata: {
-              courseId: course.id,
-              type: "course",
-            },
+            metadata: { courseId: course.id, type: "course" },
           },
           unit_amount: course.priceInCents,
         },
         quantity: 1,
-      }));
+      })
+    );
 
-    // Create pending purchase records
+    // Pending purchase records for the paid courses
     const purchaseIds: string[] = [];
-    for (const course of courses) {
-      if (course.isFree) continue;
-
-      const purchaseData = {
-        odUserId: customerInfo.userId,
-        userEmail: customerInfo.email,
-        userName: customerInfo.name,
+    for (const course of paidCourses) {
+      const purchaseRef = await db.collection(LMS_COLLECTIONS.COURSE_PURCHASES).add({
+        odUserId: learner.learnerId,
+        userEmail: learner.email,
+        userName: learner.displayName,
         courseId: course.id,
         courseTitle: course.title,
         priceInCents: course.priceInCents,
@@ -177,50 +174,51 @@ export async function POST(request: NextRequest) {
         refundedAt: null,
         refundReason: null,
         createdAt: Timestamp.now(),
-      };
-
-      const purchaseRef = await adminDb
-        .collection(LMS_COLLECTIONS.COURSE_PURCHASES)
-        .add(purchaseData);
+      });
       purchaseIds.push(purchaseRef.id);
     }
 
-    // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: STRIPE_CONFIG.paymentMethods as Stripe.Checkout.SessionCreateParams.PaymentMethodType[],
       line_items: stripeLineItems,
       mode: "payment",
       success_url: `${APP_URL}/academy/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${APP_URL}/academy/cart?cancelled=true`,
-      customer_email: customerInfo.email,
+      customer_email: learner.email || undefined,
       metadata: {
         type: "course_purchase",
-        userId: customerInfo.userId,
-        courseIds: courseIds.join(","),
+        userId: learner.learnerId,
+        courseIds: paidCourses.map((c) => c.id).join(","),
         purchaseIds: purchaseIds.join(","),
       },
       billing_address_collection: "required",
       allow_promotion_codes: true,
     });
 
-    // Update purchase records with Stripe session ID
     for (const purchaseId of purchaseIds) {
-      await adminDb.collection(LMS_COLLECTIONS.COURSE_PURCHASES).doc(purchaseId).update({
+      await db.collection(LMS_COLLECTIONS.COURSE_PURCHASES).doc(purchaseId).update({
         stripeSessionId: session.id,
       });
     }
 
+    // Enroll the free cart items immediately — they don't wait for payment.
+    const freeEnrollmentIds: string[] = [];
+    for (const course of unowned.filter((c) => c.isFree || c.priceInCents <= 0)) {
+      const { enrollmentId } = await ensureEnrollment(learner.learnerId, course.id);
+      freeEnrollmentIds.push(enrollmentId);
+    }
+
     return NextResponse.json({
-      success: true,
-      sessionId: session.id,
-      sessionUrl: session.url,
-      purchaseIds,
+      data: {
+        success: true,
+        sessionId: session.id,
+        sessionUrl: session.url,
+        purchaseIds,
+        freeEnrollmentIds,
+        alreadyOwned: alreadyOwned.map((c) => c.id),
+      },
     });
   } catch (error) {
-    console.error("Error creating course checkout session:", error);
-    return NextResponse.json(
-      { error: "Failed to create checkout session" },
-      { status: 500 }
-    );
+    return handleError(error);
   }
 }
