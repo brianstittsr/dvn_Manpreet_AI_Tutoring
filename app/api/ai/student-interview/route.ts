@@ -22,8 +22,10 @@ import {
   GPTLessonAuthError,
   addSafetyIncident,
   getApprovedGuardianConsent,
+  ensureEnrollmentForLearner,
   getEnrollmentForLearner,
   getLatestGuardianLink,
+  isStaffRole,
   getLessonOrThrow,
   markLessonCompleteAdmin,
   requireAdminDb,
@@ -222,7 +224,11 @@ export async function POST(request: NextRequest) {
         return jsonError("This lesson is not an AI student interview", 400);
       }
       const config = lesson.interviewConfig;
-      const enrollment = await getEnrollmentForLearner(learnerId, courseId);
+      let enrollment = await getEnrollmentForLearner(learnerId, courseId);
+      if (!enrollment && isStaffRole(actor.teamMember.role)) {
+        // Staff can preview interview lessons without a manual enroll step.
+        enrollment = await ensureEnrollmentForLearner(learnerId, courseId);
+      }
       if (!enrollment) {
         return jsonError("You must be enrolled in this course to start", 403);
       }

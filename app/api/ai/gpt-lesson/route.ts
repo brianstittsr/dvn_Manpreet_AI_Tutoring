@@ -15,8 +15,10 @@ import {
   buildClientState,
   getApprovedGuardianConsent,
   getAssessmentOrThrow,
+  ensureEnrollmentForLearner,
   getEnrollmentForLearner,
   getLatestGuardianLink,
+  isStaffRole,
   getLessonOrThrow,
   getSessionOrThrow,
   GPT_LMS_COLLECTIONS,
@@ -773,7 +775,11 @@ export async function POST(request: NextRequest) {
         if (lesson.courseId !== body.courseId) {
           return jsonError("Lesson does not belong to the requested course", 400);
         }
-        const enrollment = await getEnrollmentForLearner(actor.teamMember.id, body.courseId);
+        let enrollment = await getEnrollmentForLearner(actor.teamMember.id, body.courseId);
+        if (!enrollment && isStaffRole(actor.teamMember.role)) {
+          // Staff can preview AI lessons without a manual enroll step.
+          enrollment = await ensureEnrollmentForLearner(actor.teamMember.id, body.courseId);
+        }
         if (!enrollment) {
           return jsonError("You must be enrolled in this course before starting the lesson", 403);
         }

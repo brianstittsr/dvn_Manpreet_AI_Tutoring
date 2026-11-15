@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,16 @@ import { auth, reconnectFirestore } from "@/lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { findAndLinkTeamMember } from "@/lib/auth-team-member-link";
 
-export default function SignInPage() {
+/** Same-origin path check — blocks open redirects like "//evil.com". */
+function safeRedirectPath(value: string | null): string | null {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+}
+
+function SignInContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = safeRedirectPath(searchParams.get("redirect"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -132,9 +140,10 @@ export default function SignInPage() {
       }
       
       console.log("Sign-in complete, redirecting to portal...");
-      
-      // Redirect to portal - use replace to prevent back button issues
-      router.replace("/portal");
+
+      // Honor ?redirect= (e.g. back to a course page); use replace to
+      // prevent back button issues.
+      router.replace(redirectTo ?? "/portal");
       return; // Exit early to prevent finally from setting isLoading to false
     } catch (err) {
       console.error("Sign-in error:", err);
@@ -259,7 +268,17 @@ export default function SignInPage() {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="pt-0" />
+          <CardFooter className="pt-0 justify-center">
+            <p className="text-sm text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link
+                href={redirectTo ? `/sign-up?redirect=${encodeURIComponent(redirectTo)}` : "/sign-up"}
+                className="text-primary hover:underline font-medium"
+              >
+                Create one
+              </Link>
+            </p>
+          </CardFooter>
         </Card>
 
         {/* Footer */}
@@ -271,5 +290,19 @@ export default function SignInPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <SignInContent />
+    </Suspense>
   );
 }

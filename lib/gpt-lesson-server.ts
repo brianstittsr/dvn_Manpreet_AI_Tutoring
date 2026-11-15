@@ -134,7 +134,7 @@ export async function getEnrollmentForLearner(
   const db = requireAdminDb();
   const snapshot = await db
     .collection(LMS_COLLECTIONS.ENROLLMENTS)
-    .where("odUserId", "==", learnerId)
+    .where("userId", "==", learnerId)
     .where("courseId", "==", courseId)
     .limit(1)
     .get();
@@ -142,6 +142,35 @@ export async function getEnrollmentForLearner(
   if (snapshot.empty) return null;
   const docSnap = snapshot.docs[0];
   return { id: docSnap.id, ...docSnap.data() } as EnrollmentDoc;
+}
+
+/**
+ * Idempotent enrollment creation keyed on the shared `userId` field.
+ * Used so staff can preview AI lessons without a manual enroll step —
+ * the enrollment is real, so downstream progress writes still work.
+ */
+export async function ensureEnrollmentForLearner(
+  learnerId: string,
+  courseId: string
+): Promise<EnrollmentDoc> {
+  const existing = await getEnrollmentForLearner(learnerId, courseId);
+  if (existing) return existing;
+
+  const db = requireAdminDb();
+  const ref = db.collection(LMS_COLLECTIONS.ENROLLMENTS).doc();
+  const enrollment = {
+    id: ref.id,
+    userId: learnerId,
+    courseId,
+    enrolledAt: Timestamp.now(),
+    completedAt: null,
+    progressPercentage: 0,
+    lastAccessedAt: null,
+    certificateIssuedAt: null,
+    certificateId: null,
+  };
+  await ref.set(enrollment);
+  return enrollment as EnrollmentDoc;
 }
 
 export async function getApprovedGuardianConsent(learnerId: string): Promise<GPTGuardianLinkDoc | null> {

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,16 @@ import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { findAndLinkTeamMember } from "@/lib/auth-team-member-link";
 import { COLLECTIONS } from "@/lib/schema";
 
-export default function SignUpPage() {
+/** Same-origin path check — blocks open redirects like "//evil.com". */
+function safeRedirectPath(value: string | null): string | null {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+}
+
+function SignUpContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = safeRedirectPath(searchParams.get("redirect"));
   const [step, setStep] = useState(1);
   const [accountType] = useState<"client">("client");
   const [firstName, setFirstName] = useState("");
@@ -169,8 +177,9 @@ export default function SignUpPage() {
         sessionStorage.setItem("svp_firebase_uid", firebaseUid);
       }
 
-      // Redirect to client onboarding
-      router.push("/onboarding/client");
+      // Honor ?redirect= (e.g. back to a course the learner was enrolling in);
+      // otherwise start client onboarding.
+      router.push(redirectTo ?? "/onboarding/client");
     } catch (err) {
       setError("An error occurred during registration. Please try again.");
     } finally {
@@ -429,7 +438,10 @@ export default function SignUpPage() {
           <CardFooter className="flex flex-col gap-4 pt-0">
             <p className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/sign-in" className="text-primary hover:underline font-medium">
+              <Link
+                href={redirectTo ? `/sign-in?redirect=${encodeURIComponent(redirectTo)}` : "/sign-in"}
+                className="text-primary hover:underline font-medium"
+              >
                 Sign in
               </Link>
             </p>
@@ -445,5 +457,19 @@ export default function SignUpPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <SignUpContent />
+    </Suspense>
   );
 }

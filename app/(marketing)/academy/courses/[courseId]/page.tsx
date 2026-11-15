@@ -7,6 +7,7 @@ import { useUserProfile } from "@/contexts/user-profile-context";
 import { useCourseCart } from "@/contexts/course-cart-context";
 import {
   getCourse,
+  getCourseBySlug,
   getModules,
   getLessons,
   getEnrollment,
@@ -65,17 +66,23 @@ export default function CourseDetailPage() {
   const loadCourseData = async () => {
     setLoading(true);
     try {
-      const courseData = await getCourse(courseId);
+      // The route param is a slug in catalog links but may also be a doc ID
+      // (deep links / admin previews) — resolve either.
+      let courseData = await getCourse(courseId);
+      if (!courseData) {
+        courseData = await getCourseBySlug(courseId);
+      }
 
       if (!courseData || !courseData.isPublished) {
         router.push("/academy/courses");
         return;
       }
 
+      const resolvedCourseId = courseData.id;
       setCourse(courseData);
 
       // Load modules and lessons
-      const modulesData = await getModules(courseId);
+      const modulesData = await getModules(resolvedCourseId);
       const modulesWithLessons = await Promise.all(
         modulesData.map(async (mod) => {
           const lessons = await getLessons(mod.id);
@@ -91,7 +98,7 @@ export default function CourseDetailPage() {
 
       // Check enrollment status
       if (isAuthenticated && profile.id) {
-        const enrollment = await getEnrollment(profile.id, courseId);
+        const enrollment = await getEnrollment(profile.id, resolvedCourseId);
         setIsEnrolled(!!enrollment);
       }
     } catch (error) {
@@ -107,7 +114,7 @@ export default function CourseDetailPage() {
       return;
     }
 
-    if (!profile.id) return;
+    if (!profile.id || !course) return;
 
     setEnrolling(true);
     try {
@@ -118,7 +125,7 @@ export default function CourseDetailPage() {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ courseId }),
+        body: JSON.stringify({ courseId: course.id }),
       });
       const json = (await res.json()) as { error?: string };
       if (!res.ok) {
@@ -126,7 +133,13 @@ export default function CourseDetailPage() {
       }
       setIsEnrolled(true);
       toast.success("Successfully enrolled in course!");
-      router.push(`/portal/my-courses/${courseId}`);
+      // Drop the learner into the first lesson so training starts immediately
+      const firstLesson = modules.flatMap((m) => m.lessons)[0];
+      router.push(
+        firstLesson
+          ? `/portal/my-courses/${course.id}/lessons/${firstLesson.id}`
+          : `/portal/my-courses/${course.id}`
+      );
     } catch (error) {
       console.error("Error enrolling:", error);
       toast.error(error instanceof Error ? error.message : "Failed to enroll in course");
@@ -138,7 +151,7 @@ export default function CourseDetailPage() {
   const handleAddToCart = () => {
     if (!course) return;
     
-    if (isInCart(courseId)) {
+    if (isInCart(course.id)) {
       toast.info("This course is already in your cart");
       return;
     }
@@ -156,7 +169,7 @@ export default function CourseDetailPage() {
   };
 
   const isPaidCourse = course && !course.isFree && course.priceInCents > 0;
-  const courseInCart = isInCart(courseId);
+  const courseInCart = course ? isInCart(course.id) : false;
 
   const toggleModule = (moduleId: string) => {
     setExpandedModules(prev => {
@@ -304,7 +317,7 @@ export default function CourseDetailPage() {
 
                   {isEnrolled ? (
                     <Button className="w-full bg-green-600 hover:bg-green-700" size="lg" asChild>
-                      <Link href={`/portal/my-courses/${courseId}`}>
+                      <Link href={`/portal/my-courses/${course.id}`}>
                         <PlayCircle className="h-5 w-5 mr-2" />
                         Continue Learning
                       </Link>
