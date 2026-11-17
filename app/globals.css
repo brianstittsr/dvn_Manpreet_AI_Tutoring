@@ -194,3 +194,110 @@
     white-space: normal;
   }
 }
+
+/* ---- MechaniX concept theme palettes ----
+   Applied on <html> and the workspace root as .mx-<theme> so portaled UI
+   (popovers, dialogs, sheets) also resolves the tokens. :root mirrors the
+   default palette so un-themed contexts still get sensible values. */
+:root {
+  --mx-bg: #F5F7F6;
+  --mx-card: #FFFFFF;
+  --mx-border: #E4E9E6;
+  --mx-hover: #F1F5F9;
+  --mx-primary: #14532D;
+  --mx-deep: #0F3D2E;
+  --mx-accent: #16A34A;
+  --mx-active-bg: #EAF6EF;
+  --mx-active-border: #CFE8DA;
+  --mx-up: #22A06B;
+  --mx-down: #E5484D;
+  --mx-grid: #EEF2F0;
+  --mx-text: #1E293B;
+  --mx-muted: #64748B;
+  --mx-faint: #94A3B8;
+}
+.mx-green {
+  --mx-bg: #F5F7F6;
+  --mx-card: #FFFFFF;
+  --mx-border: #E4E9E6;
+  --mx-hover: #F1F5F9;
+  --mx-primary: #14532D;
+  --mx-deep: #0F3D2E;
+  --mx-accent: #16A34A;
+  --mx-active-bg: #EAF6EF;
+  --mx-active-border: #CFE8DA;
+  --mx-up: #22A06B;
+  --mx-down: #E5484D;
+  --mx-grid: #EEF2F0;
+  --mx-text: #1E293B;
+  --mx-muted: #64748B;
+  --mx-faint: #94A3B8;
+}
+.mx-ocean {
+  --mx-bg: #F4F8FB;
+  --mx-card: #FFFFFF;
+  --mx-border: #DFE8EF;
+  --mx-hover: #EDF3F8;
+  --mx-primary: #0C4A6E;
+  --mx-deep: #083344;
+  --mx-accent: #0284C7;
+  --mx-active-bg: #E0F2FE;
+  --mx-active-border: #BAE6FD;
+  --mx-up: #22A06B;
+  --mx-down: #E5484D;
+  --mx-grid: #E9F0F5;
+  --mx-text: #1E293B;
+  --mx-muted: #64748B;
+  --mx-faint: #94A3B8;
+}
+.mx-ember {
+  --mx-bg: #FAF6F2;
+  --mx-card: #FFFFFF;
+  --mx-border: #EAE0D6;
+  --mx-hover: #F4EDE6;
+  --mx-primary: #7C2D12;
+  --mx-deep: #431407;
+  --mx-accent: #EA580C;
+  --mx-active-bg: #FFEDD5;
+  --mx-active-border: #FED7AA;
+  --mx-up: #22A06B;
+  --mx-down: #E5484D;
+  --mx-grid: #F2EAE1;
+  --mx-text: #1E293B;
+  --mx-muted: #64748B;
+  --mx-faint: #94A3B8;
+}
+.mx-violet {
+  --mx-bg: #F7F5FB;
+  --mx-card: #FFFFFF;
+  --mx-border: #E5E0F0;
+  --mx-hover: #F0ECF8;
+  --mx-primary: #4C1D95;
+  --mx-deep: #2E1065;
+  --mx-accent: #7C3AED;
+  --mx-active-bg: #EDE9FE;
+  --mx-active-border: #DDD6FE;
+  --mx-up: #22A06B;
+  --mx-down: #E5484D;
+  --mx-grid: #EEEAF5;
+  --mx-text: #1E293B;
+  --mx-muted: #64748B;
+  --mx-faint: #94A3B8;
+}
+.mx-midnight {
+  --mx-bg: #0B1220;
+  --mx-card: #111A2E;
+  --mx-border: #22304A;
+  --mx-hover: #1B2740;
+  --mx-primary: #16A34A;
+  --mx-deep: #15803D;
+  --mx-accent: #22C55E;
+  --mx-active-bg: #123B2A;
+  --mx-active-border: #1F5138;
+  --mx-up: #34D399;
+  --mx-down: #F87171;
+  --mx-grid: #1B2740;
+  --mx-text: #E2E8F0;
+  --mx-muted: #94A3B8;
+  --mx-faint: #64748B;
+}

@@ -718,6 +718,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    // GrantedAI saved grants — staff reads via admin API; client writes denied.
+    match /grantedaiSavedGrants/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
     match /lms_badges/{docId} {
       allow read: if true;
       allow write: if isAdmin();
